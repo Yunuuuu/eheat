@@ -1,0 +1,18 @@
+Package: eheat
+Title: Extented ComplexHeatmap
+Version: 0.0.0.9000
+Authors@R: 
+    person("Yun", "Peng", , "yunyunp96@gmail.com", role = c("aut", "cre"))
+Description: Extented ComplexHeatmap.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
+Imports: 
+    cli,
+    ComplexHeatmap,
+    ggplot2,
+    rlang
+Depends: 
+    grid
+ByteCompile: true
