@@ -15,3 +15,5 @@ Imports:
     ggplot2,
     rlang (>= 1.1.0)
 ByteCompile: true
+URL: https://github.com/Yunuuuu/eheat
+BugReports: https://github.com/Yunuuuu/eheat/issues
