@@ -1,14 +1,14 @@
 new_layer <- function(geom, ..., matrix = NULL, check.aes = TRUE, check.param = TRUE, name = NULL, layer_class = eheatLayer) {
     call_env <- rlang::caller_env()
     dots <- rlang::list2(...)
-    mapping_idx <- vapply(dots, is_eheat_scale, logical(1L))
-    mapping <- dots[mapping_idx]
-    if (length(mapping) != sum(nzchar(names(mapping)))) {
+    scale_idx <- vapply(dots, is_eheat_scale, logical(1L))
+    scales <- dots[scale_idx]
+    if (length(scales) != sum(nzchar(names(scales)))) {
         cli::cli_abort("All {.cls eheatScale} objects must be named",
             call = call_env
         )
     }
-    params <- dots[!mapping_idx]
+    params <- dots[!scale_idx]
     # Split up params between aesthetics and geom
     params <- rename_aes(params)
     params_nms <- names(params)
@@ -25,7 +25,7 @@ new_layer <- function(geom, ..., matrix = NULL, check.aes = TRUE, check.param = 
         )
     }
 
-    extra_aes <- setdiff(names(mapping), geom$aesthetics_nms())
+    extra_aes <- setdiff(names(scales), geom$aesthetics_nms())
     if (check.aes && length(extra_aes) > 0) {
         cli::cli_warn("Ignoring unknown aesthetics: {.field {extra_aes}}",
             call = call_env
@@ -34,7 +34,7 @@ new_layer <- function(geom, ..., matrix = NULL, check.aes = TRUE, check.param = 
     if (!is.null(matrix)) matrix <- build_matrix(matrix)
     ggplot2::ggproto("eheatLayerInstance", layer_class,
         name = name, matrix = matrix,
-        mapping = mapping,
+        scales = scales,
         geom = geom, geom_params = geom_params,
         aes_params = aes_params
     )
@@ -46,7 +46,8 @@ is_eheat_layer <- function(x) {
 
 eheatLayer <- ggplot2::ggproto(
     "eheatLayer", NULL,
-    name = NULL, matrix = NULL, mapping = NULL,
+    name = NULL, matrix = NULL,
+    scales = NULL, # for heatmap, the geom internally can have their own scales
     geom = NULL, geom_params = NULL, aes_params = NULL,
     # `id` used for message
     draw_layer = function(self, heat_matrix, id = NULL) {
@@ -71,26 +72,15 @@ eheatLayer <- ggplot2::ggproto(
         }
         check_required_aesthetics(
             self$geom$required_aes,
-            c(names(self$mapping), names(self$aes_params)),
+            c(names(self$scales), names(self$aes_params)),
             self$name
         )
         layer_matrix <- self$matrix %||% heat_matrix
-        aesthetics <- self$map_aesthetics(layer_matrix)
         self$geom$draw_geom(
-            layer_matrix, aesthetics,
+            layer_matrix, self$scales,
             geom_params = self$geom_params,
             aes_params = self$aes_params
         )
     },
-    map_aesthetics = function(self, layer_matrix) {
-        mapped_aes <- self$mapping
-        right_dim <- dim(layer_matrix)
-        right_length <- length(layer_matrix)
-        if (length(mapped_aes)) {
-            mapped_aes <- imap(mapped_aes, function(aesthetic, id) {
-                aesthetic$map_aesthetic(layer_matrix, id)
-            })
-        }
-        mapped_aes
-    }
+    draw_guides = NULL
 )

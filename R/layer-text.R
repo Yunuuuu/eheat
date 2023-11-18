@@ -24,10 +24,8 @@ eheatTextGeom <- ggplot2::ggproto("eheatTextGeom", eheatGeom,
         force(fmt)
         force(check_overlap)
         size.unit <- resolve_text_unit(size.unit)
-        function(j, i, x, y, w, h, fill) {
-            aes_list <- lapply(aesthetics, function(aesthetic) {
-                pindex(aesthetic, i, j)
-            })
+        function(i, x, y, w, h, fill) {
+            aes_list <- lapply(aesthetics, `[`, i)
             labels <- aes_list$label
             if (rlang::is_string(fmt)) {
                 labels <- sprintf(fmt, labels)
