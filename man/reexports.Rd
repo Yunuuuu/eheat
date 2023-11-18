@@ -4,6 +4,7 @@
 \name{reexports}
 \alias{reexports}
 \alias{gpar}
+\alias{unit}
 \alias{alpha}
 \alias{.pt}
 \title{Objects exported from other packages}
@@ -15,6 +16,6 @@ below to see their documentation.
 \describe{
   \item{ggplot2}{\code{\link[ggplot2:graphical-units]{.pt}}, \code{\link[ggplot2:reexports]{alpha}}}
 
-  \item{grid}{\code{\link[grid]{gpar}}}
+  \item{grid}{\code{\link[grid]{gpar}}, \code{\link[grid]{unit}}}
 }}
 

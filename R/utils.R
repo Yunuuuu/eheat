@@ -8,6 +8,10 @@ pkg_nm <- function() {
 #' @export
 grid::gpar
 
+#' @importFrom grid unit
+#' @export
+grid::unit
+
 #' @importFrom ggplot2 alpha
 #' @export
 ggplot2::alpha
@@ -60,7 +64,6 @@ lower_ascii <- "abcdefghijklmnopqrstuvwxyz"
 upper_ascii <- "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 to_lower_ascii <- function(x) chartr(upper_ascii, lower_ascii, x)
 to_upper_ascii <- function(x) chartr(lower_ascii, upper_ascii, x)
-
 
 pindex <- function(array, ...) {
     if (length(dim(array)) != ...length()) {
@@ -122,25 +125,6 @@ rename <- function(x, replace) {
     }
     names(x)[match(old_names, current_names)] <- as.vector(replace)
     x
-}
-
-flip_coord <- function(aesthetics) {
-    x <- c("x", "x0", "x1", "width", "xscale")
-    y <- c("y", "y0", "y1", "height", "yscale")
-    rename(aesthetics, structure(c(x, y), names = c(y, x)))
-}
-
-subset_gp <- function(gp, i) {
-    params <- lapply(gp, `[[`, i)
-    do.call(grid::gpar, params)
-}
-
-recycle_gp <- function(gp, n) {
-    n <- max(n, 1L)
-    for (i in seq_along(gp)) {
-        gp[[i]] <- rep_len(gp[[i]], n)
-    }
-    gp
 }
 
 reverse_trans <- function(x) {
