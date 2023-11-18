@@ -1,7 +1,7 @@
 #' Wrap ggplot2 scale object into ComplexHeatmap
 #' @param scale A [scale][ggplot2::discrete_scale] object.
 #' @param matrix Matrix used for this aesthetic mapping
-#' @export  
+#' @export
 eheat_scale <- function(scale, matrix = NULL) {
     if (!inherits(scale, "Scale")) {
         cli::cli_abort("{.arg scale} must be a {.cls Scale} object")
@@ -20,12 +20,10 @@ eheat_scale <- function(scale, matrix = NULL) {
             }
             aes_matrix <- self$matrix %||% layer_matrix
             values <- self$transform(aes_matrix)
-            new <- self$clone()
-            new$reset()
-            new$train(values)
-            out <- new$map(values)
-            dim(out) <- right_dim
-            out
+            new_scale <- self$clone()
+            new_scale$reset()
+            new_scale$train(values)
+            new_scale$map(values)
         }
     )
 }

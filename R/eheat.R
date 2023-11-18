@@ -22,7 +22,7 @@ eheat_build <- function(layers, heat_matrix) {
     }, list(layers, rlang::names2(layers)), NULL)
     function(j, i, x, y, w, h, fill) {
         lapply(fn_list, function(draw_fn) {
-            draw_fn(j, i, x, y, w, h, fill)
+            draw_fn(j * i, x, y, w, h, fill)
         })
     }
 }

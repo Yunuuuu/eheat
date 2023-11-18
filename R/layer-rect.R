@@ -1,7 +1,8 @@
-layer_rect <- function(..., linejoin = "mitre", matrix = NULL) {
+layer_rect <- function(..., lineend = "butt", linejoin = "mitre", matrix = NULL) {
     new_layer(
         geom = eheatRectGeom, ...,
         linejoin = linejoin,
+        lineend = lineend,
         matrix = matrix,
         name = "eheat_rect"
     )
@@ -19,10 +20,8 @@ eheatRectGeom <- ggplot2::ggproto("eheatRectGeom", eheatGeom,
         force(aesthetics)
         force(lineend)
         force(linejoin)
-        function(j, i, x, y, w, h, fill) {
-            aes_list <- lapply(aesthetics, function(aesthetic) {
-                pindex(aesthetic, i, j)
-            })
+        function(i, x, y, w, h, fill) {
+            aes_list <- lapply(aesthetics, `[`, i)
             grid::grid.rect(x, y,
                 width = w, height = h,
                 gp = gpar(
