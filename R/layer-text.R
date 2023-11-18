@@ -1,4 +1,4 @@
-layer_text <- function(..., matrix = NULL, fmt = NULL, check_overlap = FALSE) {
+layer_text <- function(..., fmt = NULL, check_overlap = FALSE, matrix = NULL) {
     new_layer(
         geom = eheatTextGeom, ...,
         check_overlap = check_overlap, fmt = fmt,
