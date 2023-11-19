@@ -14,7 +14,7 @@ eheat_map <- function(scale = NULL, aesthetic = NULL, matrix = NULL) {
             cli::cli_abort("Invalid {aesthetic} aesthetic")
         }
     }
-    if (!is.null(matrix)) matrix <- build_matrix(matrix)
+    matrix <- allow_lambda(matrix)
     ggplot2::ggproto("eheatMap", scale,
         matrix = matrix,
         aesthetics = aesthetic,
@@ -32,8 +32,19 @@ eheat_map <- function(scale = NULL, aesthetic = NULL, matrix = NULL) {
                     matrix <- self$matrix
                 }
                 # check heat_matrix and layer_matrix are compatible
-                if (!all(dim(matrix) == dim(layer_matrix))) {
-                    cli::cli_abort("matrix of {.field {name}} aesthetic is not compatible with layer matrix")
+                if ((!is.null(dim(matrix)) &&
+                    !all(dim(matrix) == dim(layer_matrix))) ||
+                    (is.null(dim(matrix)) && is.atomic(matrix) &&
+                        length(matrix) != length(layer_matrix))) {
+                    msg <- sprintf(
+                        "(%s) aesthetic matrix",
+                        style_fn(snake_class(self))
+                    )
+                    msg <- paste(msg,
+                        "is not compatible with heatmap matrix",
+                        sep = " "
+                    )
+                    cli::cli_abort(msg)
                 }
             }
             matrix

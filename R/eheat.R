@@ -71,6 +71,9 @@ eheat_build_draw_fn <- function(object, slice, finite = FALSE, na.rm = FALSE) {
         return(NULL)
     }
     heat_matrix <- object@heatmap@matrix
+    index_matrix <- matrix(seq_along(heat_matrix),
+        nrow = nrow(heat_matrix), ncol = ncol(heat_matrix)
+    )
     .mapply(function(layer) {
         layer_matrix <- layer$layer_matrix(heat_matrix)
 
@@ -83,7 +86,10 @@ eheat_build_draw_fn <- function(object, slice, finite = FALSE, na.rm = FALSE) {
         data <- scales$transform_df(data)
 
         # Do summary across row, column or slice
-        data <- layer$compute_aesthetics(data, layer_matrix, slice)
+        data <- layer$compute_aesthetics(
+            data, layer_matrix,
+            slice, index_matrix
+        )
 
         # correspoond to compute_geom_1
         # Reparameterise geoms from (e.g.) y and width to ymin and ymax
@@ -95,7 +101,7 @@ eheat_build_draw_fn <- function(object, slice, finite = FALSE, na.rm = FALSE) {
         }
         # Fill in defaults etc.
         data <- layer$compute_geom_2(data)
-        layer$draw_fun(data, slice)
+        layer$draw_fun(data, slice, index_matrix)
     }, list(layer = object@layers), NULL)
 }
 

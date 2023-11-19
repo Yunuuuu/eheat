@@ -81,18 +81,17 @@ eheatLayer <- ggplot2::ggproto(
         } else {
             if (is.function(self$matrix)) {
                 matrix <- self$matrix(heat_matrix)
-                if (!is.matrix(matrix)) {
-                    cli::cli_abort("{.fn layer_matrix} must return a {.cls matrix}")
-                }
             } else {
                 matrix <- self$matrix
             }
-            matrix <- build_matrix(matrix)
             # check heat_matrix and layer_matrix are compatible
-            if (!all(dim(matrix) == dim(heat_matrix))) {
+            if ((!is.null(dim(matrix)) &&
+                !all(dim(matrix) == dim(heat_matrix))) ||
+                (is.null(dim(matrix)) && is.atomic(matrix) &&
+                    length(matrix) != length(heat_matrix))) {
                 msg <- sprintf(
                     "(%s) layer matrix",
-                    style_fn(snake_class(layer))
+                    style_fn(snake_class(self))
                 )
                 msg <- paste(msg,
                     "is not compatible with heatmap matrix",
@@ -112,9 +111,10 @@ eheatLayer <- ggplot2::ggproto(
         data
     },
     # Do summary across row, column or slice
-    compute_aesthetics = function(self, data, layer_matrix, slice) {
+    compute_aesthetics = function(self, data, layer_matrix,
+                                  slice, index_matrix) {
         out <- imap(slice, function(idx, slice_idx) {
-            .idx <- idx[[1L]] * idx[[2L]]
+            .idx <- pindex(index_matrix, idx[[1L]], idx[[2L]])
             slice_data <- data[.idx, , drop = FALSE]
             slice_data$.idx <- .idx
             slice_data$.row_idx <- idx[[1L]]
@@ -167,10 +167,11 @@ eheatLayer <- ggplot2::ggproto(
         }
         self$geom$use_defaults(data, self$computed_geom_params)
     },
-    draw_fun = function(self, data, slice) {
+    draw_fun = function(self, data, slice, index_matrix) {
         data <- self$geom$handle_na(data, self$computed_geom_params)
         self$geom$draw_layer(data,
-            group = self$group, slice,
+            group = self$group, slice = slice,
+            index_matrix = index_matrix,
             self$computed_geom_params
         )
     },

@@ -34,23 +34,23 @@ eheatGeom <- ggplot2::ggproto("eheatGeom",
             snake_class(self)
         )
     },
-    draw_layer = function(self, data, group, slice, params) {
+    draw_layer = function(self, data, group, slice, index_matrix, params) {
         # Trim off extra parameters
         params <- params[intersect(names(params), self$parameters())]
 
         if (is.null(group)) {
-            self$draw_slice(data, params)
+            self$draw_slice(data, index_matrix, params)
         } else {
             self$draw_group(data, group, slice, params)
         }
     },
-    draw_slice = function(self, data, params) {
+    draw_slice = function(self, data, index_matrix, params) {
         force(self)
         data_list <- split(data, ~.slice_group)
         lapply(data_list, function(data) {
             force(data)
             function(j, i, x, y, w, h, fill) {
-                data <- match_data(data, i, j)
+                data <- data[match(pindex(index_matrix, i, j), data$.idx), ]
                 coord <- tibble::tibble(x = x, y = y, width = w, height = h)
                 rlang::inject(self$draw_geom(data, coord, !!!params))
             }
