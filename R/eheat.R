@@ -99,26 +99,6 @@ eheat_build_draw_fn <- function(object, slice, finite = FALSE, na.rm = FALSE) {
     }, list(layer = object@layers), NULL)
 }
 
-# Apply function to layer and matching data
-by_layer <- function(f, layers, data, step = NULL) {
-    ordinal <- scales::label_ordinal() # nolint
-    out <- vector("list", length(data))
-    rlang::try_fetch(
-        for (i in seq_along(data)) {
-            out[[i]] <- f(l = layers[[i]], d = data[[i]])
-        },
-        error = function(cnd) {
-            cli::cli_abort(
-                c("Problem while {step}.",
-                    "i" = "Error occurred in the {ordinal(i)} layer."
-                ),
-                call = layers[[i]]$constructor, parent = cnd
-            )
-        }
-    )
-    out
-}
-
 is_finite <- function(x) {
     if (typeof(x) == "list") {
         !vapply(x, is.null, logical(1))
