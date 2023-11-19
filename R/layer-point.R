@@ -1,7 +1,7 @@
-layer_point <- function(..., matrix = NULL) {
+layer_point <- function(..., na.rm = FALSE, matrix = NULL) {
     new_layer(
         geom = eheatPointGeom, ...,
-        matrix = matrix,
+        na.rm = na.rm, matrix = matrix,
         name = "eheat_point"
     )
 }
@@ -12,25 +12,25 @@ eheatPointGeom <- ggplot2::ggproto("eheatPointGeom", eheatGeom,
         shape = 19, colour = "black", size = 1.5, fill = NA,
         alpha = NA, stroke = 0.5
     ),
-    draw_slice = function(self, layer_matrix, aesthetics) {
-        if (is.character(aesthetics$shape)) {
-            aesthetics$shape <- ggplot2::translate_shape_string(
-                aesthetics$shape
+    draw_slice = function(self, data, group) {
+        if (is.character(data$shape)) {
+            data$shape <- ggplot2::translate_shape_string(
+                data$shape
             )
         }
-        function(i, x, y, w, h, fill) {
-            aes_list <- lapply(aesthetics, `[`, i)
-            stroke_size <- aes_list$stroke
+        function(j, i, x, y, w, h, fill) {
+            data <- match_data(data, i, j)
+            stroke_size <- data$stroke
             stroke_size[is.na(stroke_size)] <- 0
             grid::grid.points(x, y,
-                pch = aes_list$shape,
+                pch = data$shape,
                 gp = gpar(
-                    col = alpha(aes_list$colour, aes_list$alpha),
-                    fill = alpha(aes_list$fill, aes_list$alpha),
+                    col = alpha(data$colour, data$alpha),
+                    fill = alpha(data$fill, data$alpha),
                     # Stroke is added around the outside of the point
-                    fontsize = aes_list$size * .pt +
+                    fontsize = data$size * .pt +
                         stroke_size * ggplot2::.stroke / 2,
-                    lwd = aes_list$stroke * ggplot2::.stroke / 2
+                    lwd = data$stroke * ggplot2::.stroke / 2
                 ),
                 name = "eheat_point"
             )

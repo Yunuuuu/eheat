@@ -43,7 +43,7 @@ style_run <- function(x, target = NULL) {
 
 .cli_style_inline <- function(x, span, fallback = "`%s`") {
     if (.cli_has_cli()) {
-        cli_vec_format(paste0("{.", span, " {x}}"))
+        cli_vec_format(sprintf("{.%s %s}", span, x))
     } else if (is.null(fallback)) {
         x
     } else if (is.function(fallback)) {
@@ -60,9 +60,9 @@ cli_vec_format <- function(x, envir = parent.frame()) {
 .cli_style_inline_link <- function(x, target, span, fallback = "`%s`") {
     if (.cli_has_cli()) {
         if (is.null(target)) {
-            cli_vec_format(paste0("{.", span, " {x}}"))
+            cli_vec_format(sprintf("{.%s %s}", span, x))
         } else {
-            cli_vec_format(paste0("{.", span, " [{x}]({target})}"))
+            cli_vec_format(sprintf("{.%s [%s](%s)}", span, x, target))
         }
     } else {
         .cli_style_inline(x, span, fallback = fallback)
