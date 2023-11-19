@@ -20,33 +20,30 @@ eheatTextGeom <- ggplot2::ggproto("eheatTextGeom", eheatGeom,
         params$fmt <- allow_lambda(params$fmt)
         params
     },
-    draw_slice = function(self, data, group, fmt = NULL, check_overlap = FALSE, size.unit = "mm") {
+    draw_geom = function(self, data, coord, fmt = NULL, check_overlap = FALSE, size.unit = "mm") {
         force(data)
         force(fmt)
         force(check_overlap)
         size.unit <- resolve_text_unit(size.unit)
-        function(j, i, x, y, w, h, fill) {
-            data <- match_data(data, i, j)
-            labels <- data$label
-            if (rlang::is_string(fmt)) {
-                labels <- sprintf(fmt, labels)
-            } else if (is.function(fmt)) {
-                labels <- fmt(labels)
-            }
-            grid::grid.text(labels, x, y,
-                hjust = data$hjust, vjust = data$vjust,
-                rot = data$angle,
-                gp = gpar(
-                    col = alpha(data$colour, data$alpha),
-                    fontsize = data$size * size.unit,
-                    fontfamily = data$family,
-                    fontface = data$fontface,
-                    lineheight = data$lineheight
-                ),
-                check.overlap = check_overlap,
-                name = "eheat_text"
-            )
+        labels <- data$label
+        if (rlang::is_string(fmt)) {
+            labels <- sprintf(fmt, labels)
+        } else if (is.function(fmt)) {
+            labels <- fmt(labels)
         }
+        grid::grid.text(labels, coord$x, coord$y,
+            hjust = data$hjust, vjust = data$vjust,
+            rot = data$angle,
+            gp = gpar(
+                col = alpha(data$colour, data$alpha),
+                fontsize = data$size * size.unit,
+                fontfamily = data$family,
+                fontface = data$fontface,
+                lineheight = data$lineheight
+            ),
+            check.overlap = check_overlap,
+            name = "eheat_text"
+        )
     }
 )
 
