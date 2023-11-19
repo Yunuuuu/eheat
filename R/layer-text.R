@@ -1,7 +1,8 @@
-layer_text <- function(..., fmt = NULL, check_overlap = FALSE, matrix = NULL) {
+layer_text <- function(..., fmt = NULL, check_overlap = FALSE, na.rm = FALSE, matrix = NULL) {
     new_layer(
         geom = eheatTextGeom, ...,
         check_overlap = check_overlap, fmt = fmt,
+        na.rm = na.rm,
         matrix = matrix,
         name = "eheat_text"
     )
@@ -19,28 +20,28 @@ eheatTextGeom <- ggplot2::ggproto("eheatTextGeom", eheatGeom,
         params$fmt <- allow_lambda(params$fmt)
         params
     },
-    draw_slice = function(self, layer_matrix, aesthetics, fmt = NULL, check_overlap = FALSE, size.unit = "mm") {
-        force(aesthetics)
+    draw_slice = function(self, data, group, fmt = NULL, check_overlap = FALSE, size.unit = "mm") {
+        force(data)
         force(fmt)
         force(check_overlap)
         size.unit <- resolve_text_unit(size.unit)
-        function(i, x, y, w, h, fill) {
-            aes_list <- lapply(aesthetics, `[`, i)
-            labels <- aes_list$label
+        function(j, i, x, y, w, h, fill) {
+            data <- match_data(data, i, j)
+            labels <- data$label
             if (rlang::is_string(fmt)) {
                 labels <- sprintf(fmt, labels)
             } else if (is.function(fmt)) {
                 labels <- fmt(labels)
             }
             grid::grid.text(labels, x, y,
-                hjust = aes_list$hjust, vjust = aes_list$vjust,
-                rot = aes_list$angle,
+                hjust = data$hjust, vjust = data$vjust,
+                rot = data$angle,
                 gp = gpar(
-                    col = alpha(aes_list$colour, aes_list$alpha),
-                    fontsize = aes_list$size * size.unit,
-                    fontfamily = aes_list$family,
-                    fontface = aes_list$fontface,
-                    lineheight = aes_list$lineheight
+                    col = alpha(data$colour, data$alpha),
+                    fontsize = data$size * size.unit,
+                    fontfamily = data$family,
+                    fontface = data$fontface,
+                    lineheight = data$lineheight
                 ),
                 check.overlap = check_overlap,
                 name = "eheat_text"
