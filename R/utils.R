@@ -232,5 +232,5 @@ stop_input_type <- function(
 }
 
 match_data <- function(data, i, j) {
-    data[match(i * j, data$.raw_idx), ]
+    data[match(i * j, data$.idx), ]
 }

@@ -83,7 +83,7 @@ eheat_build_draw_fn <- function(object, slice, finite = FALSE, na.rm = FALSE) {
         data <- scales$transform_df(data)
 
         # Do summary across row, column or slice
-        data <- layer$compute_aesthetics(data, slice)
+        data <- layer$compute_aesthetics(data, layer_matrix, slice)
 
         # correspoond to compute_geom_1
         # Reparameterise geoms from (e.g.) y and width to ymin and ymax

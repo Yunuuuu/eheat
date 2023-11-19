@@ -14,7 +14,6 @@ eheat_map <- function(scale = NULL, aesthetic = NULL, matrix = NULL) {
             cli::cli_abort("Invalid {aesthetic} aesthetic")
         }
     }
-
     if (!is.null(matrix)) matrix <- build_matrix(matrix)
     ggplot2::ggproto("eheatMap", scale,
         matrix = matrix,
@@ -38,17 +37,10 @@ eheat_map <- function(scale = NULL, aesthetic = NULL, matrix = NULL) {
                 }
             }
             matrix
-        },
+        }
         # https://github.com/tidyverse/ggplot2/blob/main/R/scale-.R
         #  - `transform()` Transforms a vector of values using `self$trans`.
         #  This occurs before the `Stat` is calculated.
-        map_aesthetic = function(self, value) {
-            value <- self$transform(value)
-            new_scale <- self$clone()
-            new_scale$reset()
-            new_scale$train(value)
-            new_scale$map(value)
-        }
     )
 }
 
@@ -64,22 +56,22 @@ eheat_map_list <- function() {
 }
 
 eheatMapList <- ggplot2::ggproto("eheatMapList", NULL,
-    mapping_list = NULL,
+    elements = NULL,
     aesthetic_data = function(self, layer_matrix) {
         # Evaluate aesthetics
-        data <- lapply(self$mapping_list, function(eheat_map) {
+        data <- lapply(self$elements, function(eheat_map) {
             c(eheat_map$aesthetic_matrix(layer_matrix))
         })
-        data <- data_frame0(do.call(cbind, data))
+        data <- data_frame0(!!!data)
         names(data) <- vapply(
-            self$mapping_list,
+            self$elements,
             function(x) x$aesthetics[1L],
             character(1L)
         )
         data
     },
     find_aes = function(self, aesthetic) {
-        vapply(self$mapping_list, function(x) any(aesthetic %in% x$aesthetics), logical(1))
+        vapply(self$elements, function(x) any(aesthetic %in% x$aesthetics), logical(1))
     },
     has_aes = function(self, aesthetic) {
         any(self$find_aes(aesthetic))
@@ -93,7 +85,7 @@ eheatMapList <- ggplot2::ggproto("eheatMapList", NULL,
         if (any(prev_aes)) {
             # Get only the first aesthetic name in the returned vector -- it can
             # sometimes be c("x", "xmin", "xmax", ....)
-            mapping_nm <- self$mapping_list[prev_aes][[1]]$aesthetics[1]
+            mapping_nm <- self$elements[prev_aes][[1]]$aesthetics[1]
             cli::cli_inform(c(
                 "Mapping for {.field {mapping_nm}} is already present.",
                 "Adding another scale for {.field {mapping_nm}}, which will replace the existing scale."
@@ -101,25 +93,30 @@ eheatMapList <- ggplot2::ggproto("eheatMapList", NULL,
         }
 
         # Remove old scale for this aesthetic (if it exists)
-        self$mapping_list <- c(self$mapping_list[!prev_aes], list(scale))
+        self$elements <- c(self$elements[!prev_aes], list(scale))
     },
     n = function(self) {
-        length(self$mapping_list)
+        length(self$elements)
     },
     get_scales = function(self, aesthetic) {
-        self$mapping_list[vapply(self$mapping_list, function(x) inherits(x, "Scale"), logical(1))]
+        self$elements[
+            vapply(
+                self$elements, function(x) inherits(x, "Scale"),
+                logical(1)
+            )
+        ]
     },
     input_mapping = function(self) {
-        unlist(lapply(self$mapping_list, `[[`, "aesthetics"))
+        unlist(lapply(self$elements, `[[`, "aesthetics"))
     },
     input_scales = function(self) {
         unlist(lapply(self$get_scales(), `[[`, "aesthetics"))
     },
     clone_scales = function(self) {
-        ggplot2::ggproto(NULL, self, scales = self$get_scales())
+        ggplot2::ggproto(NULL, self, elements = self$get_scales())
     },
     get_mapping = function(self, output) {
-        mapping <- self$mapping_list[self$find_aes(output)]
+        mapping <- self$elements[self$find_aes(output)]
         if (length(mapping) == 0) {
             return()
         }
@@ -141,18 +138,18 @@ eheatMapList <- ggplot2::ggproto("eheatMapList", NULL,
 
     # used for only scales mapping ----------------------------
     train_df = function(self, df, drop = FALSE) {
-        if (empty(df) || length(self$mapping_list) == 0) {
+        if (empty(df) || length(self$elements) == 0) {
             return()
         }
-        lapply(self$mapping_list, function(scale) scale$train_df(df = df))
+        lapply(self$elements, function(scale) scale$train_df(df = df))
     },
     map_df = function(self, df) {
-        if (empty(df) || length(self$mapping_list) == 0) {
+        if (empty(df) || length(self$elements) == 0) {
             return(df)
         }
 
         mapped <- unlist(lapply(
-            self$mapping_list,
+            self$elements,
             function(scale) scale$map_df(df = df)
         ), recursive = FALSE)
 
@@ -165,11 +162,11 @@ eheatMapList <- ggplot2::ggproto("eheatMapList", NULL,
 
         # If the scale contains to trans or trans is identity, there is no need
         # to transform anything
-        idx_skip <- vapply(self$mapping_list, function(x) {
+        idx_skip <- vapply(self$elements, function(x) {
             has_default_transform(x) &&
                 (is.null(x$trans) || identical(x$trans$transform, identity))
         }, logical(1L))
-        scales <- self$mapping_list[!idx_skip]
+        scales <- self$elements[!idx_skip]
 
         if (length(scales) == 0) {
             return(df)
@@ -188,11 +185,11 @@ eheatMapList <- ggplot2::ggproto("eheatMapList", NULL,
 
         # If the scale contains to trans or trans is identity, there is no need
         # to transform anything
-        idx_skip <- vapply(self$mapping_list, function(x) {
+        idx_skip <- vapply(self$elements, function(x) {
             has_default_transform(x) &&
                 (is.null(x$trans) || identical(x$trans$transform, identity))
         }, logical(1))
-        scales <- self$mapping_list[!idx_skip]
+        scales <- self$elements[!idx_skip]
 
         if (length(scales) == 0) {
             return(df)

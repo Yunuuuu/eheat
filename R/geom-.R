@@ -34,16 +34,72 @@ eheatGeom <- ggplot2::ggproto("eheatGeom",
             snake_class(self)
         )
     },
-    draw_layer = function(self, data, group, params) {
+    draw_layer = function(self, data, group, slice, params) {
         # Trim off extra parameters
         params <- params[intersect(names(params), self$parameters())]
+
+        if (is.null(group)) {
+            self$draw_slice(data, params)
+        } else {
+            self$draw_group(data, group, slice, params)
+        }
+    },
+    draw_slice = function(self, data, params) {
+        force(self)
         data_list <- split(data, ~.slice_group)
         lapply(data_list, function(data) {
-            rlang::inject(self$draw_slice(data, group, !!!params))
+            force(data)
+            function(j, i, x, y, w, h, fill) {
+                data <- match_data(data, i, j)
+                coord <- tibble::tibble(x = x, y = y, width = w, height = h)
+                rlang::inject(self$draw_geom(data, coord, !!!params))
+            }
         })
     },
-    draw_slice = function(self, data, group) {
-        cli::cli_abort("{.fn {snake_class(self)}}, has not implemented a {.fn draw_slice} method")
+    draw_group = function(self, data, group, slice, params) {
+        force(self)
+        force(params)
+        if (group == "slice") {
+            data_list <- split(data, ~group)
+            lapply(data_list, function(data) {
+                force(data)
+                function(j, i, x, y, w, h, fill) {
+                    coord <- tibble::tibble(
+                        x = unit(0.5, "npc"),
+                        y = unit(0.5, "npc"),
+                        width = unit(1, "npc"),
+                        height = unit(1, "npc")
+                    )
+                    rlang::inject(self$draw_geom(data, coord, !!!params))
+                }
+            })
+        } else {
+            force(data)
+            force(group)
+            lapply(slice, function(placeholder) {
+                function(j, i, x, y, w, h, fill) {
+                    coord <- switch(group,
+                        row = tibble::tibble(
+                            x = unit(0.5, "npc"), y = y,
+                            width = unit(1, "npc"), height = h
+                        ),
+                        column = tibble::tibble(
+                            x = x, y = unit(0.5, "npc"),
+                            width = w, height = unit(1, "npc")
+                        )
+                    )
+                    coord <- unique(coord)
+                    data <- switch(group,
+                        row = data[match(i, data$group), ],
+                        column = data[match(j, data$group), ]
+                    )
+                    rlang::inject(self$draw_geom(data, coord, !!!params))
+                }
+            })
+        }
+    },
+    draw_geom = function(self, data, coord) {
+        cli::cli_abort("{.fn {snake_class(self)}}, has not implemented a {.fn draw_geom} method")
     },
     aesthetics_nms = function(self) {
         if (is.null(self$required_aes)) {
@@ -60,10 +116,10 @@ eheatGeom <- ggplot2::ggproto("eheatGeom",
     extra_params = "na.rm",
     parameters = function(self, extra = FALSE) {
         # Look first in draw_panel. If it contains ... then look in draw groups
-        args <- names(ggproto_formals(self$draw_slice))
+        args <- names(ggproto_formals(self$draw_geom))
 
         # Remove arguments of defaults
-        args <- setdiff(args, names(ggproto_formals(eheatGeom$draw_slice)))
+        args <- setdiff(args, names(ggproto_formals(eheatGeom$draw_geom)))
 
         if (extra) {
             args <- union(args, self$extra_params)
