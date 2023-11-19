@@ -93,6 +93,7 @@ eheatGeom <- ggplot2::ggproto("eheatGeom",
                         row = data[match(i, data$group), ],
                         column = data[match(j, data$group), ]
                     )
+                    data <- unique(data)
                     rlang::inject(self$draw_geom(data, coord, !!!params))
                 }
             })

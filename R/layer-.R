@@ -143,6 +143,12 @@ eheatLayer <- ggplot2::ggproto(
                 ),
                 .by = "group"
             )
+            if (anyDuplicated(out$group)) {
+                cli::cli_abort(sprintf(
+                    "{.arg fun} in the layer (%s) must return a length one",
+                    style_fn(snake_class(self))
+                ))
+            }
         }
         out
     },
