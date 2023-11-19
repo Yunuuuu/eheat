@@ -230,7 +230,3 @@ stop_input_type <- function(
     )
     rlang::abort(msg, ..., call = call, arg = arg)
 }
-
-match_data <- function(data, i, j) {
-    data[match(i * j, data$.idx), ]
-}
