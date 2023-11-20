@@ -14,7 +14,11 @@ Imports:
     ComplexHeatmap,
     ggplot2,
     rlang (>= 1.1.0),
-    dplyr (>= 1.1.0)
+    dplyr (>= 1.1.0),
+    gtable,
+    tidyr,
+    methods,
+    tibble
 ByteCompile: true
 URL: https://github.com/Yunuuuu/eheat
 BugReports: https://github.com/Yunuuuu/eheat/issues
