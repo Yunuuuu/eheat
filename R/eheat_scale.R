@@ -11,7 +11,7 @@ eheat_map <- function(scale = NULL, aesthetic = NULL, matrix = NULL) {
         out <- ggplot2::ggproto("eheatMap", scale, matrix = matrix)
     } else {
         aesthetic <- standardise_aes_names(aesthetic)
-        if (!any(aesthetic == ggplot2:::.all_aesthetics)) {
+        if (!any(aesthetic == .all_aesthetics)) {
             cli::cli_abort("Invalid {aesthetic} aesthetic")
         }
         out <- ggplot2::ggproto("eheatMap", scale,
