@@ -12,28 +12,25 @@ eheatPointGeom <- ggplot2::ggproto("eheatPointGeom", eheatGeom,
         shape = 19, colour = "black", size = 1.5, fill = NA,
         alpha = NA, stroke = 0.5
     ),
-    draw_slice = function(self, data, group) {
+    draw_geom = function(self, data, group) {
         if (is.character(data$shape)) {
             data$shape <- ggplot2::translate_shape_string(
                 data$shape
             )
         }
-        function(j, i, x, y, w, h, fill) {
-            data <- match_data(data, i, j)
-            stroke_size <- data$stroke
-            stroke_size[is.na(stroke_size)] <- 0
-            grid::grid.points(x, y,
-                pch = data$shape,
-                gp = gpar(
-                    col = alpha(data$colour, data$alpha),
-                    fill = alpha(data$fill, data$alpha),
-                    # Stroke is added around the outside of the point
-                    fontsize = data$size * .pt +
-                        stroke_size * ggplot2::.stroke / 2,
-                    lwd = data$stroke * ggplot2::.stroke / 2
-                ),
-                name = "eheat_point"
-            )
-        }
+        stroke_size <- data$stroke
+        stroke_size[is.na(stroke_size)] <- 0
+        grid::grid.points(data$x, data$y,
+            pch = data$shape,
+            gp = gpar(
+                col = alpha(data$colour, data$alpha),
+                fill = alpha(data$fill, data$alpha),
+                # Stroke is added around the outside of the point
+                fontsize = data$size * .pt +
+                    stroke_size * ggplot2::.stroke / 2,
+                lwd = data$stroke * ggplot2::.stroke / 2
+            ),
+            name = "eheat_point"
+        )
     }
 )

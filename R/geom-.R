@@ -52,7 +52,7 @@ eheatGeom <- ggplot2::ggproto("eheatGeom",
             function(j, i, x, y, w, h, fill) {
                 data <- data[match(pindex(index_matrix, i, j), data$.idx), ]
                 coord <- tibble::tibble(x = x, y = y, width = w, height = h)
-                rlang::inject(self$draw_geom(data, coord, !!!params))
+                rlang::inject(self$draw_geom(cbind(data, coord), !!!params))
             }
         })
     },
@@ -70,7 +70,8 @@ eheatGeom <- ggplot2::ggproto("eheatGeom",
                         width = unit(1, "npc"),
                         height = unit(1, "npc")
                     )
-                    rlang::inject(self$draw_geom(data, coord, !!!params))
+
+                    rlang::inject(self$draw_geom(cbind(data, coord), !!!params))
                 }
             })
         } else {
@@ -94,12 +95,12 @@ eheatGeom <- ggplot2::ggproto("eheatGeom",
                         column = data[match(j, data$group), ]
                     )
                     data <- unique(data)
-                    rlang::inject(self$draw_geom(data, coord, !!!params))
+                    rlang::inject(self$draw_geom(cbind(data, coord), !!!params))
                 }
             })
         }
     },
-    draw_geom = function(self, data, coord) {
+    draw_geom = function(self, data) {
         cli::cli_abort("{.fn {snake_class(self)}}, has not implemented a {.fn draw_geom} method")
     },
     aesthetics_nms = function(self) {

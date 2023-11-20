@@ -17,9 +17,9 @@ eheatRectGeom <- ggplot2::ggproto("eheatRectGeom", eheatGeom,
         colour = NA, fill = "grey35",
         linewidth = 0.5, linetype = 1, alpha = NA
     ),
-    draw_geom = function(self, data, coord, lineend = "butt", linejoin = "mitre") {
+    draw_geom = function(self, data, lineend = "butt", linejoin = "mitre") {
         grid::grid.rect(
-            coord$x, coord$y, coord$width, coord$height,
+            data$x, data$y, data$width, data$height,
             gp = gpar(
                 col = data$colour,
                 fill = alpha(data$fill, data$alpha),

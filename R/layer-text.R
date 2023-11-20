@@ -20,7 +20,7 @@ eheatTextGeom <- ggplot2::ggproto("eheatTextGeom", eheatGeom,
         params$fmt <- allow_lambda(params$fmt)
         params
     },
-    draw_geom = function(self, data, coord, fmt = NULL, check_overlap = FALSE, size.unit = "mm") {
+    draw_geom = function(self, data, fmt = NULL, check_overlap = FALSE, size.unit = "mm") {
         force(data)
         force(fmt)
         force(check_overlap)
@@ -31,7 +31,7 @@ eheatTextGeom <- ggplot2::ggproto("eheatTextGeom", eheatGeom,
         } else if (is.function(fmt)) {
             labels <- fmt(labels)
         }
-        grid::grid.text(labels, coord$x, coord$y,
+        grid::grid.text(labels, data$x, data$y,
             hjust = data$hjust, vjust = data$vjust,
             rot = data$angle,
             gp = gpar(
