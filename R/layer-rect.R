@@ -5,7 +5,7 @@ layer_rect <- function(..., lineend = "butt", linejoin = "mitre", na.rm = FALSE,
         lineend = lineend,
         na.rm = na.rm,
         matrix = matrix,
-        name = "eheat_rect"
+        name = "layer_rect"
     )
 }
 

@@ -4,7 +4,7 @@ layer_text <- function(..., fmt = NULL, check_overlap = FALSE, na.rm = FALSE, ma
         check_overlap = check_overlap, fmt = fmt,
         na.rm = na.rm,
         matrix = matrix,
-        name = "eheat_text"
+        name = "layer_text"
     )
 }
 

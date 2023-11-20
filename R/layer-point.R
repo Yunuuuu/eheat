@@ -2,7 +2,7 @@ layer_point <- function(..., na.rm = FALSE, matrix = NULL) {
     new_layer(
         geom = eheatPointGeom, ...,
         na.rm = na.rm, matrix = matrix,
-        name = "eheat_point"
+        name = "layer_point"
     )
 }
 
