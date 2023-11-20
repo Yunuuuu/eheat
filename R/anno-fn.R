@@ -2,13 +2,117 @@ anno_fn <- function(
     draw_fn, ..., scale = NULL,
     subset_rule = NULL, subsettable = NULL,
     width = NULL, height = NULL, show_name = TRUE,
-    which = NULL, matrix = NULL) {
-    anno <- new_anno(matrix = matrix, scale = scale)
-    anno$draw_anno(draw_fn, ...,
-        which = which,
-        subsettable = subsettable,
-        subset_rule = subset_rule,
-        width = width, height = height,
-        show_name = show_name
+    which = NULL, matrix = NULL, heat_matrix = NULL) {
+    assert_s3_class(scale, "Scale", null_ok = TRUE)
+    matrix <- anno_check_matrix(allow_lambda(matrix), which, heat_matrix)
+    yscale <- scale_get_limits(matrix)
+    draw_fn <- allow_lambda(draw_fn)
+    dots <- rlang::list2(...)
+    if (length(dots) != sum(nzchar(names(dots)))) {
+        cli::cli_abort("All members in {.arg ...} must be named.")
+    }
+    # name <- name %||% rlang::as_name(rlang::caller_call()[[1L]])
+    subsettable <- subsettable %||% TRUE
+    # var_import <- list(
+    #     matrix = matrix, dots = dots,
+    #     which = which, yscale = yscale
+    # )
+    if (isTRUE(subsettable)) {
+        internal_subset <- list(
+            matrix = function(x, i) x[i, , drop = FALSE]
+        )
+        if (length(dots) && is.null(subset_rule)) {
+            subset_rule <- lapply(dots, function(var) {
+                if (is.matrix(var)) {
+                    function(x, i) {
+                        x[i, , drop = FALSE]
+                    }
+                } else if (inherits(var, "gpar")) {
+                    subset_gp
+                } else if (is.vector(var)) {
+                    if (length(var) > 1) {
+                        function(x, i) {
+                            x[i]
+                        }
+                    }
+                }
+            })
+        }
+        if (!is.null(subset_rule)) {
+            rules <- subset_rule
+            rules_nms <- names(rules)
+            subset_rule <- list(dots = function(x, i) {
+                imap(x, function(element, nm) {
+                    if (any(nm == rules_nms)) {
+                        rule <- rules[[nm]]
+                        if (is.null(rule) || isFALSE(rule)) {
+                            element
+                        } else {
+                            rule(element, i)
+                        }
+                    } else {
+                        element
+                    }
+                })
+            })
+            subset_rule <- c(internal_subset, subset_rule)
+        }
+    }
+    new_anno(
+        matrix = matrix,
+        draw_fn = function(index, k, n) {
+            vp <- flip_viewport(which,
+                xscale = c(0.5, n + 0.5),
+                yscale = yscale
+            )
+            matrix <- matrix[index, , drop = FALSE]
+            rlang::inject(draw_fn(matrix, !!!dots, which = which, vp = vp))
+        },
+        yscale = yscale,
+        subset_rule = subset_rule, subsettable = subsettable,
+        which = which, width = width, height = height,
+        show_name = show_name, name = "anno_fn"
     )
+}
+
+anno_check_matrix <- function(matrix, which, heat_matrix, name) {
+    if (is.null(matrix) && is.null(heat_matrix)) {
+        cli::cli_abort("{.arg matrix} must be provided")
+    } else if (is.null(matrix)) {
+        matrix <- heat_matrix
+    } else {
+        if (is.function(matrix)) {
+            matrix <- matrix(heat_matrix)
+        }
+        matrix <- build_matrix(matrix)
+        if (!is.null(heat_matrix)) {
+            # check heat_matrix and anno_check_matrix are compatible
+            bad_matrix <- switch(which,
+                row = nrow(matrix) == nrow(heat_matrix),
+                column = nrow(matrix) == ncol(heat_matrix)
+            )
+            if (bad_matrix) {
+                msg <- sprintf("(%s) annotation matrix", style_fn(name))
+                msg <- paste(msg, "is not compatible with heatmap matrix",
+                    sep = " "
+                )
+                cli::cli_abort(msg)
+            }
+        }
+    }
+    matrix
+}
+
+scale_get_limits <- function(matrix, scale = NULL) {
+    if (is.null(scale)) {
+        if (is_discrete(matrix)) {
+            scale <- ggplot2::scale_y_discrete()
+        } else {
+            scale <- ggplot2::scale_y_continuous()
+        }
+    }
+    new_scale <- scale$clone()
+    new_scale$reset()
+    new_scale$train(matrix)
+    new_scale$get_limits()
 }

@@ -22,26 +22,3 @@ Imports:
 ByteCompile: true
 URL: https://github.com/Yunuuuu/eheat
 BugReports: https://github.com/Yunuuuu/eheat/issues
-Collate: 
-    'anno-.R'
-    'eheat.R'
-    'anno-fn.R'
-    'anno_gg.R'
-    'eanno.R'
-    'eheat-package.R'
-    'eheat_scale.R'
-    'geom-.R'
-    'ggheat.R'
-    'import-standalone-assert.R'
-    'import-standalone-cli.R'
-    'import-standalone-obj-type.R'
-    'layer-.R'
-    'layer-draw.R'
-    'layer-point.R'
-    'layer-rect.R'
-    'layer-text.R'
-    'scale.R'
-    'utils-assert.R'
-    'utils-complexheatmap.R'
-    'utils-grid.R'
-    'utils.R'
