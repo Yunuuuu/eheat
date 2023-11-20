@@ -51,7 +51,7 @@ eheatGeom <- ggplot2::ggproto("eheatGeom",
             force(data)
             function(j, i, x, y, w, h, fill) {
                 data <- data[match(pindex(index_matrix, i, j), data$.idx), ]
-                coord <- tibble::tibble(x = x, y = y, width = w, height = h)
+                coord <- data_frame0(x = x, y = y, width = w, height = h)
                 rlang::inject(self$draw_geom(cbind(data, coord), !!!params))
             }
         })
@@ -64,7 +64,7 @@ eheatGeom <- ggplot2::ggproto("eheatGeom",
             lapply(data_list, function(data) {
                 force(data)
                 function(j, i, x, y, w, h, fill) {
-                    coord <- tibble::tibble(
+                    coord <- data_frame0(
                         x = unit(0.5, "npc"),
                         y = unit(0.5, "npc"),
                         width = unit(1, "npc"),
@@ -80,11 +80,11 @@ eheatGeom <- ggplot2::ggproto("eheatGeom",
             lapply(slice, function(placeholder) {
                 function(j, i, x, y, w, h, fill) {
                     coord <- switch(group,
-                        row = tibble::tibble(
+                        row = data_frame0(
                             x = unit(0.5, "npc"), y = y,
                             width = unit(1, "npc"), height = h
                         ),
-                        column = tibble::tibble(
+                        column = data_frame0(
                             x = x, y = unit(0.5, "npc"),
                             width = w, height = unit(1, "npc")
                         )
