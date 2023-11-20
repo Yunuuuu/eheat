@@ -11,12 +11,13 @@ new_layer <- function(geom, ..., group = NULL, fun = mean, fun.args = list(), ma
     }
     matrix <- allow_lambda(matrix)
     dots <- rlang::list2(...)
-    map_idx <- vapply(dots, is_eheat_map, logical(1L))
-    # provide map in scale object directly
-    scale_idx <- vapply(dots, is_scale, logical(1L))
-    map_list <- dots[map_idx | scale_idx]
+    map_idx <- vapply(dots, function(x) {
+        # provide map in scale object directly
+        is_eheat_map(x) | is_scale(x)
+    }, logical(1L))
+    map_list <- dots[map_idx]
 
-    params <- dots[!(map_idx | scale_idx)]
+    params <- dots[!map_idx]
     # Split up params between aesthetics and geom
     params <- rename_aes(params)
     params_nms <- names(params)
@@ -143,7 +144,7 @@ eheatLayer <- ggplot2::ggproto(
             )
             if (anyDuplicated(out$group)) {
                 cli::cli_abort(sprintf(
-                    "{.arg fun} in the layer (%s) must return a length one",
+                    "{.arg fun} in the layer (%s) must return length one",
                     style_fn(self$name)
                 ))
             }
