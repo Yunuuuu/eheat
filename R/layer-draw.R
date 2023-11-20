@@ -1,6 +1,6 @@
-layer_draw <- function(..., na.rm = FALSE, matrix = NULL) {
+layer_draw <- function(..., draw = print, na.rm = FALSE, matrix = NULL) {
     new_layer(
-        geom = eheatDrawGeom, ...,
+        geom = eheatDrawGeom, ..., draw = print,
         na.rm = na.rm, matrix = matrix,
         name = "layer_point"
     )

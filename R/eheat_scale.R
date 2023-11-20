@@ -152,7 +152,7 @@ eheatMapList <- ggplot2::ggproto("eheatMapList", NULL,
         }
         lapply(self$elements, function(scale) scale$train_df(df = df))
     },
-    map_df = function(self, df) {
+    map_df = function(self, df, keep_raw = TRUE) {
         if (empty(df) || length(self$elements) == 0) {
             return(df)
         }
@@ -161,8 +161,14 @@ eheatMapList <- ggplot2::ggproto("eheatMapList", NULL,
             self$elements,
             function(scale) scale$map_df(df = df)
         ), recursive = FALSE)
-
-        data_frame0(!!!mapped, df[setdiff(names(df), names(mapped))])
+        if (keep_raw) {
+            data_frame0(!!!mapped, rename(df, structure(
+                names = intersect(names(df), names(mapped)),
+                paste(intersect(names(df), names(mapped)), "raw", sep = "_")
+            )))
+        } else {
+            data_frame0(!!!mapped, df[setdiff(names(df), names(mapped))])
+        }
     },
     transform_df = function(self, df) {
         if (empty(df)) {
