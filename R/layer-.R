@@ -51,8 +51,10 @@ new_layer <- function(geom, ..., group = NULL, fun = mean, fun.args = list(), ma
             call = call_env
         )
     }
+
     ggplot2::ggproto("eheatLayerInstance", layer_class,
-        name = name, matrix = matrix,
+        name = name %||% rlang::as_name(rlang::caller_call()[[1L]]),
+        matrix = matrix,
         mapping = mapping, geom = geom, geom_params = geom_params,
         aes_params = aes_params,
         group = group, summary = list(fun = fun, fun.args = fun.args)
@@ -91,7 +93,7 @@ eheatLayer <- ggplot2::ggproto(
                     length(matrix) != length(heat_matrix))) {
                 msg <- sprintf(
                     "(%s) layer matrix",
-                    style_fn(snake_class(self))
+                    style_fn(self$name)
                 )
                 msg <- paste(msg,
                     "is not compatible with heatmap matrix",
@@ -146,7 +148,7 @@ eheatLayer <- ggplot2::ggproto(
             if (anyDuplicated(out$group)) {
                 cli::cli_abort(sprintf(
                     "{.arg fun} in the layer (%s) must return a length one",
-                    style_fn(snake_class(self))
+                    style_fn(self$name)
                 ))
             }
         }
