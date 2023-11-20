@@ -1,4 +1,5 @@
 #' @keywords internal
+#' @aliases eheat-package
 "_PACKAGE"
 
 ## usethis namespace: start
