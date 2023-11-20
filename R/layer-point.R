@@ -12,11 +12,9 @@ eheatPointGeom <- ggplot2::ggproto("eheatPointGeom", eheatGeom,
         shape = 19, colour = "black", size = 1.5, fill = NA,
         alpha = NA, stroke = 0.5
     ),
-    draw_geom = function(self, data, group) {
+    draw_geom = function(self, data) {
         if (is.character(data$shape)) {
-            data$shape <- ggplot2::translate_shape_string(
-                data$shape
-            )
+            data$shape <- ggplot2::translate_shape_string(data$shape)
         }
         stroke_size <- data$stroke
         stroke_size[is.na(stroke_size)] <- 0
