@@ -3,60 +3,61 @@
 #' @param matrix Matrix used for this aesthetic mapping
 #' @export
 eheat_map <- function(scale = NULL, aesthetic = NULL, matrix = NULL) {
+    matrix <- allow_lambda(matrix)
     if (is.null(scale) && is.null(aesthetic)) {
         cli::cli_abort("One of {.arg scale} or {.arg aesthetic} must be provided")
-    } else if (!is.null(scale)) {
+    } else if (!is.null(scale)) { # ignore aesthetic argument
         assert_s3_class(scale, "Scale")
-        aesthetic <- scale$aesthetics
+        out <- ggplot2::ggproto("eheatMap", scale, matrix = matrix)
     } else {
         aesthetic <- standardise_aes_names(aesthetic)
         if (!any(aesthetic == ggplot2:::.all_aesthetics)) {
             cli::cli_abort("Invalid {aesthetic} aesthetic")
         }
+        out <- ggplot2::ggproto("eheatMap", scale,
+            matrix = matrix, aesthetics = aesthetic
+        )
     }
-    matrix <- allow_lambda(matrix)
-    ggplot2::ggproto("eheatMap", scale,
-        matrix = matrix,
-        aesthetics = aesthetic,
-        aesthetic_matrix = function(self, layer_matrix) {
-            name <- self$aesthetics[1L] # nolint
-            if (is.null(self$matrix)) {
-                matrix <- layer_matrix
+    out$aesthetic <- function(self, layer_matrix) {
+        name <- self$aesthetics[1L] # nolint
+        if (is.null(self$matrix)) {
+            matrix <- layer_matrix
+        } else {
+            if (is.function(self$matrix)) {
+                matrix <- self$matrix(layer_matrix)
+                if (!is.matrix(matrix)) {
+                    cli::cli_abort("{.fn matrix} of {name} aesthetic must return a {.cls matrix}")
+                }
             } else {
-                if (is.function(self$matrix)) {
-                    matrix <- self$matrix(layer_matrix)
-                    if (!is.matrix(matrix)) {
-                        cli::cli_abort("{.fn matrix} of {name} aesthetic must return a {.cls matrix}")
-                    }
-                } else {
-                    matrix <- self$matrix
-                }
-                # check heat_matrix and layer_matrix are compatible
-                if ((!is.null(dim(matrix)) &&
-                    !all(dim(matrix) == dim(layer_matrix))) ||
-                    (is.null(dim(matrix)) && is.atomic(matrix) &&
-                        length(matrix) != length(layer_matrix))) {
-                    msg <- sprintf(
-                        "(%s) aesthetic matrix",
-                        style_fn(snake_class(self))
-                    )
-                    msg <- paste(msg,
-                        "is not compatible with heatmap matrix",
-                        sep = " "
-                    )
-                    cli::cli_abort(msg)
-                }
+                matrix <- self$matrix
             }
-            matrix
+            # check heat_matrix and layer_matrix are compatible
+            if ((!is.null(dim(matrix)) &&
+                !all(dim(matrix) == dim(layer_matrix))) ||
+                (is.null(dim(matrix)) && is.atomic(matrix) &&
+                    length(matrix) != length(layer_matrix))) {
+                msg <- sprintf(
+                    "(%s) aesthetic matrix",
+                    style_fn(snake_class(self))
+                )
+                msg <- paste(msg,
+                    "is not compatible with heatmap matrix",
+                    sep = " "
+                )
+                cli::cli_abort(msg)
+            }
         }
-        # https://github.com/tidyverse/ggplot2/blob/main/R/scale-.R
-        #  - `transform()` Transforms a vector of values using `self$trans`.
-        #  This occurs before the `Stat` is calculated.
-    )
+        matrix
+    }
+    out
 }
 
 is_eheat_map <- function(x) {
     inherits(x, "eheatMap")
+}
+
+is_scale <- function(x) {
+    inherits(x, "Scale")
 }
 
 # Scales object encapsulates multiple scales.
@@ -71,7 +72,7 @@ eheatMapList <- ggplot2::ggproto("eheatMapList", NULL,
     aesthetic_data = function(self, layer_matrix) {
         # Evaluate aesthetics
         data <- lapply(self$elements, function(eheat_map) {
-            c(eheat_map$aesthetic_matrix(layer_matrix))
+            c(eheat_map$aesthetic(layer_matrix))
         })
         data <- data_frame0(!!!data)
         names(data) <- vapply(
@@ -87,12 +88,14 @@ eheatMapList <- ggplot2::ggproto("eheatMapList", NULL,
     has_aes = function(self, aesthetic) {
         any(self$find_aes(aesthetic))
     },
-    add = function(self, scale) {
-        if (is.null(scale)) {
+    add = function(self, element) {
+        if (is.null(element)) {
             return()
         }
-
-        prev_aes <- self$find_aes(scale$aesthetics)
+        if (!is_eheat_map(element) && is_scale(element)) {
+            element <- eheat_map(scale = element)
+        }
+        prev_aes <- self$find_aes(element$aesthetics)
         if (any(prev_aes)) {
             # Get only the first aesthetic name in the returned vector -- it can
             # sometimes be c("x", "xmin", "xmax", ....)
@@ -104,18 +107,13 @@ eheatMapList <- ggplot2::ggproto("eheatMapList", NULL,
         }
 
         # Remove old scale for this aesthetic (if it exists)
-        self$elements <- c(self$elements[!prev_aes], list(scale))
+        self$elements <- c(self$elements[!prev_aes], list(element))
     },
     n = function(self) {
         length(self$elements)
     },
     get_scales = function(self, aesthetic) {
-        self$elements[
-            vapply(
-                self$elements, function(x) inherits(x, "Scale"),
-                logical(1)
-            )
-        ]
+        self$elements[vapply(self$elements, is_scale, logical(1))]
     },
     input_mapping = function(self) {
         unlist(lapply(self$elements, `[[`, "aesthetics"))
@@ -271,10 +269,8 @@ data_frame0 <- function(...) {
 
 has_default_transform <- function(scale) {
     transform_method <- environment(scale$transform)$f
-    identical(default_transform, transform_method) || identical(
-        identity,
-        transform_method
-    )
+    identical(default_transform, transform_method) ||
+        identical(identity, transform_method)
 }
 
 default_transform <- function(self, x) {

@@ -12,32 +12,28 @@ new_layer <- function(geom, ..., group = NULL, fun = mean, fun.args = list(), ma
     matrix <- allow_lambda(matrix)
     dots <- rlang::list2(...)
     map_idx <- vapply(dots, is_eheat_map, logical(1L))
-    map_list <- dots[map_idx]
+    # provide map in scale object directly
+    scale_idx <- vapply(dots, is_scale, logical(1L))
+    map_list <- dots[map_idx | scale_idx]
 
-    params <- dots[!map_idx]
+    params <- dots[!(map_idx | scale_idx)]
     # Split up params between aesthetics and geom
     params <- rename_aes(params)
     params_nms <- names(params)
-    geom_params <- params[intersect(params_nms, geom$parameters(TRUE))]
     aes_params <- params[intersect(params_nms, geom$aesthetics_nms())]
-    bad_aes <- vapply(
-        aes_params,
-        function(x) inherits(x, "Scale"), logical(1L)
-    )
-    if (any(bad_aes)) {
-        cli::cli_abort(c(
-            "Found {.cls Scale} object directly set in {.field {names(bad_aes[bad_aes])}} aesthetic",
-            i = "Did you forget wrap it with {.fn eheat_scale}?"
-        ))
-    }
-    all <- c(geom$parameters(TRUE), geom$aesthetics_nms())
-
-    # Warn about extra params and aesthetics
-    extra_param <- setdiff(names(params), all)
-    if (check.param && length(extra_param) > 0) {
-        cli::cli_warn("Ignoring unknown parameters: {.arg {extra_param}}",
-            call = call_env
-        )
+    if ("..." %in% geom$parameters()) {
+        # special use for layer_draw
+        geom_params <- params[setdiff(params_nms, names(aes_params))]
+    } else {
+        geom_params <- params[intersect(params_nms, geom$parameters(TRUE))]
+        all <- c(geom$parameters(TRUE), geom$aesthetics_nms())
+        # Warn about extra params and aesthetics
+        extra_param <- setdiff(names(params), all)
+        if (check.param && length(extra_param) > 0) {
+            cli::cli_warn("Ignoring unknown parameters: {.arg {extra_param}}",
+                call = call_env
+            )
+        }
     }
 
     # for heatmap, the geom internally can have their own scales

@@ -4,8 +4,8 @@ eheatGeom <- ggplot2::ggproto("eheatGeom",
     optional_aes = character(),
     default_aes = list(),
     draw_key = NULL,
-    setup_params = function(matrix, params) params,
-    setup_data = function(matrix, params) matrix,
+    setup_params = function(data, params) params,
+    setup_data = function(data, params) data,
     use_defaults = function(self, data, params = list()) {
         # Override mappings with params
         aes_params <- intersect(self$aesthetics_nms(), names(params))
@@ -70,7 +70,6 @@ eheatGeom <- ggplot2::ggproto("eheatGeom",
                         width = unit(1, "npc"),
                         height = unit(1, "npc")
                     )
-
                     rlang::inject(self$draw_geom(cbind(data, coord), !!!params))
                 }
             })
