@@ -37,6 +37,9 @@ fit_ggplot <- function(ggplot, vp, elements = c("b", "t", "l", "r")) {
 
     # Extract panel, axes and axis labels
     panel <- gtable::gtable_filter(gt, "panel")
+    # panel <- egg::set_panel_size(
+    #     ggplot, width = unit(1, "npc"), height = unit(1, "npc")
+    # )
     grid::pushViewport(vp)
     grid::grid.draw(panel)
 

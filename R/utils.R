@@ -241,3 +241,7 @@ stop_input_type <- function(
     "size", "srt", "upper", "vjust", "weight", "width", "x", "xend", "xmax",
     "xmin", "xintercept", "y", "yend", "ymax", "ymin", "yintercept", "z"
 )
+
+is_discrete <- function(x) {
+    is.factor(x) || is.character(x) || is.logical(x)
+}

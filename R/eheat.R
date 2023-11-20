@@ -46,16 +46,16 @@
 #' clustering on the slice means?
 #' - `clustering_distance_rows`: It can be a pre-defined character which is in
 #' ("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski",
-#' "pearson", "spearman", "kendall"). It can also be a function. 
+#' "pearson", "spearman", "kendall"). It can also be a function.
 #'   - If the function has one argument, the input argument should be a matrix
-#' and the returned value should be a `stats::dist` object. 
+#' and the returned value should be a `stats::dist` object.
 #'   - If the function has two arguments, the input arguments are two vectors
 #' and the function calculates distance between these two vectors.
-#' 
+#'
 #' - `clustering_method_rows` Method to perform hierarchical clustering, pass to
 #'   [hclust][stats::hclust].
 #' - `row_dend_side` Should the row dendrogram be put on the left or right of
-#'   the heatmap? 
+#'   the heatmap?
 #' - `row_dend_width` Width of the row dendrogram, should be a `grid::unit`
 #'   object.
 #' - `show_row_dend` Whether show row dendrogram?
@@ -152,28 +152,28 @@
 #' - `post_fun` A function which will be executed after the heatmap list is
 #'   drawn.
 #'
-#' @details 
+#' @details
 #' The initialization function only applies parameter checking and fill values to the slots with some validation.
 #'
 #' Following methods can be applied to the `Heatmap-class` object:
 #'
-#' - `show,eheat-method`: draw a single heatmap with default parameters
-#' - `draw,eheat-method`: draw a single heatmap.
+#' - `show,eHeat-method`: draw a single heatmap with default parameters
+#' - `draw,eHeat-method`: draw a single heatmap.
 #' - `+` or `%v%` append heatmaps and annotations to a list of heatmaps.
 #'
 #' The constructor function pretends to be a high-level graphic function because
 #' the ``show`` method of the `Heatmap-class` object actually plots the
 #' graphics.
-#' @return A `eheat` Object.
+#' @return A `eHeat` Object.
 #' @export
-#' @name eheat
+#' @name eHeat
 eheat <- function(matrix, ...) {
     matrix <- build_matrix(matrix)
     dots <- rlang::list2(...)
     layers_idx <- vapply(dots, is_eheat_layer, logical(1L))
     layers <- dots[layers_idx]
     params <- dots[!layers_idx]
-    methods::new("eheat",
+    methods::new("eHeat",
         heatmap = rlang::inject(ComplexHeatmap::Heatmap(
             matrix = matrix,
             rect_gp = gpar(type = "none"),
@@ -187,21 +187,23 @@ eheat <- function(matrix, ...) {
 
 #' @importClassesFrom ComplexHeatmap Heatmap
 #' @export
-#' @rdname eheat
+#' @rdname eHeat
 methods::setClass(
-    "eheat",
+    "eHeat",
     slots = list(heatmap = "Heatmap", layers = "list")
 )
+
+# methods::setGeneric("draw", function(object, ...) {})
 
 #' @importFrom ComplexHeatmap draw
 #' @export
 ComplexHeatmap::draw
 
-#' @param object A `eheat` object.
+#' @param object A `eHeat` object.
 #' @export
-#' @method draw eheat
-#' @rdname eheat
-methods::setMethod("draw", "eheat", function(object, ...) {
+#' @method draw eHeat
+#' @rdname eHeat
+methods::setMethod("draw", "eHeat", function(object, ...) {
     # ComplexHeatmap::Heatmap will change the function environment of
     # `layer_fun`, we just assign it directly
     heat <- object@heatmap
@@ -211,9 +213,9 @@ methods::setMethod("draw", "eheat", function(object, ...) {
 
 #' @importFrom methods show
 #' @export
-#' @method show eheat
-#' @rdname eheat
-methods::setMethod("show", "eheat", function(object) {
+#' @method show eHeat
+#' @rdname eHeat
+methods::setMethod("show", "eHeat", function(object) {
     draw(object)
 })
 
