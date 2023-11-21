@@ -70,7 +70,7 @@ fit_panel <- function(gt, vp, elements = c("b", "t", "l", "r")) {
         # Viewport for right axis and label
         lab_r <- gtable::gtable_filter(gt, "ylab-r")
         axis_r <- gtable::gtable_filter(gt, "axis-r")
-        right <- safe_bind(cbind, lab_r, axis_r)
+        right <- safe_bind(cbind, axis_r, lab_r)
         if (length(right)) {
             # Get their width
             w <- grid::convertX(sum(right$widths), "mm")
@@ -109,7 +109,7 @@ fit_panel <- function(gt, vp, elements = c("b", "t", "l", "r")) {
         # Viewport for top axis and label
         axis_t <- gtable::gtable_filter(gt, "axis-t")
         lab_t <- gtable::gtable_filter(gt, "xlab-t")
-        top <- safe_bind(rbind, axis_t, lab_t)
+        top <- safe_bind(rbind, lab_t, axis_t)
         if (length(top)) {
             # Get their width / height
             h <- grid::convertX(sum(top$heights), "mm")
