@@ -1,4 +1,4 @@
-new_anno <- function(matrix, draw_fn, yscale,
+new_anno <- function(n, draw_fn, ylim,
                      subset_rule = list(), subsettable = TRUE,
                      width = NULL, height = NULL, show_name = TRUE,
                      which = NULL, name = NULL) {
@@ -13,8 +13,8 @@ new_anno <- function(matrix, draw_fn, yscale,
     anno@width <- anno_size$width
     anno@height <- anno_size$height
     anno@show_name <- show_name
-    anno@n <- nrow(matrix)
-    anno@data_scale <- yscale
+    anno@n <- n
+    anno@data_scale <- ylim
     anno@fun <- draw_fn
     anno@var_env <- new.env(parent = environment(draw_fn))
     anno@subsettable <- subsettable

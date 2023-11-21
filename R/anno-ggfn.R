@@ -26,5 +26,5 @@ anno_ggfn <- function(ggfn, ..., debug = FALSE) {
         }
         fit_ggplot(p, vp = vp)
     }
-    anno_fn(draw_fn = draw_fn, ..., debug = debug)
+    anno_fn(draw_fn = draw_fn, ..., show_name = FALSE, debug = debug)
 }

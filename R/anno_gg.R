@@ -1,30 +1,63 @@
-anno_gg <- function(ggfun, ..., debug = FALSE) {
-    ggfun <- allow_lambda(ggfun)
-    debug <- allow_lambda(debug)
-    draw_fn <- function(matrix, ..., which, vp, debug) {
-        data <- tibble::as_tibble(build_matrix(matrix), .name_repair = "unique")
-        data$x <- seq_len(nrow(data))
-        p <- ggfun(data, ...)
-        if (isTRUE(debug)) {
-            rlang::return_from(sys.frame(which = 1L), value = p)
-        } else if (is.function(debug)) {
-            debug(p)
-        }
-        if (!ggplot2::is.ggplot(p)) {
-            cli::cli_abort("{.arg ggfun} must return a {.cls ggplot2} object.")
-        }
-        if (which == "row") {
-            p <- p + ggplot2::scale_y_discrete(
-                name = NULL,
-                expand = ggplot2::expansion(add = 0.5)
-            ) + ggplot2::coord_flip()
-        } else {
-            p <- p + ggplot2::scale_x_discrete(
-                name = NULL,
-                expand = ggplot2::expansion(add = 0.5)
-            )
-        }
-        fit_ggplot(p, vp = vp)
-    }
-    anno_fn(draw_fn = draw_fn, ..., debug = debug)
+anno_gg <- function() {
+
 }
+
+insert_gg <- function(gg, ..., arg = rlang::caller_arg(gg), call = rlang::caller_env()) {
+    assert_s3_class(gg, "ggplot", arg = arg, call = call)
+    new_anno(
+        matrix = matrix,
+        draw_fn = function(index, k, n) {
+            vp <- flip_viewport(which,
+                xscale = c(0.5, n + 0.5),
+                yscale = yscale
+            )
+            matrix <- matrix[index, , drop = FALSE]
+            rlang::inject(draw_fn(matrix, !!!dots, which = which, vp = vp))
+        },
+        yscale = yscale,
+        subset_rule = subset_rule, subsettable = subsettable,
+        which = which, width = width, height = height,
+        show_name = show_name, name = "anno_fn"
+    )
+}
+
+guide_from_gg <- function(gg, direction = NULL) {
+    gt <- ggplot2::ggplot_gtable(gg)
+    guide <- gtable::gtable_filter(gt, "guide")
+    grob <- grid::grobTree(guide)
+    attr(object@grob, "width") <- sum(guide$widths)
+    attr(object@grob, "height") <- sum(guide$heights)
+    methods::new(
+        "Legends",
+        grob = grob,
+        type = "gg_legend",
+        name = "gg",
+        n = 1L, multiple = 1L,
+        direction = match.arg(direction, c("vertical", "horizontal"))
+    )
+}
+
+# ComplexHeatmap::Legend()
+# legend <- function() {
+#   object <- new("Legends")
+#   object@grob <- legend_body
+#   object@type <- "single_legend_no_title"
+#   object@n <- 1
+#   object@multiple <- 1
+#   object@direction <- "vertical"
+#   return(object)
+#   object <- new("Legends")
+#   object@grob <- legend_body
+#   object@type <- "single_legend_no_title"
+#   object@n <- 1
+#   object@multiple <- 1
+#   object@direction <- "vertical"
+#   return(object)
+#   object <- new("Legends")
+#   object@grob <- gf
+#   object@type <- "single_legend"
+#   object@name <- name
+#   object@n <- 1
+#   object@multiple <- 1
+#   object@direction <- "vertical"
+# }
