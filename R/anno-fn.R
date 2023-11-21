@@ -1,22 +1,18 @@
 anno_fn <- function(
-    draw_fn, ..., scale = NULL,
+    draw_fn, ..., yscale = NULL,
     subset_rule = NULL, subsettable = NULL,
     width = NULL, height = NULL, show_name = TRUE,
     which = NULL, matrix = NULL, heat_matrix = NULL) {
-    assert_s3_class(scale, "Scale", null_ok = TRUE)
+    assert_s3_class(yscale, "Scale", null_ok = TRUE)
     matrix <- anno_check_matrix(allow_lambda(matrix), which, heat_matrix)
-    yscale <- scale_get_limits(matrix)
+    ylim <- scale_get_limits(matrix, yscale)
     draw_fn <- allow_lambda(draw_fn)
     dots <- rlang::list2(...)
     if (length(dots) != sum(nzchar(names(dots)))) {
         cli::cli_abort("All members in {.arg ...} must be named.")
     }
-    # name <- name %||% rlang::as_name(rlang::caller_call()[[1L]])
+    name <- name %||% rlang::as_name(rlang::caller_call()[[1L]])
     subsettable <- subsettable %||% TRUE
-    # var_import <- list(
-    #     matrix = matrix, dots = dots,
-    #     which = which, yscale = yscale
-    # )
     if (isTRUE(subsettable)) {
         internal_subset <- list(
             matrix = function(x, i) x[i, , drop = FALSE]
@@ -58,20 +54,24 @@ anno_fn <- function(
             subset_rule <- c(internal_subset, subset_rule)
         }
     }
+    # var_import <- list(
+    #     matrix = matrix, dots = dots,
+    #     which = which, ylim = ylim
+    # )
     new_anno(
-        matrix = matrix,
+        n = nrow(matrix),
         draw_fn = function(index, k, n) {
             vp <- flip_viewport(which,
                 xscale = c(0.5, n + 0.5),
-                yscale = yscale
+                yscale = ylim
             )
             matrix <- matrix[index, , drop = FALSE]
             rlang::inject(draw_fn(matrix, !!!dots, which = which, vp = vp))
         },
-        yscale = yscale,
+        yscale = ylim,
         subset_rule = subset_rule, subsettable = subsettable,
         which = which, width = width, height = height,
-        show_name = show_name, name = "anno_fn"
+        show_name = show_name, name = name
     )
 }
 
@@ -86,7 +86,7 @@ anno_check_matrix <- function(matrix, which, heat_matrix, name) {
         }
         matrix <- build_matrix(matrix)
         if (!is.null(heat_matrix)) {
-            # check heat_matrix and anno_check_matrix are compatible
+            # check heat_matrix and anno_matrix are compatible
             bad_matrix <- switch(which,
                 row = nrow(matrix) == nrow(heat_matrix),
                 column = nrow(matrix) == ncol(heat_matrix)
