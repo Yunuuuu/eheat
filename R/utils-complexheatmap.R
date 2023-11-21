@@ -19,21 +19,22 @@ cheat_env <- function() {
 }
 
 # get slice informations from the draw function
-cheat_get_order <- function(pos = 2L) {
-    slice <- NULL
-    while (is.null(slice)) {
-        env <- parent.frame(pos)
-        has_slice <- exists("object", envir = env, inherits = FALSE) &&
-            methods::.hasSlot(env$object, "row_order_list") &&
-            methods::.hasSlot(env$object, "column_order_list")
-        if (has_slice) {
-            return(list(
-                row_order_list = env$object@row_order_list,
-                column_order_list = env$object@column_order_list
-            ))
-        }
-        pos <- pos + 1L
-    }
+cheat_get_order_list <- function(name, pos = 2L, return_env = FALSE) {
+    trace_data(
+        name = name,
+        has_fn = function(env, name) {
+            exists(name, envir = env, inherits = FALSE) &&
+                methods::.hasSlot(env[[name]], "row_order_list") &&
+                methods::.hasSlot(env[[name]], "column_order_list")
+        },
+        return_fn = function(env, name) {
+            list(
+                row_order_list = env[[name]]@row_order_list,
+                column_order_list = env[[name]]@column_order_list
+            )
+        },
+        pos = pos, return_env = return_env
+    )
 }
 
 cheat_full_slice_index <- function(slice) {

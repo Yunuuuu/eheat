@@ -1,8 +1,8 @@
 anno_fn <- function(
-    draw_fn, ..., yscale = NULL,
+    matrix, draw_fn, ..., yscale = NULL,
     subset_rule = NULL, subsettable = NULL,
     width = NULL, height = NULL, show_name = TRUE,
-    which = NULL, matrix = NULL, heat_matrix = NULL) {
+    which = NULL, name = NULL, heat_matrix = NULL) {
     assert_s3_class(yscale, "Scale", null_ok = TRUE)
     matrix <- anno_check_matrix(allow_lambda(matrix), which, heat_matrix)
     ylim <- scale_get_limits(matrix, yscale)
@@ -11,7 +11,8 @@ anno_fn <- function(
     if (length(dots) != sum(nzchar(names(dots)))) {
         cli::cli_abort("All members in {.arg ...} must be named.")
     }
-    name <- name %||% rlang::as_name(rlang::caller_call()[[1L]])
+    # rlang::as_name(rlang::caller_call()[[1L]])
+    name <- name %||% "anno_fn"
     subsettable <- subsettable %||% TRUE
     if (isTRUE(subsettable)) {
         internal_subset <- list(
@@ -68,7 +69,7 @@ anno_fn <- function(
             matrix <- matrix[index, , drop = FALSE]
             rlang::inject(draw_fn(matrix, !!!dots, which = which, vp = vp))
         },
-        yscale = ylim,
+        ylim = ylim,
         subset_rule = subset_rule, subsettable = subsettable,
         which = which, width = width, height = height,
         show_name = show_name, name = name
