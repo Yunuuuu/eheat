@@ -108,19 +108,24 @@ anno_gg <- function(
 }
 
 guide_from_gg <- function(gg, direction = NULL) {
-    gt <- ggplot2::ggplot_gtable(gg)
-    guide <- gtable::gtable_filter(gt, "guide")
-    grob <- grid::grobTree(guide)
-    attr(object@grob, "width") <- sum(guide$widths)
-    attr(object@grob, "height") <- sum(guide$heights)
-    methods::new(
-        "Legends",
-        grob = grob,
-        type = "gg_legend",
-        name = "gg",
-        n = 1L, multiple = 1L,
-        direction = match.arg(direction, c("vertical", "horizontal"))
-    )
+    pdf(NULL)
+    on.exit(dev.off())
+    gt <- ggplot2::ggplotGrob(gg)
+    guides <- gtable::gtable_filter(gt, "guide-box")
+    guides <- lapply(guides$grobs, function(x) {
+        guide <- gtable::gtable_filter(x, "guides")
+        attr(guide, "width") <- sum(guide$widths)
+        attr(guide, "height") <- sum(guide$heights)
+        methods::new(
+            "Legends",
+            grob = guide,
+            type = "gg_legend",
+            name = "gg",
+            n = 1L, multiple = 1L,
+            direction = match.arg(direction, c("vertical", "horizontal"))
+        )
+    })
+    rlang::inject(ComplexHeatmap::Legends(!!!guides))
 }
 
 # ComplexHeatmap::Legend()
