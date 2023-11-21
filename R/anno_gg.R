@@ -2,7 +2,7 @@ anno_gg <- function(
     matrix, ggfn, ..., which = NULL,
     width = NULL, height = NULL, debug = FALSE) {
     .data <- tibble::as_tibble(build_matrix(matrix), .name_repair = "unique")
-    .data$x <- seq_len(nrow(.data))
+    .data$index <- seq_len(nrow(.data))
     ggfn <- allow_lambda(ggfn)
     debug <- allow_lambda(debug)
     env <- new.env()
@@ -34,13 +34,12 @@ anno_gg <- function(
                     )
                     env$with_slice <- TRUE
                     .data <- dplyr::bind_cols(
-                        update_x, dplyr::rename(
-                            .data[match(x, .data$x), ],
-                            index = .data$x
-                        ),
+                        update_x, .data[match(x, .data$index), ],
                         .name_repair = "minimal"
                     )
                 }
+            } else {
+                .data$x <- .data$index
             }
             p <- ggfn(.data, ...)
             if (!ggplot2::is.ggplot(p)) {
