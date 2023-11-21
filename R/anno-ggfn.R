@@ -13,18 +13,17 @@ anno_ggfn <- function(ggfn, ..., debug = FALSE) {
         if (!ggplot2::is.ggplot(p)) {
             cli::cli_abort("{.arg ggfn} must return a {.cls ggplot2} object.")
         }
+        p <- p + ggplot2::scale_x_discrete(
+            name = NULL,
+            expand = ggplot2::expansion(add = 0.5)
+        )
         if (which == "row") {
-            p <- p + ggplot2::scale_y_discrete(
-                name = NULL,
-                expand = ggplot2::expansion(add = 0.5)
-            ) + ggplot2::coord_flip()
-        } else {
-            p <- p + ggplot2::scale_x_discrete(
-                name = NULL,
-                expand = ggplot2::expansion(add = 0.5)
-            )
+            p <- p + ggplot2::coord_flip()
         }
-        fit_ggplot(p, vp = vp)
+        fit_panel(p, vp = vp)
     }
-    anno_fn(draw_fn = draw_fn, ..., show_name = FALSE, debug = debug)
+    anno_fn(
+        draw_fn = draw_fn, ..., show_name = FALSE,
+        debug = debug, name = "anno_ggfn"
+    )
 }
