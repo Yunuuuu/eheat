@@ -3,6 +3,16 @@
 #' Plot heatmaps layer by layer
 #' @param matrix A matrix, if it is a simple vector, it will be converted to a
 #' one-column matrix. Data.frame will also be coerced into matrix.
+#' @param ggfn A function or formula, accept a initial [ggplot][ggplot2::ggplot]
+#' data as the input and must return a [ggplot][ggplot2::ggplot] object.
+#'
+#'   If a **function**, it is used as is.
+#'
+#'   If a **formula**, e.g. `~ .x + 2`, it is converted to a function with up to
+#'   two arguments: `.x` (single argument) or `.x` and `.y` (two arguments). The
+#'   `.` placeholder can be used instead of `.x`.  This allows you to create
+#'   very compact anonymous functions (lambdas) with up to two inputs.
+#'
 #' @param ... Other arguments passsed to [Heatmap][ComplexHeatmap::Heatmap].
 #' - `name`: Name of the heatmap. By default the heatmap name is used as the
 #'  title of the heatmap legend.
@@ -181,12 +191,17 @@ ggheat <- function(matrix, ggfn = NULL, ..., ggparams = list()) {
     )
 }
 
+methods::setClassUnion("FunctionOrNull", c("function", "NULL"))
+
 #' @importClassesFrom ComplexHeatmap Heatmap
 #' @export
 #' @rdname eHeat
 methods::setClass(
     "eHeat",
-    slots = list(heatmap = "Heatmap", ggfn = "function", ggparams = "list")
+    slots = list(
+        heatmap = "Heatmap", ggfn = "FunctionOrNull",
+        ggparams = "list"
+    )
 )
 
 #' @importFrom ComplexHeatmap draw
