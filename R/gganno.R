@@ -1,12 +1,12 @@
-anno_gg <- function(
+gganno <- function(
     matrix, ggfn, ..., which = NULL,
     width = NULL, height = NULL, debug = FALSE) {
-    .data <- tibble::as_tibble(build_matrix(matrix), .name_repair = "unique")
-    .data$index <- seq_len(nrow(.data))
+    matrix <- build_matrix(matrix)
+    row_nms <- rownames(matrix)
+    data <- tibble::as_tibble(row_nms, .name_repair = "unique") # nolint
     ggfn <- allow_lambda(ggfn)
     debug <- allow_lambda(debug)
-    env <- new.env()
-    env$with_slice <- FALSE
+    env <- new.env() # nolint
     draw_fn <- function(index, k, n) {
         if (k == 1L) {
             # only prepare ggplot data in the first run and run everytime when
@@ -14,42 +14,44 @@ anno_gg <- function(
             # https://github.com/jokergoo/ComplexHeatmap/blob/master/R/HeatmapList-draw_component.R
             # trace back into `draw_heatmap_list()`
             order_list <- cheat_get_order_list("ht_main")
-            if (!isFALSE(order_list)) {
-                order_list <- switch(which,
-                    row = order_list$row_order_list,
-                    column = order_list$column_order_list
-                )
-                if (length(order_list) > 1L) {
-                    x <- unlist(order_list,
-                        recursive = FALSE, use.names = FALSE
-                    )
-                    update_x <- data_frame0(
-                        .slice = rep(
-                            seq_along(order_list),
-                            times = lengths(order_list)
-                        ),
-                        x = unlist(lapply(order_list, seq_along),
-                            recursive = FALSE, use.names = FALSE
-                        )
-                    )
-                    env$with_slice <- TRUE
-                    .data <- dplyr::bind_cols(
-                        update_x, .data[match(x, .data$index), ],
-                        .name_repair = "minimal"
-                    )
-                }
+            order_list <- switch(which,
+                row = order_list$row_order_list,
+                column = order_list$column_order_list
+            )
+            if (length(order_list) > 1L) {
+                env$with_slice <- TRUE
             } else {
-                .data$x <- .data$index
+                env$with_slice <- FALSE
             }
-            p <- ggfn(.data, ...)
+            x <- unlist(order_list,
+                recursive = FALSE, use.names = FALSE
+            )
+            update_x <- data_frame0(
+                .slice = rep(
+                    seq_along(order_list),
+                    times = lengths(order_list)
+                ),
+                x = unlist(lapply(order_list, seq_along),
+                    recursive = FALSE, use.names = FALSE
+                )
+            )
+            data$index <- seq_len(nrow(data))
+            data <- dplyr::bind_cols(
+                update_x, data[match(x, data$index), ],
+                .name_repair = "minimal"
+            )
+            p <- ggplot2::ggplot(data, ggplot2::aes(x = .data$x))
+            p <- ggfn(p, ...)
             if (!ggplot2::is.ggplot(p)) {
                 cli::cli_abort(
                     "{.arg ggfn} must return a {.cls ggplot2} object."
                 )
             }
-            p <- p + ggplot2::scale_x_discrete(
-                name = NULL,
-                expand = ggplot2::expansion(add = 0.5)
+            p <- p + ggplot2::scale_x_continuous(
+                limits = c(0.5, nrow(data) + 0.5),
+                breaks = seq_len(nrow(data)),
+                labels = row_nms,
+                expand = ggplot2::expansion()
             )
             if (which == "row") {
                 p <- p + ggplot2::coord_flip()
@@ -71,6 +73,7 @@ anno_gg <- function(
             } else if (is.function(debug)) {
                 debug(p)
             }
+            env$p <- p
             env$gt <- ggplot2::ggplotGrob(p)
         }
         vp <- flip_viewport(which, xscale = c(0.5, n + 0.5), yscale = c(0, 1))
@@ -105,27 +108,6 @@ anno_gg <- function(
         which = which, width = width, height = height,
         show_name = FALSE, name = "anno_gg"
     )
-}
-
-guide_from_gg <- function(gg, direction = NULL) {
-    pdf(NULL)
-    on.exit(dev.off())
-    gt <- ggplot2::ggplotGrob(gg)
-    guides <- gtable::gtable_filter(gt, "guide-box")
-    guides <- lapply(guides$grobs, function(x) {
-        guide <- gtable::gtable_filter(x, "guides")
-        attr(guide, "width") <- sum(guide$widths)
-        attr(guide, "height") <- sum(guide$heights)
-        methods::new(
-            "Legends",
-            grob = guide,
-            type = "gg_legend",
-            name = "gg",
-            n = 1L, multiple = 1L,
-            direction = match.arg(direction, c("vertical", "horizontal"))
-        )
-    })
-    rlang::inject(ComplexHeatmap::Legends(!!!guides))
 }
 
 # ComplexHeatmap::Legend()

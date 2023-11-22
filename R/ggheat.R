@@ -3,8 +3,7 @@
 #' Plot heatmaps layer by layer
 #' @param matrix A matrix, if it is a simple vector, it will be converted to a
 #' one-column matrix. Data.frame will also be coerced into matrix.
-#' @param ... Layers were added in sequential and other arguments passsed to
-#' [Heatmap][ComplexHeatmap::Heatmap].
+#' @param ... Other arguments passsed to [Heatmap][ComplexHeatmap::Heatmap].
 #' - `name`: Name of the heatmap. By default the heatmap name is used as the
 #'  title of the heatmap legend.
 #' - `border`: Whether draw border. The value can be logical or a string of
@@ -167,21 +166,17 @@
 #' @return A `eHeat` Object.
 #' @export
 #' @name eHeat
-eheat <- function(matrix, ...) {
+ggheat <- function(matrix, ggfn = NULL, ...) {
     matrix <- build_matrix(matrix)
-    dots <- rlang::list2(...)
-    layers_idx <- vapply(dots, is_eheat_layer, logical(1L))
-    layers <- dots[layers_idx]
-    params <- dots[!layers_idx]
+    ggfn <- allow_lambda(ggfn)
     methods::new("eHeat",
-        heatmap = rlang::inject(ComplexHeatmap::Heatmap(
+        heatmap = ComplexHeatmap::Heatmap(
             matrix = matrix,
-            rect_gp = gpar(type = "none"),
-            !!!params,
+            ...,
             layer_fun = NULL,
             show_heatmap_legend = FALSE
-        )),
-        layers = layers
+        ),
+        ggfn = ggfn
     )
 }
 
@@ -190,10 +185,8 @@ eheat <- function(matrix, ...) {
 #' @rdname eHeat
 methods::setClass(
     "eHeat",
-    slots = list(heatmap = "Heatmap", layers = "list")
+    slots = list(heatmap = "Heatmap", ggfn = "function")
 )
-
-# methods::setGeneric("draw", function(object, ...) {})
 
 #' @importFrom ComplexHeatmap draw
 #' @export
@@ -203,11 +196,143 @@ ComplexHeatmap::draw
 #' @export
 #' @method draw eHeat
 #' @rdname eHeat
-methods::setMethod("draw", "eHeat", function(object, ...) {
+methods::setMethod("draw", "eHeat", function(object, ..., debug = FALSE) {
+    heat <- object@heatmap
+    matrix <- heat@matrix
+    row_nms <- rownames(matrix)
+    col_nms <- colnames(matrix)
+    data <- tibble::as_tibble(matrix, .name_repair = "minimal")
+    colnames(data) <- seq_len(ncol(data))
+    data$.row_index <- seq_len(nrow(data))
+    data <- tidyr::pivot_longer(data,
+        cols = !dplyr::all_of(".row_index"),
+        names_to = ".column_index", values_to = "values"
+    )
+    data$.column_index <- as.integer(data$.column_index)
+    layer_fun <- heat@matrix_param$layer_fun
+    rect_gp <- heat@matrix_param$gp
+    heat@matrix_param$gp$type <- "none"
+    # as a termporary placeholder in order to only caculate these once
+    env <- new.env() # nolint
+    env$estimate_gg <- TRUE
+    env$with_slice <- FALSE
+    force(debug)
     # ComplexHeatmap::Heatmap will change the function environment of
     # `layer_fun`, we just assign it directly
-    heat <- object@heatmap
-    heat@matrix_param$layer_fun <- cheat_draw_fn(object)
+    gglayer <- function(j, i, x, y, w, h, fill) {
+        if (!is.null(layer_fun)) {
+            layer_fun(j, i, x, y, w, h, fill)
+        }
+        # https://github.com/jokergoo/ComplexHeatmap/blob/master/R/Heatmap-draw_component.R
+        # trace back into `draw_heatmap_body()`
+        draw_body_env <- parent.frame()
+        if (env$estimate_gg) {
+            order_list <- list(
+                row = draw_body_env$object@row_order_list,
+                column = draw_body_env$object@column_order_list
+            )
+            if (any(lengths(order_list) > 1L)) {
+                env$with_slice <- TRUE
+            }
+            update_data <- dplyr::bind_rows(
+                cheat_full_slice_index(order_list),
+                .id = ".slice"
+            )
+            data <- dplyr::inner_join(update_data, data,
+                by = c(".row_index", ".column_index")
+            )
+            p <- ggplot2::ggplot(data, ggplot2::aes(.data$.column, .data$.row))
+            if (!identical(rect_gp$type, "none")) {
+                p <- p + ggplot2::geom_tile(
+                    ggplot2::aes(.data$.column, .data$.row,
+                        fill = .data$values
+                    ),
+                    width = 1L, height = 1L
+                )
+            }
+            p <- object@ggfn(p, ...)
+            if (!ggplot2::is.ggplot(p)) {
+                cli::cli_abort(
+                    "{.arg ggfn} must return a {.cls ggplot2} object."
+                )
+            }
+            if (env$with_slice) {
+                scales <- imap(
+                    c(.row = ".slice_row", .column = ".slice_column"),
+                    function(x, i) {
+                        lapply(split(data, data[[x]]), function(subdata) {
+                            sort(unique(subdata[[i]]))
+                            n <- max(subdata[[i]])
+                            if (i == ".row") {
+                                fn <- ggplot2::scale_y_continuous
+                                labels <- row_nms[subdata$.row_index][
+                                    order(subdata$.row)
+                                ][!duplicated(subdata$.row)]
+                            } else {
+                                fn <- ggplot2::scale_x_continuous
+                                labels <- col_nms[subdata$.column_index][
+                                    order(subdata$.column)
+                                ][!duplicated(subdata$.column)]
+                            }
+                            do.call(fn, list(
+                                limits = c(0.5, n + 0.5),
+                                breaks = seq_len(n),
+                                labels = labels,
+                                expand = ggplot2::expansion()
+                            ))
+                        })
+                    }
+                )
+                p <- p + ggplot2::facet_grid(
+                    rows = ggplot2::vars(.data$.slice_row),
+                    cols = ggplot2::vars(.data$.slice_column),
+                    scales = "free", space = "free"
+                ) +
+                    ggh4x::facetted_pos_scales(
+                        x = scales$.column, y = scales$.row
+                    )
+            } else {
+                p <- p +
+                    ggplot2::scale_x_continuous(
+                        limits = c(0.5, ncol(matrix) + 0.5),
+                        breaks = seq_len(ncol(matrix)),
+                        labels = col_nms[data$.column_index],
+                        expand = ggplot2::expansion()
+                    ) +
+                    ggplot2::scale_y_continuous(
+                        limits = c(0.5, nrow(matrix) + 0.5),
+                        breaks = seq_len(nrow(matrix)),
+                        labels = row_nms[data$.row_index],
+                        expand = ggplot2::expansion()
+                    )
+            }
+            env$estimate_gg <- FALSE
+            if (isTRUE(debug)) {
+                rlang::return_from(sys.frame(which = 1L), value = p)
+            } else if (is.function(debug)) {
+                debug(p)
+            }
+            env$p <- p
+            env$gt <- ggplot2::ggplotGrob(p)
+        }
+        vp <- grid::viewport()
+        if (env$with_slice) {
+            # we can also use grid::current.viewport()
+            # and parse name to get kr or kc
+            # -kr Row slice index.
+            # -kc Column slice index.
+            kr <- draw_body_env$kr
+            kc <- draw_body_env$kc
+            pattern <- sprintf("panel-%d-%d", kr, kc)
+            fit_panel(
+                trim_zero_grob(gtable::gtable_filter(env$gt, pattern)),
+                vp = vp
+            )
+        } else {
+            fit_panel(trim_zero_grob(env$gt), vp = vp)
+        }
+    }
+    heat@matrix_param$layer_fun <- gglayer
     draw(heat, ...)
 })
 
@@ -218,87 +343,3 @@ methods::setMethod("draw", "eHeat", function(object, ...) {
 methods::setMethod("show", "eHeat", function(object) {
     draw(object)
 })
-
-cheat_draw_fn <- function(object) {
-    # as a termporary placeholder in order to only caculate these once
-    slice <- NULL
-    draw_fn_list <- NULL
-    function(j, i, x, y, w, h, fill) {
-        # https://github.com/jokergoo/ComplexHeatmap/blob/master/R/Heatmap-draw_component.R
-        # trace back into `draw_heatmap_body()`
-        env <- parent.frame()
-        slice <<- slice %||% cheat_full_slice_index(list(
-            row_order_list = env$object@row_order_list,
-            column_order_list = env$object@column_order_list
-        ))
-        # we can also use grid::current.viewport()
-        # and parse name to get kr or kc
-        # -kr Row slice index.
-        # -kc Column slice index.
-        kr <- env$kr
-        kc <- env$kc
-        name <- sprintf("r%dc%d", kr, kc)
-        draw_fn_list <<- draw_fn_list %||% eheat_build_draw_fn(object, slice)
-        lapply(draw_fn_list, function(draw_fn) {
-            draw_fn <- draw_fn[[name]]
-            draw_fn(j, i, x, y, w, h, fill)
-        })
-    }
-}
-
-eheat_build_draw_fn <- function(object, slice, finite = FALSE) {
-    if (is.null(object@layers)) {
-        return(NULL)
-    }
-    heat_matrix <- object@heatmap@matrix
-    index_matrix <- matrix(seq_along(heat_matrix),
-        nrow = nrow(heat_matrix), ncol = ncol(heat_matrix)
-    )
-    .mapply(function(layer) {
-        layer_matrix <- layer$layer_matrix(heat_matrix)
-
-        # setup aesthetics to produce data with generalised variable names
-        # and add default scales, will create a data.frame
-        data <- layer$setup_aesthetics(layer_matrix)
-
-        # Transform all scales
-        scales <- layer$mapping$clone_scales()
-        data <- scales$transform_df(data)
-
-        # Do summary across row, column or slice
-        data <- layer$compute_aesthetics(
-            data, layer_matrix,
-            slice, index_matrix
-        )
-
-        # correspoond to compute_geom_1
-        # Reparameterise geoms from (e.g.) y and width to ymin and ymax
-        data <- layer$compute_geom_1(data)
-        # Train and map scales
-        if (scales$n() > 0) {
-            scales$train_df(data)
-            data <- scales$map_df(data)
-        }
-        # Fill in defaults etc.
-        data <- layer$compute_geom_2(data)
-        layer$draw_fun(data, slice, index_matrix)
-    }, list(layer = object@layers), NULL)
-}
-
-is_finite <- function(x) {
-    if (typeof(x) == "list") {
-        !vapply(x, is.null, logical(1))
-    } else if (typeof(x) == "character") {
-        !is.na(x)
-    } else {
-        is.finite(x)
-    }
-}
-
-is_complete <- function(x) {
-    if (typeof(x) == "list") {
-        !vapply(x, is.null, logical(1))
-    } else {
-        !is.na(x)
-    }
-}

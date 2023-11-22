@@ -37,18 +37,22 @@ cheat_get_order_list <- function(name, pos = 2L, return_env = FALSE) {
     )
 }
 
-cheat_full_slice_index <- function(slice) {
+cheat_full_slice_index <- function(order_list) {
     out <- vector("list")
-    for (i in seq_along(slice$row_order_list)) {
-        row_order <- slice$row_order_list[[i]]
+    for (i in seq_along(order_list$row)) {
+        row_order <- order_list$row[[i]]
         nr <- length(row_order)
-        for (j in seq_along(slice$column_order_list)) {
-            column_order <- slice$column_order_list[[j]]
+        for (j in seq_along(order_list$column)) {
+            column_order <- order_list$column[[j]]
             nc <- length(column_order)
             expand_idx <- expand.grid(seq_len(nr), seq_len(nc))
-            out[[sprintf("r%dc%d", i, j)]] <- list(
-                row = row_order[expand_idx[[1]]],
-                column = column_order[expand_idx[[2]]]
+            out[[sprintf("r%dc%d", i, j)]] <- data_frame0(
+                .slice_row = i,
+                .slice_column = j,
+                .row = expand_idx[[1L]],
+                .column = expand_idx[[2L]],
+                .row_index = row_order[.data$.row], # nolint
+                .column_index = column_order[.data$.column] # nolint
             )
         }
     }
@@ -92,38 +96,6 @@ cheat_text_just <- function(rot, side) {
     }
 }
 
-cheat_validate <- function(m, ha, which) {
-    if (!ht_opt$validate_names) {
-        return(NULL)
-    }
-    if (which == "column") {
-        if (is.null(colnames(m))) {
-            return(NULL)
-        }
-        cn <- colnames(m)
-        for (i in seq_along(ha@anno_list)) {
-            if (setequal(cn, names(ha@anno_list[[i]]))) {
-                if (!identical(cn, names(ha@anno_list[[i]]))) {
-                    cli::cli_warn("Values in column annotation '@{ha@anno_list[[i]]@name}' have a different order of names from the matrix column names. It may lead to wrong conclusion of your data. Please double check.")
-                }
-            }
-        }
-    }
-    if (which == "row") {
-        if (is.null(rownames(m))) {
-            return(NULL)
-        }
-        rn <- rownames(m)
-        for (i in seq_along(ha@anno_list)) {
-            if (setequal(rn, names(ha@anno_list[[i]]))) {
-                if (!identical(rn, names(ha@anno_list[[i]]))) {
-                    cli::cli_warn("Values in row annotation '@{ha@anno_list[[i]]@name}' have a different order of names from the matrix row names. It may lead to wrong conclusion of your data. Please double check.")
-                }
-            }
-        }
-    }
-}
-
 cheat_check_gp <- function(gp) {
     if (!"lineheight" %in% names(gp)) {
         gp$lineheight <- 0.9
@@ -131,5 +103,27 @@ cheat_check_gp <- function(gp) {
     if (!inherits(gp, "gpar")) {
         cli::cli_abort("Graphic parameters should be specified by `gpar()`.")
     }
-    return(gp)
+    gp
+}
+
+guide_from_gg <- function(gg, direction = NULL) {
+    grDevices::pdf(NULL)
+    on.exit(grDevices::dev.off())
+    gt <- ggplot2::ggplotGrob(gg)
+    guides <- gtable::gtable_filter(gt, "guide-box")
+    guides <- lapply(guides$grobs, function(x) {
+        guide <- gtable::gtable_filter(x, "guides")
+        attr(guide, "width") <- sum(guide$widths)
+        attr(guide, "height") <- sum(guide$heights)
+        methods::new(
+            "Legends",
+            grob = guide,
+            type = "gg_legend",
+            name = "gg",
+            n = 1L, multiple = 1L,
+            # extract information directly from ggplot2 ? how to
+            direction = match.arg(direction, c("vertical", "horizontal"))
+        )
+    })
+    rlang::inject(ComplexHeatmap::Legends(!!!guides))
 }
