@@ -19,6 +19,16 @@ ggheat(matrix, ggfn = NULL, ..., ggparams = list())
 \item{matrix}{A matrix, if it is a simple vector, it will be converted to a
 one-column matrix. Data.frame will also be coerced into matrix.}
 
+\item{ggfn}{A function or formula, accept a initial \link[ggplot2:ggplot]{ggplot}
+data as the input and must return a \link[ggplot2:ggplot]{ggplot} object.
+
+If a \strong{function}, it is used as is.
+
+If a \strong{formula}, e.g. \code{~ .x + 2}, it is converted to a function with up to
+two arguments: \code{.x} (single argument) or \code{.x} and \code{.y} (two arguments). The
+\code{.} placeholder can be used instead of \code{.x}.  This allows you to create
+very compact anonymous functions (lambdas) with up to two inputs.}
+
 \item{...}{Other arguments passsed to \link[ComplexHeatmap:Heatmap]{Heatmap}.
 \itemize{
 \item \code{name}: Name of the heatmap. By default the heatmap name is used as the
