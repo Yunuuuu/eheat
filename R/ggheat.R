@@ -254,6 +254,17 @@ methods::setMethod("draw", "eHeat", function(object, ..., debug = FALSE) {
                 cheat_full_slice_index(order_list),
                 .id = ".slice"
             )
+            # reverse y-axis as ggplot2 and ComplexHeatmap draw in different
+            # direction, but we cannot use scale_y_reverse, I don't know why
+            # It won't draw anything if we use `scale_y_reverse`.
+            update_data <- lapply(
+                split(update_data, update_data$.slice_row),
+                function(subdata) {
+                    subdata$.row <- reverse_trans(subdata$.row)
+                    subdata
+                }
+            )
+            update_data <- dplyr::bind_rows(update_data)
             data <- dplyr::inner_join(update_data, data,
                 by = c(".row_index", ".column_index")
             )
@@ -277,9 +288,11 @@ methods::setMethod("draw", "eHeat", function(object, ..., debug = FALSE) {
                     c(.row = ".slice_row", .column = ".slice_column"),
                     function(x, i) {
                         lapply(split(data, data[[x]]), function(subdata) {
-                            sort(unique(subdata[[i]]))
                             n <- max(subdata[[i]])
+                            limits <- c(0.5, n + 0.5)
+                            breaks <- seq_len(n)
                             if (i == ".row") {
+                                # cannot use reverse
                                 fn <- ggplot2::scale_y_continuous
                                 labels <- row_nms[subdata$.row_index][
                                     order(subdata$.row)
@@ -291,8 +304,8 @@ methods::setMethod("draw", "eHeat", function(object, ..., debug = FALSE) {
                                 ][!duplicated(subdata$.column)]
                             }
                             do.call(fn, list(
-                                limits = c(0.5, n + 0.5),
-                                breaks = seq_len(n),
+                                limits = limits,
+                                breaks = breaks,
                                 labels = labels,
                                 expand = ggplot2::expansion()
                             ))
@@ -340,6 +353,7 @@ methods::setMethod("draw", "eHeat", function(object, ..., debug = FALSE) {
             kr <- draw_body_env$kr
             kc <- draw_body_env$kc
             pattern <- sprintf("panel-%d-%d", kr, kc)
+            grid::grid.draw(env$gt)
             fit_panel(
                 trim_zero_grob(gtable::gtable_filter(env$gt, pattern)),
                 vp = vp
@@ -348,7 +362,9 @@ methods::setMethod("draw", "eHeat", function(object, ..., debug = FALSE) {
             fit_panel(trim_zero_grob(env$gt), vp = vp)
         }
     }
-    heat@matrix_param$layer_fun <- gglayer
+    if (!is.null(object@ggfn)) {
+        heat@matrix_param$layer_fun <- gglayer
+    }
     draw(heat, ...)
 })
 
