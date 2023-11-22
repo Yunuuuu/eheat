@@ -270,3 +270,7 @@ trace_data <- function(
     }
     FALSE
 }
+
+data_frame0 <- function(...) {
+    tibble::tibble(..., .name_repair = "minimal")
+}
