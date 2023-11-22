@@ -177,7 +177,7 @@
 #' @return A `eHeat` Object.
 #' @export
 #' @name eHeat
-ggheat <- function(matrix, ggfn = NULL, ..., rect_gp = gpar(), layer_fun = NULL,ggparams = list(), debug = FALSE) {
+ggheat <- function(matrix, ggfn = NULL, ..., rect_gp = gpar(), layer_fun = NULL, ggparams = list(), debug = FALSE) {
     matrix <- build_matrix(matrix)
     row_nms <- rownames(matrix)
     col_nms <- colnames(matrix)
@@ -194,8 +194,15 @@ ggheat <- function(matrix, ggfn = NULL, ..., rect_gp = gpar(), layer_fun = NULL,
     env <- new.env() # nolint
     env$estimate_gg <- TRUE
     env$with_slice <- FALSE
-    force(rect_gp)
-    force(layer_fun)
+    rect_gp2 <- rect_gp
+    rect_gp2$type <- "none"
+    # eHeat cannot be added into another heatmap, so it's better to just return
+    # A simple Heatmap
+    out <- ComplexHeatmap::Heatmap(
+        matrix = matrix, rect_gp = rect_gp2, ...,
+        layer_fun = layer_fun,
+        show_heatmap_legend = FALSE
+    )
     force(ggparams)
     force(debug)
     # ComplexHeatmap::Heatmap will change the function environment of
@@ -334,19 +341,9 @@ ggheat <- function(matrix, ggfn = NULL, ..., rect_gp = gpar(), layer_fun = NULL,
         }
     }
     if (!(is.null(ggfn) && identical(rect_gp$type, "none"))) {
-        layer_fun2 <- gglayer
-    } else {
-        layer_fun2 <- layer_fun
+        out@matrix_param$layer_fun <- gglayer
     }
-    rect_gp2 <- rect_gp
-    rect_gp2$type <- "none"
-    # eHeat cannot be added into another heatmap, so it's better to just return
-    # A simple Heatmap
-    ComplexHeatmap::Heatmap(
-        matrix = matrix, rect_gp = rect_gp2, ...,
-        layer_fun = layer_fun2,
-        show_heatmap_legend = FALSE
-    )
+    out
 }
 
 #' @importFrom ComplexHeatmap draw
