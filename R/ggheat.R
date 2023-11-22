@@ -160,7 +160,10 @@
 #' `magick::filter_types`. The default is ``"Lanczos"``.
 #' - `post_fun` A function which will be executed after the heatmap list is
 #'   drawn.
+#' @inheritParams ComplexHeatmap::Heatmap
 #' @param ggparams Other arguments passed to `ggfn`.
+#' @param debug If `TRUE`, will return [ggplot][ggplot2::ggplot] object
+#' directly, or you can pass a function (formula would be also okay). 
 #'
 #' @details
 #' The initialization function only applies parameter checking and fill values to the slots with some validation.
@@ -189,6 +192,7 @@ ggheat <- function(matrix, ggfn = NULL, ..., rect_gp = gpar(), layer_fun = NULL,
         names_to = ".column_index", values_to = "values"
     )
     ggfn <- allow_lambda(ggfn)
+    debug <- allow_lambda(debug)
     data$.column_index <- as.integer(data$.column_index)
     # as a termporary placeholder in order to only caculate these once
     env <- new.env() # nolint

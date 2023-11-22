@@ -18,7 +18,8 @@ Imports:
     gtable,
     tidyr,
     methods,
-    tibble
+    tibble,
+    ggh4x
 ByteCompile: true
 URL: https://github.com/Yunuuuu/eheat
 BugReports: https://github.com/Yunuuuu/eheat/issues

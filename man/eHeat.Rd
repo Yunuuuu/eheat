@@ -180,7 +180,14 @@ image.
 drawn.
 }}
 
+\item{rect_gp}{Graphic parameters for drawing rectangles (for heatmap body). The value should be specified by \code{\link[grid]{gpar}} and \code{fill} parameter is ignored.}
+
+\item{layer_fun}{Similar as \code{cell_fun}, but is vectorized. Check \url{https://jokergoo.github.io/ComplexHeatmap-reference/book/a-single-heatmap.html#customize-the-heatmap-body} .}
+
 \item{ggparams}{Other arguments passed to \code{ggfn}.}
+
+\item{debug}{If \code{TRUE}, will return \link[ggplot2:ggplot]{ggplot} object
+directly, or you can pass a function (formula would be also okay).}
 }
 \value{
 A \code{eHeat} Object.
