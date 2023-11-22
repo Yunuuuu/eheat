@@ -9,7 +9,7 @@
 \alias{show,eHeat-method}
 \title{Extended Heatmap}
 \usage{
-ggheat(matrix, ggfn = NULL, ...)
+ggheat(matrix, ggfn = NULL, ..., ggparams = list())
 
 \S4method{draw}{eHeat}(object, ..., debug = FALSE)
 
@@ -169,6 +169,8 @@ image.
 \item \code{post_fun} A function which will be executed after the heatmap list is
 drawn.
 }}
+
+\item{ggparams}{Other arguments passed to \code{ggfn}.}
 
 \item{object}{A \code{eHeat} object.}
 }
