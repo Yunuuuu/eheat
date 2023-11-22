@@ -7,6 +7,7 @@ gganno <- function(
     ggfn <- allow_lambda(ggfn)
     debug <- allow_lambda(debug)
     env <- new.env() # nolint
+    dots <- rlang::list2(...)
     draw_fn <- function(index, k, n) {
         if (k == 1L) {
             # only prepare ggplot data in the first run and run everytime when
@@ -41,7 +42,7 @@ gganno <- function(
                 .name_repair = "minimal"
             )
             p <- ggplot2::ggplot(data, ggplot2::aes(x = .data$x))
-            p <- ggfn(p, ...)
+            p <- rlang::inject(ggfn, !!!dots)
             if (!ggplot2::is.ggplot(p)) {
                 cli::cli_abort(
                     "{.arg ggfn} must return a {.cls ggplot2} object."
