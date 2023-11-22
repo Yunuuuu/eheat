@@ -247,21 +247,21 @@ is_discrete <- function(x) {
 }
 
 trace_data <- function(
-    name,
+    name, 
     has_fn = function(env, name) {
         exists(name, envir = env, inherits = FALSE)
     },
     return_fn = function(env, name) {
         get(name, envir = env, inherits = FALSE)
     },
-    pos = 2L, return_env = FALSE) {
+    pos = 2L, return_env = FALSE, all = FALSE) {
     n <- sys.nframe()
     while (pos <= n) {
         env <- parent.frame(pos)
         if (has_fn(env, name)) {
             out <- return_fn(env, name)
             if (return_env) {
-                return(out, env = env)
+                return(env)
             } else {
                 return(out)
             }

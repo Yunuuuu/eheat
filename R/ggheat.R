@@ -190,7 +190,6 @@ ggheat <- function(matrix, ggfn = NULL, ..., ggparams = list()) {
     )
 }
 
-
 methods::setClassUnion("FunctionOrNull", c("function", "NULL"))
 
 #' @importClassesFrom ComplexHeatmap Heatmap
@@ -255,7 +254,7 @@ methods::setMethod("draw", "eHeat", function(object, ..., debug = FALSE) {
                 .id = ".slice"
             )
             # reverse y-axis as ggplot2 and ComplexHeatmap draw in different
-            # direction, but we cannot use scale_y_reverse, I don't know why
+            # direction, but we cannot use scale_y_reverse, I don't know why?
             # It won't draw anything if we use `scale_y_reverse`.
             update_data <- lapply(
                 split(update_data, update_data$.slice_row),
@@ -360,7 +359,6 @@ methods::setMethod("draw", "eHeat", function(object, ..., debug = FALSE) {
             kr <- draw_body_env$kr
             kc <- draw_body_env$kc
             pattern <- sprintf("panel-%d-%d", kr, kc)
-            grid::grid.draw(env$gt)
             fit_panel(
                 trim_zero_grob(gtable::gtable_filter(env$gt, pattern)),
                 vp = vp
