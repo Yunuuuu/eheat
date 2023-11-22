@@ -3,7 +3,7 @@ gganno <- function(
     width = NULL, height = NULL, debug = FALSE) {
     matrix <- build_matrix(matrix)
     row_nms <- rownames(matrix)
-    data <- tibble::as_tibble(row_nms, .name_repair = "unique") # nolint
+    data <- tibble::as_tibble(matrix, .name_repair = "unique") # nolint
     ggfn <- allow_lambda(ggfn)
     debug <- allow_lambda(debug)
     env <- new.env() # nolint
@@ -48,6 +48,7 @@ gganno <- function(
                 )
             }
             p <- p + ggplot2::scale_x_continuous(
+                name = NULL,
                 limits = c(0.5, nrow(data) + 0.5),
                 breaks = seq_len(nrow(data)),
                 labels = row_nms,

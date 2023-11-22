@@ -184,12 +184,12 @@ ggheat <- function(matrix, ggfn = NULL, ..., ggparams = list()) {
         heatmap = ComplexHeatmap::Heatmap(
             matrix = matrix,
             ...,
-            layer_fun = NULL,
             show_heatmap_legend = FALSE
         ),
         ggfn = ggfn, ggparams = ggparams
     )
 }
+
 
 methods::setClassUnion("FunctionOrNull", c("function", "NULL"))
 
@@ -277,11 +277,13 @@ methods::setMethod("draw", "eHeat", function(object, ..., debug = FALSE) {
                     width = 1L, height = 1L
                 )
             }
-            p <- rlang::inject(object@ggfn(p, !!!object@ggparams))
-            if (!ggplot2::is.ggplot(p)) {
-                cli::cli_abort(
-                    "{.arg ggfn} must return a {.cls ggplot2} object."
-                )
+            if (!is.null(object@ggfn)) {
+                p <- rlang::inject(object@ggfn(p, !!!object@ggparams))
+                if (!ggplot2::is.ggplot(p)) {
+                    cli::cli_abort(
+                        "{.arg ggfn} must return a {.cls ggplot2} object."
+                    )
+                }
             }
             if (env$with_slice) {
                 scales <- imap(
@@ -296,13 +298,14 @@ methods::setMethod("draw", "eHeat", function(object, ..., debug = FALSE) {
                                 fn <- ggplot2::scale_y_continuous
                                 labels <- row_nms[subdata$.row_index][
                                     order(subdata$.row)
-                                ][!duplicated(subdata$.row)]
+                                ]
                             } else {
                                 fn <- ggplot2::scale_x_continuous
                                 labels <- col_nms[subdata$.column_index][
                                     order(subdata$.column)
-                                ][!duplicated(subdata$.column)]
+                                ]
                             }
+                            labels <- labels[!duplicated(labels)]
                             do.call(fn, list(
                                 limits = limits,
                                 breaks = breaks,
@@ -321,17 +324,21 @@ methods::setMethod("draw", "eHeat", function(object, ..., debug = FALSE) {
                         x = scales$.column, y = scales$.row
                     )
             } else {
+                xlabels <- col_nms[data$.column_index][order(data$.column)]
+                xlabels <- xlabels[!duplicated(xlabels)]
+                ylabels <- row_nms[data$.row_index][order(data$.row)]
+                ylabels <- ylabels[!duplicated(ylabels)]
                 p <- p +
                     ggplot2::scale_x_continuous(
                         limits = c(0.5, ncol(matrix) + 0.5),
                         breaks = seq_len(ncol(matrix)),
-                        labels = col_nms[data$.column_index],
+                        labels = xlabels,
                         expand = ggplot2::expansion()
                     ) +
                     ggplot2::scale_y_continuous(
                         limits = c(0.5, nrow(matrix) + 0.5),
                         breaks = seq_len(nrow(matrix)),
-                        labels = row_nms[data$.row_index],
+                        labels = ylabels,
                         expand = ggplot2::expansion()
                     )
             }
@@ -359,10 +366,10 @@ methods::setMethod("draw", "eHeat", function(object, ..., debug = FALSE) {
                 vp = vp
             )
         } else {
-            fit_panel(trim_zero_grob(env$gt), vp = vp)
+            fit_panel(trim_zero_grob(env$gt), vp = vp, elements = NULL)
         }
     }
-    if (!is.null(object@ggfn)) {
+    if (!(is.null(object@ggfn) && identical(rect_gp$type, "none"))) {
         heat@matrix_param$layer_fun <- gglayer
     }
     draw(heat, ...)
