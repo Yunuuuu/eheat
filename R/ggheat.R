@@ -150,6 +150,7 @@
 #' `magick::filter_types`. The default is ``"Lanczos"``.
 #' - `post_fun` A function which will be executed after the heatmap list is
 #'   drawn.
+#' @param ggparams Other arguments passed to `ggfn`.
 #'
 #' @details
 #' The initialization function only applies parameter checking and fill values to the slots with some validation.
@@ -166,7 +167,7 @@
 #' @return A `eHeat` Object.
 #' @export
 #' @name eHeat
-ggheat <- function(matrix, ggfn = NULL, ...) {
+ggheat <- function(matrix, ggfn = NULL, ..., ggparams = list()) {
     matrix <- build_matrix(matrix)
     ggfn <- allow_lambda(ggfn)
     methods::new("eHeat",
@@ -176,7 +177,7 @@ ggheat <- function(matrix, ggfn = NULL, ...) {
             layer_fun = NULL,
             show_heatmap_legend = FALSE
         ),
-        ggfn = ggfn
+        ggfn = ggfn, ggparams = ggparams
     )
 }
 
@@ -185,7 +186,7 @@ ggheat <- function(matrix, ggfn = NULL, ...) {
 #' @rdname eHeat
 methods::setClass(
     "eHeat",
-    slots = list(heatmap = "Heatmap", ggfn = "function")
+    slots = list(heatmap = "Heatmap", ggfn = "function", ggparams = "list")
 )
 
 #' @importFrom ComplexHeatmap draw
@@ -250,7 +251,7 @@ methods::setMethod("draw", "eHeat", function(object, ..., debug = FALSE) {
                     width = 1L, height = 1L
                 )
             }
-            p <- object@ggfn(p, ...)
+            p <- rlang::inject(object@ggfn(p, !!!object@ggparams))
             if (!ggplot2::is.ggplot(p)) {
                 cli::cli_abort(
                     "{.arg ggfn} must return a {.cls ggplot2} object."
