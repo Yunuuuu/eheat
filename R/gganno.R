@@ -103,10 +103,10 @@ gganno <- function(
         }
     }
     new_anno(
-        n = nrow(.data), draw_fn = draw_fn, ylim = NULL,
+        n = nrow(data), draw_fn = draw_fn, ylim = NULL,
         subset_rule = list(), subsettable = FALSE,
         which = which, width = width, height = height,
-        show_name = FALSE, name = "anno_gg"
+        show_name = FALSE, name = "gganno"
     )
 }
 
