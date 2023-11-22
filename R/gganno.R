@@ -42,7 +42,7 @@ gganno <- function(
                 .name_repair = "minimal"
             )
             p <- ggplot2::ggplot(data, ggplot2::aes(x = .data$x))
-            p <- rlang::inject(ggfn, !!!dots)
+            p <- rlang::inject(ggfn(p, !!!dots))
             if (!ggplot2::is.ggplot(p)) {
                 cli::cli_abort(
                     "{.arg ggfn} must return a {.cls ggplot2} object."

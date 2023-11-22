@@ -177,43 +177,8 @@
 #' @return A `eHeat` Object.
 #' @export
 #' @name eHeat
-ggheat <- function(matrix, ggfn = NULL, ..., ggparams = list()) {
+ggheat <- function(matrix, ggfn = NULL, ..., rect_gp = gpar(), layer_fun = NULL,ggparams = list(), debug = FALSE) {
     matrix <- build_matrix(matrix)
-    ggfn <- allow_lambda(ggfn)
-    methods::new("eHeat",
-        heatmap = ComplexHeatmap::Heatmap(
-            matrix = matrix,
-            ...,
-            show_heatmap_legend = FALSE
-        ),
-        ggfn = ggfn, ggparams = ggparams
-    )
-}
-
-methods::setClassUnion("FunctionOrNull", c("function", "NULL"))
-
-#' @importClassesFrom ComplexHeatmap Heatmap
-#' @export
-#' @rdname eHeat
-methods::setClass(
-    "eHeat",
-    slots = list(
-        heatmap = "Heatmap", ggfn = "FunctionOrNull",
-        ggparams = "list"
-    )
-)
-
-#' @importFrom ComplexHeatmap draw
-#' @export
-ComplexHeatmap::draw
-
-#' @param object A `eHeat` object.
-#' @export
-#' @method draw eHeat
-#' @rdname eHeat
-methods::setMethod("draw", "eHeat", function(object, ..., debug = FALSE) {
-    heat <- object@heatmap
-    matrix <- heat@matrix
     row_nms <- rownames(matrix)
     col_nms <- colnames(matrix)
     data <- tibble::as_tibble(matrix, .name_repair = "minimal")
@@ -223,14 +188,15 @@ methods::setMethod("draw", "eHeat", function(object, ..., debug = FALSE) {
         cols = !dplyr::all_of(".row_index"),
         names_to = ".column_index", values_to = "values"
     )
+    ggfn <- allow_lambda(ggfn)
     data$.column_index <- as.integer(data$.column_index)
-    layer_fun <- heat@matrix_param$layer_fun
-    rect_gp <- heat@matrix_param$gp
-    heat@matrix_param$gp$type <- "none"
     # as a termporary placeholder in order to only caculate these once
     env <- new.env() # nolint
     env$estimate_gg <- TRUE
     env$with_slice <- FALSE
+    force(rect_gp)
+    force(layer_fun)
+    force(ggparams)
     force(debug)
     # ComplexHeatmap::Heatmap will change the function environment of
     # `layer_fun`, we just assign it directly
@@ -276,8 +242,8 @@ methods::setMethod("draw", "eHeat", function(object, ..., debug = FALSE) {
                     width = 1L, height = 1L
                 )
             }
-            if (!is.null(object@ggfn)) {
-                p <- rlang::inject(object@ggfn(p, !!!object@ggparams))
+            if (!is.null(ggfn)) {
+                p <- rlang::inject(ggfn(p, !!!ggparams))
                 if (!ggplot2::is.ggplot(p)) {
                     cli::cli_abort(
                         "{.arg ggfn} must return a {.cls ggplot2} object."
@@ -367,16 +333,22 @@ methods::setMethod("draw", "eHeat", function(object, ..., debug = FALSE) {
             fit_panel(trim_zero_grob(env$gt), vp = vp, elements = NULL)
         }
     }
-    if (!(is.null(object@ggfn) && identical(rect_gp$type, "none"))) {
-        heat@matrix_param$layer_fun <- gglayer
+    if (!(is.null(ggfn) && identical(rect_gp$type, "none"))) {
+        layer_fun2 <- gglayer
+    } else {
+        layer_fun2 <- layer_fun
     }
-    draw(heat, ...)
-})
+    rect_gp2 <- rect_gp
+    rect_gp2$type <- "none"
+    # eHeat cannot be added into another heatmap, so it's better to just return
+    # A simple Heatmap
+    ComplexHeatmap::Heatmap(
+        matrix = matrix, rect_gp = rect_gp2, ...,
+        layer_fun = layer_fun2,
+        show_heatmap_legend = FALSE
+    )
+}
 
-#' @importFrom methods show
+#' @importFrom ComplexHeatmap draw
 #' @export
-#' @method show eHeat
-#' @rdname eHeat
-methods::setMethod("show", "eHeat", function(object) {
-    draw(object)
-})
+ComplexHeatmap::draw
