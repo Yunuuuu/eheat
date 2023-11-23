@@ -761,7 +761,7 @@ body {
 <p>The same with <code>ggheat</code>, the essential parameter of <code>gganno</code> is also <code>ggfn</code>, which accepts a ggplot2 object equipped with a default data and mappings established by <code>ggplot(data, aes(.data$x))</code>. The original matrix will be converted into a data.frame with another 3 columns added:</p>
 <ul>
 <li><p><code>.slice</code>: the slice row (which = “row”) or column (which = “column”) number.</p></li>
-<li><p><code>.x</code>/<code>.y</code>: indicating the x-axis (or y-axis) coordinates. Don’t use [coord_flip][ggplot2::coord_flip] to flip coordinates</p></li>
+<li><p><code>.x</code>/<code>.y</code>: indicating the x-axis (or y-axis) coordinates. Don’t use <code>ggplot2::coord_flip</code> to flip coordinates as it may disrupt internal operations.</p></li>
 <li><p><code>.index</code>: denoting the row index of the original matrix, where rows are uniformly considered as observations and columns as variables.</p></li>
 </ul>
 <p>In general, we should just use <code>ggheat</code> and <code>gganno</code>.</p>

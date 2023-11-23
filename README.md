@@ -243,7 +243,8 @@ matrix will be converted into a data.frame with another 3 columns added:
     number.
 
   - `.x`/`.y`: indicating the x-axis (or y-axis) coordinates. Don’t use
-    \[coord\_flip\]\[ggplot2::coord\_flip\] to flip coordinates
+    `ggplot2::coord_flip` to flip coordinates as it may disrupt internal
+    operations.
 
   - `.index`: denoting the row index of the original matrix, where rows
     are uniformly considered as observations and columns as variables.
