@@ -124,6 +124,7 @@ draw_gganno <- function(anno, heat_matrix, order_list, which, id) {
     )
     data <- cbind(coord, data[match(coord$.index, seq_len(nrow(data))), ])
     if (which == "row") {
+        orientation <- ".y"
         data <- rename(data, c(.x = ".y"))
         if (with_slice) {
             data <- lapply(split(data, data$.slice), function(subdata) {
@@ -137,6 +138,7 @@ draw_gganno <- function(anno, heat_matrix, order_list, which, id) {
         }
         p <- ggplot2::ggplot(data, ggplot2::aes(y = .data$.y))
     } else {
+        orientation <- ".x"
         p <- ggplot2::ggplot(data, ggplot2::aes(x = .data$.x))
     }
     p <- rlang::inject(anno@ggfn(p, !!!anno@ggparams))
@@ -150,14 +152,12 @@ draw_gganno <- function(anno, heat_matrix, order_list, which, id) {
             rows = ggplot2::vars(.data$.slice),
             scales = "free_y", space = "free_y"
         )
-        orientation <- ".y"
         scale_fn <- ggplot2::scale_y_continuous
     } else {
         facet_params <- list(
             cols = ggplot2::vars(.data$.slice),
             scales = "free_x", space = "free_x"
         )
-        orientation <- ".x"
         scale_fn <- ggplot2::scale_x_continuous
     }
     if (with_slice) {
@@ -175,9 +175,15 @@ draw_gganno <- function(anno, heat_matrix, order_list, which, id) {
             ))
         })
         if (which == "row") {
-            p <- p + ggh4x::facetted_pos_scales(y = scales)
+            p <- p + ggh4x::facetted_pos_scales(
+                x = p$scales$get_scales("x"),
+                y = scales
+            )
         } else {
-            p <- p + ggh4x::facetted_pos_scales(x = scales)
+            p <- p + ggh4x::facetted_pos_scales(
+                x = scales, 
+                y = p$scales$get_scales("y")
+            )
         }
     } else {
         limits <- range(data[[orientation]])
