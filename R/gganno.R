@@ -19,12 +19,13 @@
 #' data.frame with another 3 columns added:
 #' - `.slice`: the slice row (which = "row") or column (which = "column")
 #'   number.
-#' - `.x`: indicating the x-axis coordinates (always aligned in parallel with
-#'   the heatmap). The internal will flip the coordinates if if the annotation
-#'   pertains to rows.
+#' - `.x`/`.y`: indicating the x-axis (or y-axis) coordinates. Don't use
+#'   [coord_flip][ggplot2::coord_flip] to flip coordinates as it may disrupt
+#'   internal operations. 
 #' - `.index`: denoting the row index of the original matrix, where rows are
 #'   uniformly considered as observations and columns as variables.
 #'
+#' @inherit ggheat
 #' @export
 #' @name gganno
 gganno <- function(matrix, ggfn, ..., which = NULL, width = NULL, height = NULL, debug = FALSE) {
@@ -106,55 +107,85 @@ draw_gganno <- function(anno, heat_matrix, order_list, which, id) {
         column = t(heat_matrix)
     )
     row_nms <- rownames(matrix)
-    data <- tibble::as_tibble(matrix, .name_repair = "unique") # nolint
-    data$.index <- seq_len(nrow(data))
+    data <- tibble::as_tibble(matrix, .name_repair = "minimal") # nolint
     if (length(order_list) > 1L) {
         with_slice <- TRUE
     } else {
         with_slice <- FALSE
     }
-    index <- unlist(order_list, recursive = FALSE, use.names = FALSE)
-    x <- data_frame0(
+    coord <- data_frame0(
         .slice = rep(
             seq_along(order_list),
             times = lengths(order_list)
         ),
-        .x = unlist(lapply(order_list, seq_along),
-            recursive = FALSE, use.names = FALSE
-        )
+        .index = unlist(order_list, recursive = FALSE, use.names = FALSE),
+        .x = seq_along(.data$.index)
     )
-    data <- dplyr::bind_cols(
-        x, data[match(index, data$.index), ],
-        .name_repair = "minimal"
-    )
-    p <- ggplot2::ggplot(data, ggplot2::aes(x = .data$.x))
+    data <- cbind(coord, data[match(coord$.index, seq_len(nrow(data))), ])
+    if (which == "row") {
+        data <- rename(data, c(.x = ".y"))
+        if (with_slice) {
+            data <- lapply(split(data, data$.slice), function(subdata) {
+                subdata$.y <- reverse_trans(subdata$.y)
+                subdata
+            })
+            data <- do.call(rbind, data)
+            data <- tibble::as_tibble(data, .name_repair = "minimal")
+        } else {
+            data$.y <- reverse_trans(data$.y)
+        }
+        p <- ggplot2::ggplot(data, ggplot2::aes(y = .data$.y))
+    } else {
+        p <- ggplot2::ggplot(data, ggplot2::aes(x = .data$.x))
+    }
     p <- rlang::inject(anno@ggfn(p, !!!anno@ggparams))
     if (!ggplot2::is.ggplot(p)) {
-        cli::cli_abort(c(
+        cli::cli_abort(
             "{.arg ggfn} of {id} must return a {.cls ggplot2} object."
-        ))
+        )
     }
-    p <- p + ggplot2::scale_x_continuous(
-        name = NULL,
-        limits = c(0.5, nrow(data) + 0.5),
-        breaks = seq_len(nrow(data)),
-        labels = row_nms,
-        expand = ggplot2::expansion()
-    )
     if (which == "row") {
-        p <- p + ggplot2::coord_flip()
         facet_params <- list(
             rows = ggplot2::vars(.data$.slice),
             scales = "free_y", space = "free_y"
         )
+        orientation <- ".y"
+        scale_fn <- ggplot2::scale_y_continuous
     } else {
         facet_params <- list(
             cols = ggplot2::vars(.data$.slice),
             scales = "free_x", space = "free_x"
         )
+        orientation <- ".x"
+        scale_fn <- ggplot2::scale_x_continuous
     }
     if (with_slice) {
+        # ".slice" and ".x"/".y"
+        scales <- lapply(split(data, data$.slice), function(subdata) {
+            n <- max(subdata[[orientation]])
+            limits <- c(0.5, n + 0.5)
+            breaks <- seq_len(n)
+            labels <- row_nms[subdata$.index][order(subdata[[orientation]])]
+            labels <- labels[!duplicated(labels)]
+            do.call(scale_fn, list(
+                limits = limits, breaks = breaks,
+                labels = labels, expand = ggplot2::expansion()
+            ))
+        })
+        if (which == "row") {
+            p <- p + ggh4x::facetted_pos_scales(y = scales)
+        } else {
+            p <- p + ggh4x::facetted_pos_scales(x = scales)
+        }
         p <- p + do.call(ggplot2::facet_grid, facet_params)
+    } else {
+        labels <- row_nms[data$.index][order(data[[orientation]])]
+        labels <- labels[!duplicated(labels)]
+        p <- p + do.call(scale_fn, list(
+            limits = c(0.5, max(data[[orientation]]) + 0.5),
+            breaks = seq_len(max(data[[orientation]])),
+            labels = labels, expand = ggplot2::expansion()
+        ))
     }
     if (isTRUE(anno@debug)) {
         cli::cli_inform(

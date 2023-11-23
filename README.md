@@ -242,9 +242,8 @@ matrix will be converted into a data.frame with another 3 columns added:
   - `.slice`: the slice row (which = “row”) or column (which = “column”)
     number.
 
-  - `.x`: indicating the x-axis coordinates (always aligned in parallel
-    with the heatmap). The internal will flip the coordinates if if the
-    annotation pertains to rows.
+  - `.x`/`.y`: indicating the x-axis (or y-axis) coordinates. Don’t use
+    \[coord\_flip\]\[ggplot2::coord\_flip\] to flip coordinates
 
   - `.index`: denoting the row index of the original matrix, where rows
     are uniformly considered as observations and columns as variables.
@@ -257,18 +256,16 @@ draw(ggheat(small_mat,
   top_annotation = HeatmapAnnotation(
     foo = gganno(
       # Note: vector will be converted one-column data.frame
-      # tittle::as_tibble will automatically add column names `...1`
+      # with a column names `V1`
       matrix = anno_data,
       function(p) {
-        p + geom_point(aes(.x, ...1))
+        p + geom_point(aes(.x, V1))
       },
       which = "column"
     ), which = "column"
   )
 ))
 #> ℹ convert simple vector `matrix` to one-column matrix
-#> New names:
-#> • `` -> `...1`
 ```
 
 <img src="man/figures/README-unnamed-chunk-14-1.png" width="100%" />
@@ -280,19 +277,15 @@ into `annotation_legend_list`.
 draw(ggheat(small_mat,
   top_annotation = HeatmapAnnotation(
     foo = gganno(
-      # Note: vector will be converted one-column data.frame
-      # tittle::as_tibble will automatically add column names `...1`
       matrix = anno_data,
       function(p) {
-        p + geom_bar(aes(y = ...1, fill = factor(.x)), stat = "identity")
+        p + geom_bar(aes(y = V1, fill = factor(.x)), stat = "identity")
       },
       which = "column", height = unit(5, "cm")
     ), which = "column"
   )
 ), merge_legends = TRUE)
 #> ℹ convert simple vector `matrix` to one-column matrix
-#> New names:
-#> • `` -> `...1`
 ```
 
 <img src="man/figures/README-unnamed-chunk-15-1.png" width="100%" />
@@ -303,43 +296,52 @@ draw(ggheat(small_mat,
     foo = gganno(
       matrix = anno_data,
       function(p) {
-        p + geom_point(aes(y = ...1))
+        p + aes(y = V1) + geom_text(aes(label = .index))
       },
-      which = "column", height = unit(5, "cm")
+      which = "column", height = unit(2, "cm")
     ), which = "column"
   ),
   bottom_annotation = HeatmapAnnotation(
     foo = gganno(
       function(p) {
-        p + aes(y = ...1) +
+        p + aes(y = V1) +
           geom_text(aes(label = .index)) +
           scale_y_reverse()
       },
       matrix = anno_data,
-      which = "column", height = unit(5, "cm")
+      which = "column", height = unit(2, "cm")
     ),
     which = "column"
+  ),
+  right_annotation = HeatmapAnnotation(
+    foo = gganno(
+      function(p) {
+        p + aes(x = V1) +
+          geom_text(aes(label = .index))
+      },
+      matrix = anno_data,
+      which = "row", width = unit(3, "cm")
+    ),
+    which = "row"
   ),
   left_annotation = HeatmapAnnotation(
     foo = gganno(
       function(p) {
-        p + aes(y = ...1) +
+        p + aes(x = V1) +
           geom_text(aes(label = .index)) +
-          scale_y_reverse()
+          scale_x_reverse()
       },
       matrix = anno_data,
-      which = "row", width = unit(5, "cm")
+      which = "row", width = unit(3, "cm")
     ),
     which = "row"
-  )
+  ),
+  row_km = 2L, column_km = 2L,
 ), merge_legends = TRUE)
 #> ℹ convert simple vector `matrix` to one-column matrix
 #> ℹ convert simple vector `matrix` to one-column matrix
 #> ℹ convert simple vector `matrix` to one-column matrix
-#> New names:
-#> New names:
-#> New names:
-#> • `` -> `...1`
+#> ℹ convert simple vector `matrix` to one-column matrix
 ```
 
 <img src="man/figures/README-unnamed-chunk-16-1.png" width="100%" />
@@ -353,19 +355,15 @@ anno_data <- sample(1:10, nrow(small_mat))
 draw(ggheat(small_mat,
   top_annotation = HeatmapAnnotation(
     foo = gganno2(
-      # Note: vector will be converted one-column data.frame
-      # tittle::as_tibble will automatically add column names `...1`
       matrix = anno_data,
       function(p) {
-        p + geom_bar(aes(y = ...1, fill = factor(.x)), stat = "identity")
+        p + geom_bar(aes(y = V1, fill = factor(.x)), stat = "identity")
       },
       which = "column"
     ), which = "column"
   )
 ), merge_legends = TRUE)
 #> ℹ convert simple vector `matrix` to one-column matrix
-#> New names:
-#> • `` -> `...1`
 ```
 
 <img src="man/figures/README-unnamed-chunk-17-1.png" width="100%" />
@@ -377,33 +375,28 @@ anno_data <- sample(1:10, nrow(small_mat))
 draw(Heatmap(small_mat,
   top_annotation = HeatmapAnnotation(
     foo = gganno2(
-      # Note: vector will be converted one-column data.frame
-      # tittle::as_tibble will automatically add column names `...1`
       matrix = anno_data,
       function(p) {
-        p + geom_point(aes(.x, ...1))
+        p + geom_point(aes(.x, V1))
       },
       which = "column"
     ), which = "column"
   )
 ), merge_legends = TRUE)
 #> ℹ convert simple vector `matrix` to one-column matrix
-#> New names:
-#> • `` -> `...1`
 ```
 
 <img src="man/figures/README-unnamed-chunk-18-1.png" width="100%" />
+
 `gganno` will just add a blank region in `Heatmap` function.
 
 ``` r
 draw(Heatmap(small_mat,
   top_annotation = HeatmapAnnotation(
     foo = gganno(
-      # Note: vector will be converted one-column data.frame
-      # tittle::as_tibble will automatically add column names `...1`
       matrix = anno_data,
       function(p) {
-        p + geom_bar(aes(y = ...1, fill = factor(.x)), stat = "identity")
+        p + geom_bar(aes(y = V1, fill = factor(.x)), stat = "identity")
       },
       which = "column"
     ), which = "column"

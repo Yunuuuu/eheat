@@ -33,14 +33,15 @@ prepare_ggheat <- function(object) {
     colnames(data) <- seq_len(ncol(data))
     data$.row_index <- seq_len(nrow(data))
     data <- tidyr::pivot_longer(data,
-        cols = !dplyr::all_of(".row_index"),
+        cols = !".row_index",
         names_to = ".column_index", values_to = "values"
     )
     data$.column_index <- as.integer(data$.column_index)
-    update_data <- dplyr::bind_rows(
-        cheat_full_slice_index(order_list),
-        .id = ".slice"
+    update_data <- do.call(rbind, cheat_full_slice_index(order_list))
+    update_data$.slice <- sprintf(
+        "r%dc%d", update_data$.slice_row, update_data$.slice_column
     )
+
     # reverse y-axis as ggplot2 and ComplexHeatmap draw in different
     # direction, but we cannot use scale_y_reverse, I don't know why?
     # It won't draw anything if we use `scale_y_reverse`.
@@ -51,16 +52,14 @@ prepare_ggheat <- function(object) {
             subdata
         }
     )
-    update_data <- dplyr::bind_rows(update_data)
-    data <- dplyr::inner_join(update_data, data,
-        by = c(".row_index", ".column_index")
+    update_data <- do.call(rbind, update_data)
+    data <- merge(update_data, data,
+        by = c(".row_index", ".column_index"), all = FALSE
     )
     p <- ggplot2::ggplot(data, ggplot2::aes(.data$.column, .data$.row))
     if (!identical(rect_gp$type, "none")) {
         p <- p + ggplot2::geom_tile(
-            ggplot2::aes(.data$.column, .data$.row,
-                fill = .data$values
-            ),
+            ggplot2::aes(.data$.column, .data$.row, fill = .data$values),
             width = 1L, height = 1L
         ) + ggplot2::labs(fill = object@name)
     }

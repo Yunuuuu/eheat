@@ -182,9 +182,9 @@ converted into a data.frame with another 3 columns added:
 * `.slice`: the slice row (which = "row") or column (which = "column")
   number. 
 
-* `.x`: indicating the x-axis coordinates (always aligned in parallel with
-  the heatmap). The internal will flip the coordinates if if the annotation
-  pertains to rows. 
+* `.x`/`.y`: indicating the x-axis (or y-axis) coordinates. Don't use
+[coord_flip][ggplot2::coord_flip] to flip coordinates as it may disrupt internal
+operations. 
 
 * `.index`: denoting the row index of the original matrix, where rows are
   uniformly considered as observations and columns as variables. 
@@ -197,10 +197,10 @@ draw(ggheat(small_mat,
   top_annotation = HeatmapAnnotation(
     foo = gganno(
       # Note: vector will be converted one-column data.frame
-      # tittle::as_tibble will automatically add column names `...1`
+      # with a column names `V1`
       matrix = anno_data,
       function(p) {
-        p + geom_point(aes(.x, ...1))
+        p + geom_point(aes(.x, V1))
       },
       which = "column"
     ), which = "column"
@@ -214,11 +214,9 @@ Legends will also be extracted, in the similar manner like passing them into
 draw(ggheat(small_mat,
   top_annotation = HeatmapAnnotation(
     foo = gganno(
-      # Note: vector will be converted one-column data.frame
-      # tittle::as_tibble will automatically add column names `...1`
       matrix = anno_data,
       function(p) {
-        p + geom_bar(aes(y = ...1, fill = factor(.x)), stat = "identity")
+        p + geom_bar(aes(y = V1, fill = factor(.x)), stat = "identity")
       },
       which = "column", height = unit(5, "cm")
     ), which = "column"
@@ -227,41 +225,53 @@ draw(ggheat(small_mat,
 ```
 
 
-```{r}
+```{r, fig.height=8}
 draw(ggheat(small_mat,
   top_annotation = HeatmapAnnotation(
     foo = gganno(
       matrix = anno_data,
       function(p) {
-        p + geom_point(aes(y = ...1))
+        p + aes(y = V1) + geom_text(aes(label = .index))
       },
-      which = "column", height = unit(5, "cm")
+      which = "column", height = unit(2, "cm")
     ), which = "column"
   ),
   bottom_annotation = HeatmapAnnotation(
     foo = gganno(
       function(p) {
-        p + aes(y = ...1) +
+        p + aes(y = V1) +
           geom_text(aes(label = .index)) +
           scale_y_reverse()
       },
       matrix = anno_data,
-      which = "column", height = unit(5, "cm")
+      which = "column", height = unit(2, "cm")
     ),
     which = "column"
+  ),
+  right_annotation = HeatmapAnnotation(
+    foo = gganno(
+      function(p) {
+        p + aes(x = V1) +
+          geom_text(aes(label = .index))
+      },
+      matrix = anno_data,
+      which = "row", width = unit(3, "cm")
+    ),
+    which = "row"
   ),
   left_annotation = HeatmapAnnotation(
     foo = gganno(
       function(p) {
-        p + aes(y = ...1) +
+        p + aes(x = V1) +
           geom_text(aes(label = .index)) +
-          scale_y_reverse()
+          scale_x_reverse()
       },
       matrix = anno_data,
-      which = "row", width = unit(5, "cm")
+      which = "row", width = unit(3, "cm")
     ),
     which = "row"
-  )
+  ),
+  row_km = 2L, column_km = 2L,
 ), merge_legends = TRUE)
 ```
 
@@ -274,11 +284,9 @@ anno_data <- sample(1:10, nrow(small_mat))
 draw(ggheat(small_mat,
   top_annotation = HeatmapAnnotation(
     foo = gganno2(
-      # Note: vector will be converted one-column data.frame
-      # tittle::as_tibble will automatically add column names `...1`
       matrix = anno_data,
       function(p) {
-        p + geom_bar(aes(y = ...1, fill = factor(.x)), stat = "identity")
+        p + geom_bar(aes(y = V1, fill = factor(.x)), stat = "identity")
       },
       which = "column"
     ), which = "column"
@@ -292,27 +300,24 @@ anno_data <- sample(1:10, nrow(small_mat))
 draw(Heatmap(small_mat,
   top_annotation = HeatmapAnnotation(
     foo = gganno2(
-      # Note: vector will be converted one-column data.frame
-      # tittle::as_tibble will automatically add column names `...1`
       matrix = anno_data,
       function(p) {
-        p + geom_point(aes(.x, ...1))
+        p + geom_point(aes(.x, V1))
       },
       which = "column"
     ), which = "column"
   )
 ), merge_legends = TRUE)
 ```
+
 `gganno` will just add a blank region in `Heatmap` function.
 ```{r}
 draw(Heatmap(small_mat,
   top_annotation = HeatmapAnnotation(
     foo = gganno(
-      # Note: vector will be converted one-column data.frame
-      # tittle::as_tibble will automatically add column names `...1`
       matrix = anno_data,
       function(p) {
-        p + geom_bar(aes(y = ...1, fill = factor(.x)), stat = "identity")
+        p + geom_bar(aes(y = V1, fill = factor(.x)), stat = "identity")
       },
       which = "column"
     ), which = "column"

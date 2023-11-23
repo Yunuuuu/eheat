@@ -203,6 +203,10 @@ The constructor function pretends to be a high-level graphic function because
 the \code{show} method of the \code{Heatmap-class} object actually plots the
 graphics.
 }
+\note{
+Maintaining the internal limits along the heatmap to align well with
+\code{ComplexHeatmap} is important.
+}
 \section{ggfn}{
 
 

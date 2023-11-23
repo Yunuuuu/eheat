@@ -61,7 +61,7 @@ be deemed acceptable) to be carried out conjointly with the
 A \code{ggAnnotationFunction} object.
 }
 \description{
-Build AnnotationFunction Class with ggplot2
+Plot heatmaps layer by layer
 }
 \details{
 Both \code{gganno} and \code{gganno2} perform identical functions, but \code{gganno} is not
@@ -70,6 +70,10 @@ In such cases, only an empty annotation region can be added. On the other
 hand, \code{gganno2} can be seamlessly combined with both
 \link[ComplexHeatmap:Heatmap]{Heatmap} and \link{ggheat}, although legends will not be
 extracted.
+}
+\note{
+Maintaining the internal limits along the heatmap to align well with
+\code{ComplexHeatmap} is important.
 }
 \section{ggfn}{
 
@@ -80,9 +84,9 @@ data.frame with another 3 columns added:
 \itemize{
 \item \code{.slice}: the slice row (which = "row") or column (which = "column")
 number.
-\item \code{.x}: indicating the x-axis coordinates (always aligned in parallel with
-the heatmap). The internal will flip the coordinates if if the annotation
-pertains to rows.
+\item \code{.x}/\code{.y}: indicating the x-axis (or y-axis) coordinates. Don't use
+\link[ggplot2:coord_flip]{coord_flip} to flip coordinates as it may disrupt
+internal operations.
 \item \code{.index}: denoting the row index of the original matrix, where rows are
 uniformly considered as observations and columns as variables.
 }
