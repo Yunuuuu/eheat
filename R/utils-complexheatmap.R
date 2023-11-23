@@ -111,7 +111,7 @@ guide_from_gg <- function(gg, direction = NULL) {
     on.exit(grDevices::dev.off())
     gt <- ggplot2::ggplotGrob(gg)
     guides <- gtable::gtable_filter(gt, "guide-box")
-    guides <- lapply(guides$grobs, function(x) {
+    lapply(guides$grobs, function(x) {
         guide <- gtable::gtable_filter(x, "guides")
         attr(guide, "width") <- sum(guide$widths)
         attr(guide, "height") <- sum(guide$heights)
@@ -125,5 +125,4 @@ guide_from_gg <- function(gg, direction = NULL) {
             direction = match.arg(direction, c("vertical", "horizontal"))
         )
     })
-    rlang::inject(ComplexHeatmap::Legends(!!!guides))
 }
