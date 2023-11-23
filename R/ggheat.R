@@ -160,31 +160,36 @@
 #' `magick::filter_types`. The default is ``"Lanczos"``.
 #' - `post_fun` A function which will be executed after the heatmap list is
 #'   drawn.
-#' @inheritParams ComplexHeatmap::Heatmap
 #' @param ggparams Other arguments passed to `ggfn`.
-#'
+#' @param debug In the event that it is set to TRUE, the
+#' [ggplot][ggplot2::ggplot] object gracefully yielded by ggfn, during the
+#' execution of [draw][ComplexHeatmap::draw], shall be returned directly.
+#' Alternatively, one may opt to impart a function (whereas a formula would also
+#' be deemed acceptable) to be carried out conjointly with the
+#' [ggplot][ggplot2::ggplot] object, as exemplified by [print] or [browser]. 
 #' @details
 #' The initialization function only applies parameter checking and fill values to the slots with some validation.
 #'
 #' Following methods can be applied to the `Heatmap-class` object:
 #'
-#' - `show,eHeat-method`: draw a single heatmap with default parameters
-#' - `draw,eHeat-method`: draw a single heatmap.
+#' - `show,ggHeatmap-method`: draw a single heatmap with default parameters
+#' - `draw,ggHeatmap-method`: draw a single heatmap.
 #' - `+` or `%v%` append heatmaps and annotations to a list of heatmaps.
 #'
 #' The constructor function pretends to be a high-level graphic function because
 #' the ``show`` method of the `Heatmap-class` object actually plots the
 #' graphics.
-#' @return A `eHeat` Object.
+#' @return A `ggHeatmap` Object.
 #' @export
-#' @name eHeat
-ggheat <- function(matrix, ggfn = NULL, ..., rect_gp = gpar(), layer_fun = NULL, ggparams = list()) {
+#' @name ggheat
+ggheat <- function(matrix, ggfn = NULL, ..., ggparams = list(), debug = FALSE) {
     matrix <- build_matrix(matrix)
     ggfn <- allow_lambda(ggfn)
     out <- ComplexHeatmap::Heatmap(matrix = matrix, ...)
-    out <- methods::as(out, "eHeat")
+    out <- methods::as(out, "ggHeatmap")
     out@ggfn <- ggfn
     out@ggparams <- ggparams
+    out@debug <- debug
     out
 }
 
@@ -196,9 +201,9 @@ methods::setClassUnion("FunctionOrNull", c("function", "NULL"))
 
 #' @importClassesFrom ComplexHeatmap Heatmap
 #' @export
-#' @rdname eHeat
+#' @rdname ggheat
 methods::setClass(
-    "eHeat",
-    slots = list(ggfn = "FunctionOrNull", ggparams = "list"),
+    "ggHeatmap",
+    slots = list(ggfn = "FunctionOrNull", ggparams = "list", debug = "ANY"),
     contains = "Heatmap"
 )
