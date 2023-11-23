@@ -1,27 +1,36 @@
 #' Build AnnotationFunction Class with ggplot2
-#' 
+#'
+#' @details
+#' Both `gganno` and `gganno2` perform identical functions, but `gganno` is not
+#' compatible with direct integration with [Heatmap][ComplexHeatmap::Heatmap].
+#' In such cases, only an empty annotation region can be added. On the other
+#' hand, `gganno2` can be seamlessly combined with both
+#' [Heatmap][ComplexHeatmap::Heatmap] and [ggheat], although legends will not be
+#' extracted.
+#'
 #' @inheritParams ggheat
 #' @param ... Other arguments passed to `ggfn`.
 #' @inheritParams ComplexHeatmap::AnnotationFunction
 #' @return A `ggAnnotationFunction` object.
 #' @section ggfn:
-#' 
-#' `ggfn` accept a ggplot2 object with a default data and mapping created by 
+#'
+#' `ggfn` accept a ggplot2 object with a default data and mapping created by
 #' `ggplot(data, aes(.data$x))`. The original matrix will be converted into a
-#' data.frame with another 3 columns added: 
+#' data.frame with another 3 columns added:
 #' - `.slice`: the slice row (which = "row") or column (which = "column")
-#'   number. 
+#'   number.
 #' - `.x`: indicating the x-axis coordinates (always aligned in parallel with
 #'   the heatmap). The internal will flip the coordinates if if the annotation
-#'   pertains to rows. 
+#'   pertains to rows.
 #' - `.index`: denoting the row index of the original matrix, where rows are
-#'   uniformly considered as observations and columns as variables. 
-#' 
-#' @export 
+#'   uniformly considered as observations and columns as variables.
+#'
+#' @export
 #' @name gganno
 gganno <- function(matrix, ggfn, ..., which = NULL, width = NULL, height = NULL, debug = FALSE) {
     matrix <- build_matrix(matrix)
     ggfn <- allow_lambda(ggfn)
+    debug <- allow_lambda(debug)
     ggparams <- rlang::list2(...)
     out <- new_anno(
         n = nrow(matrix),
@@ -38,6 +47,40 @@ gganno <- function(matrix, ggfn, ..., which = NULL, width = NULL, height = NULL,
     out@ggparams <- ggparams
     out@debug <- debug
     out
+}
+
+#' @export
+#' @rdname gganno
+gganno2 <- function(
+    matrix, ggfn, ..., which = NULL,
+    width = NULL, height = NULL, debug = FALSE) {
+    anno <- gganno(matrix,
+        ggfn = ggfn, ..., which = which,
+        width = width, height = height,
+        debug = debug
+    )
+    ddraw <- NULL
+    draw_fn <- function(index, k, n) {
+        if (k == 1L) {
+            # only prepare ggplot data in the first run and run everytime when
+            # draw function execution
+            # https://github.com/jokergoo/ComplexHeatmap/blob/master/R/HeatmapList-draw_component.R
+            # trace back into `draw_heatmap_list()`
+            order_list <- cheat_get_order_list("ht_main")
+            order_list <- switch(which,
+                row = order_list$row_order_list,
+                column = order_list$column_order_list
+            )
+            ddraw <<- draw_gganno(anno, NULL, order_list, which = which)$draw_fn
+        }
+        ddraw(index, k, n)
+    }
+    new_anno(
+        n = nrow(anno@matrix), draw_fn = draw_fn, ylim = NULL,
+        subset_rule = list(), subsettable = FALSE,
+        which = which, width = width, height = height,
+        show_name = FALSE, name = "gganno2"
+    )
 }
 
 methods::setClassUnion("MatrixOrNull", c("matrix", "NULL"))
@@ -64,7 +107,7 @@ draw_gganno <- function(anno, heat_matrix, order_list, which, id) {
     )
     row_nms <- rownames(matrix)
     data <- tibble::as_tibble(matrix, .name_repair = "unique") # nolint
-    data$index <- seq_len(nrow(data))
+    data$.index <- seq_len(nrow(data))
     if (length(order_list) > 1L) {
         with_slice <- TRUE
     } else {
@@ -81,7 +124,7 @@ draw_gganno <- function(anno, heat_matrix, order_list, which, id) {
         )
     )
     data <- dplyr::bind_cols(
-        x, data[match(index, data$index), ],
+        x, data[match(index, data$.index), ],
         .name_repair = "minimal"
     )
     p <- ggplot2::ggplot(data, ggplot2::aes(x = .data$.x))

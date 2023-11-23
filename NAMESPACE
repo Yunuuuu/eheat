@@ -2,6 +2,7 @@
 
 export(draw)
 export(gganno)
+export(gganno2)
 export(ggheat)
 export(gpar)
 export(ht_opt)
