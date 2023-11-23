@@ -280,7 +280,7 @@ draw(ggheat(small_mat,
     foo = gganno(
       matrix = anno_data,
       function(p) {
-        p + geom_bar(aes(y = V1, fill = factor(.x)), stat = "identity")
+        p + geom_bar(aes(y = V1, fill = factor(.index)), stat = "identity")
       },
       which = "column", height = unit(5, "cm")
     ), which = "column"
@@ -358,7 +358,7 @@ draw(ggheat(small_mat,
     foo = gganno2(
       matrix = anno_data,
       function(p) {
-        p + geom_bar(aes(y = V1, fill = factor(.x)), stat = "identity")
+        p + geom_bar(aes(y = V1, fill = factor(.index)), stat = "identity")
       },
       which = "column"
     ), which = "column"
@@ -397,7 +397,7 @@ draw(Heatmap(small_mat,
     foo = gganno(
       matrix = anno_data,
       function(p) {
-        p + geom_bar(aes(y = V1, fill = factor(.x)), stat = "identity")
+        p + geom_bar(aes(y = V1, fill = factor(.index)), stat = "identity")
       },
       which = "column"
     ), which = "column"
