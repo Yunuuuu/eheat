@@ -306,7 +306,8 @@ draw(ggheat(small_mat,
     foo = gganno(
       function(p) {
         p + aes(y = V1) +
-          geom_text(aes(label = .index))
+          geom_text(aes(label = .index)) +
+          scale_y_continuous(limits = rev)
       },
       matrix = anno_data,
       which = "column", height = unit(2, "cm")
@@ -328,7 +329,8 @@ draw(ggheat(small_mat,
     foo = gganno(
       function(p) {
         p + aes(x = V1) +
-          geom_text(aes(label = .index))
+          geom_text(aes(label = .index)) +
+          scale_x_continuous(limits = rev)
       },
       matrix = anno_data,
       which = "row", width = unit(3, "cm")
@@ -341,6 +343,10 @@ draw(ggheat(small_mat,
 #> ℹ convert simple vector `matrix` to one-column matrix
 #> ℹ convert simple vector `matrix` to one-column matrix
 #> ℹ convert simple vector `matrix` to one-column matrix
+#> Warning: Attempting to add facetted x scales, while x scales are not free.
+#> ℹ Try adding `scales = "free_x"` to the facet.
+#> Warning: Attempting to add facetted y scales, while y scales are not free.
+#> ℹ Try adding `scales = "free_y"` to the facet.
 ```
 
 <img src="man/figures/README-unnamed-chunk-16-1.png" width="100%" />
