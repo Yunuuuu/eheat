@@ -222,7 +222,7 @@ draw_gganno <- function(anno, heat_matrix, order_list, which, id) {
                 vp = vp
             )
         } else {
-            fit_panel(trim_zero_grob(gt), vp = vp)
+            fit_panel(trim_zero_grob(gt), vp = vp, elements = NULL)
         }
     }
     list(legend = guide_from_gtable(gt), draw_fn = draw_fn)
