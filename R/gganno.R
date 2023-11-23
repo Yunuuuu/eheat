@@ -15,8 +15,9 @@
 #' @section ggfn:
 #'
 #' `ggfn` accept a ggplot2 object with a default data and mapping created by
-#' `ggplot(data, aes(.data$x))`. The original matrix will be converted into a
-#' data.frame with another 3 columns added:
+#' `ggplot(data, aes(.data$.x))` / `ggplot(data, ggplot2::aes(y = .data$.y))`.
+#' The original matrix will be converted into a data.frame with another 3
+#' columns added:
 #' - `.slice`: the slice row (which = "row") or column (which = "column")
 #'   number.
 #' - `.x`/`.y`: indicating the x-axis (or y-axis) coordinates. Don't use

@@ -79,8 +79,9 @@ Maintaining the internal limits along the heatmap to align well with
 
 
 \code{ggfn} accept a ggplot2 object with a default data and mapping created by
-\code{ggplot(data, aes(.data$x))}. The original matrix will be converted into a
-data.frame with another 3 columns added:
+\code{ggplot(data, aes(.data$.x))} / \code{ggplot(data, ggplot2::aes(y = .data$.y))}.
+The original matrix will be converted into a data.frame with another 3
+columns added:
 \itemize{
 \item \code{.slice}: the slice row (which = "row") or column (which = "column")
 number.
