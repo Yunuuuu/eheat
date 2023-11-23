@@ -13,7 +13,8 @@ ggheat(matrix, ggfn = NULL, ..., ggparams = list(), debug = FALSE)
 one-column matrix. Data.frame will also be coerced into matrix.}
 
 \item{ggfn}{A function or formula, accept a initial \link[ggplot2:ggplot]{ggplot}
-data as the input and must return a \link[ggplot2:ggplot]{ggplot} object.
+data as the input and must return a \link[ggplot2:ggplot]{ggplot} object. For the
+passed data details, please see section \code{ggfn}.
 
 If a \strong{function}, it is used as is.
 
@@ -202,3 +203,18 @@ The constructor function pretends to be a high-level graphic function because
 the \code{show} method of the \code{Heatmap-class} object actually plots the
 graphics.
 }
+\section{ggfn}{
+
+
+\code{ggfn} accept a ggplot2 object with a default data and mapping created by
+\code{ggplot(data, aes(.data$.column, .data$.row))}.
+the data contains 6 columns:
+\itemize{
+\item \code{.slice_row}: the slice row number
+\item \code{.slice_column}: the slice column number
+\item \code{.row} and \code{.column}: the row and column coordinates
+\item \code{.row_index} and \code{.column_index}: the row and column index of the original
+matrix.
+}
+}
+

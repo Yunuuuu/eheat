@@ -4,8 +4,9 @@
 #' @param matrix A matrix, if it is a simple vector, it will be converted to a
 #' one-column matrix. Data.frame will also be coerced into matrix.
 #' @param ggfn A function or formula, accept a initial [ggplot][ggplot2::ggplot]
-#' data as the input and must return a [ggplot][ggplot2::ggplot] object.
-#'
+#' data as the input and must return a [ggplot][ggplot2::ggplot] object. For the
+#' passed data details, please see section `ggfn`.
+#' 
 #'   If a **function**, it is used as is.
 #'
 #'   If a **formula**, e.g. `~ .x + 2`, it is converted to a function with up to
@@ -167,6 +168,18 @@
 #' Alternatively, one may opt to impart a function (whereas a formula would also
 #' be deemed acceptable) to be carried out conjointly with the
 #' [ggplot][ggplot2::ggplot] object, as exemplified by [print] or [browser]. 
+#' 
+#' @section ggfn:
+#' 
+#' `ggfn` accept a ggplot2 object with a default data and mapping created by 
+#' `ggplot(data, aes(.data$.column, .data$.row))`.
+#' the data contains 6 columns: 
+#' - `.slice_row`: the slice row number
+#' - `.slice_column`: the slice column number
+#' - `.row` and `.column`: the row and column coordinates
+#' - `.row_index` and `.column_index`: the row and column index of the original
+#'   matrix.
+#' 
 #' @details
 #' The initialization function only applies parameter checking and fill values to the slots with some validation.
 #'
