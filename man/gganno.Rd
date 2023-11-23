@@ -3,10 +3,21 @@
 \docType{class}
 \name{gganno}
 \alias{gganno}
+\alias{gganno2}
 \alias{ggAnnotationFunction-class}
 \title{Build AnnotationFunction Class with ggplot2}
 \usage{
 gganno(
+  matrix,
+  ggfn,
+  ...,
+  which = NULL,
+  width = NULL,
+  height = NULL,
+  debug = FALSE
+)
+
+gganno2(
   matrix,
   ggfn,
   ...,
@@ -51,6 +62,14 @@ A \code{ggAnnotationFunction} object.
 }
 \description{
 Build AnnotationFunction Class with ggplot2
+}
+\details{
+Both \code{gganno} and \code{gganno2} perform identical functions, but \code{gganno} is not
+compatible with direct integration with \link[ComplexHeatmap:Heatmap]{Heatmap}.
+In such cases, only an empty annotation region can be added. On the other
+hand, \code{gganno2} can be seamlessly combined with both
+\link[ComplexHeatmap:Heatmap]{Heatmap} and \link{ggheat}, although legends will not be
+extracted.
 }
 \section{ggfn}{
 
