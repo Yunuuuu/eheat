@@ -21,7 +21,8 @@ gganno(
 one-column matrix. Data.frame will also be coerced into matrix.}
 
 \item{ggfn}{A function or formula, accept a initial \link[ggplot2:ggplot]{ggplot}
-data as the input and must return a \link[ggplot2:ggplot]{ggplot} object.
+data as the input and must return a \link[ggplot2:ggplot]{ggplot} object. For the
+passed data details, please see section \code{ggfn}.
 
 If a \strong{function}, it is used as is.
 
@@ -51,3 +52,20 @@ A \code{ggAnnotationFunction} object.
 \description{
 Build AnnotationFunction Class with ggplot2
 }
+\section{ggfn}{
+
+
+\code{ggfn} accept a ggplot2 object with a default data and mapping created by
+\code{ggplot(data, aes(.data$x))}. The original matrix will be converted into a
+data.frame with another 3 columns added:
+\itemize{
+\item \code{.slice}: the slice row (which = "row") or column (which = "column")
+number.
+\item \code{.x}: indicating the x-axis coordinates (always aligned in parallel with
+the heatmap). The internal will flip the coordinates if if the annotation
+pertains to rows.
+\item \code{.index}: denoting the row index of the original matrix, where rows are
+uniformly considered as observations and columns as variables.
+}
+}
+

@@ -4,6 +4,19 @@
 #' @param ... Other arguments passed to `ggfn`.
 #' @inheritParams ComplexHeatmap::AnnotationFunction
 #' @return A `ggAnnotationFunction` object.
+#' @section ggfn:
+#' 
+#' `ggfn` accept a ggplot2 object with a default data and mapping created by 
+#' `ggplot(data, aes(.data$x))`. The original matrix will be converted into a
+#' data.frame with another 3 columns added: 
+#' - `.slice`: the slice row (which = "row") or column (which = "column")
+#'   number. 
+#' - `.x`: indicating the x-axis coordinates (always aligned in parallel with
+#'   the heatmap). The internal will flip the coordinates if if the annotation
+#'   pertains to rows. 
+#' - `.index`: denoting the row index of the original matrix, where rows are
+#'   uniformly considered as observations and columns as variables. 
+#' 
 #' @export 
 #' @name gganno
 gganno <- function(matrix, ggfn, ..., which = NULL, width = NULL, height = NULL, debug = FALSE) {
@@ -63,7 +76,7 @@ draw_gganno <- function(anno, heat_matrix, order_list, which, id) {
             seq_along(order_list),
             times = lengths(order_list)
         ),
-        x = unlist(lapply(order_list, seq_along),
+        .x = unlist(lapply(order_list, seq_along),
             recursive = FALSE, use.names = FALSE
         )
     )
@@ -71,7 +84,7 @@ draw_gganno <- function(anno, heat_matrix, order_list, which, id) {
         x, data[match(index, data$index), ],
         .name_repair = "minimal"
     )
-    p <- ggplot2::ggplot(data, ggplot2::aes(x = .data$x))
+    p <- ggplot2::ggplot(data, ggplot2::aes(x = .data$.x))
     p <- rlang::inject(anno@ggfn(p, !!!anno@ggparams))
     if (!ggplot2::is.ggplot(p)) {
         cli::cli_abort(c(
