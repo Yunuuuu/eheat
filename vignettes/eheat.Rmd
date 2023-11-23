@@ -1,0 +1,321 @@
+---
+title: "eheat"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{eheat}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  out.width = "100%"
+)
+```
+
+This package serves as a bridge between the ggplot2 and ComplexHeatmap packages.
+Essentially, all ggplot2 geometries and operations can be utilized in
+ComplexHeatmap through the `eheat` package, with the exception of facet
+operations (and you shouldn't do it in `eheat` package). Fortunately,
+ComplexHeatmap is capable of handling these operations independently, rendering
+them unnecessary. 
+
+## Installation
+
+You can install the development version of `eheat` from [GitHub](https://github.com/) with:
+
+```{r, eval=FALSE}
+if (!requireNamespace("pak")) {
+  install.packages("pak",
+    repos = sprintf(
+      "https://r-lib.github.io/p/pak/devel/%s/%s/%s",
+      .Platform$pkgType, R.Version()$os, R.Version()$arch
+    )
+  )
+}
+pak::pkg_install("Yunuuuu/eheat")
+```
+
+```{r setup}
+library(eheat)
+library(ggplot2)
+library(ComplexHeatmap)
+```
+
+
+Let's begin by creating some example data, following code was copied from
+ComplexHeatmap book directly
+
+```{r}
+set.seed(123)
+nr1 <- 4
+nr2 <- 8
+nr3 <- 6
+nr <- nr1 + nr2 + nr3
+nc1 <- 6
+nc2 <- 8
+nc3 <- 10
+nc <- nc1 + nc2 + nc3
+mat <- cbind(
+  rbind(
+    matrix(rnorm(nr1 * nc1, mean = 1, sd = 0.5), nr = nr1),
+    matrix(rnorm(nr2 * nc1, mean = 0, sd = 0.5), nr = nr2),
+    matrix(rnorm(nr3 * nc1, mean = 0, sd = 0.5), nr = nr3)
+  ),
+  rbind(
+    matrix(rnorm(nr1 * nc2, mean = 0, sd = 0.5), nr = nr1),
+    matrix(rnorm(nr2 * nc2, mean = 1, sd = 0.5), nr = nr2),
+    matrix(rnorm(nr3 * nc2, mean = 0, sd = 0.5), nr = nr3)
+  ),
+  rbind(
+    matrix(rnorm(nr1 * nc3, mean = 0.5, sd = 0.5), nr = nr1),
+    matrix(rnorm(nr2 * nc3, mean = 0.5, sd = 0.5), nr = nr2),
+    matrix(rnorm(nr3 * nc3, mean = 1, sd = 0.5), nr = nr3)
+  )
+)
+mat <- mat[sample(nr, nr), sample(nc, nc)] # random shuffle rows and columns
+rownames(mat) <- paste0("row", seq_len(nr))
+colnames(mat) <- paste0("column", seq_len(nc))
+small_mat <- mat[1:9, 1:9]
+``` 
+
+The central functions of the `eheat` package are `ggheat` and `gganno`. These two functions encompass all the necessary functionalities. `ggheat` serves as a substitute for the `ComplexHeatmap::Heatmap` function, while `gganno` replaces all the `anno_*` functions within the ComplexHeatmap package, offering a comprehensive solution for our requirements.
+
+## ggheat
+Using `ggheat`, it is effortless to create a simple Heatmap. 
+
+```{r}
+draw(ggheat(small_mat))
+```
+
+You do not need to explicitly specify the color mapping as you can utilize the
+`scale_*` function directly from ggplot2. All guide legends will directly
+extracted from `ggplot2`. The essential parameter of `ggheat` is `ggfn`, which
+accepts a ggplot2 object equipped with a default data and mappings established
+via `ggplot(data, aes(.data$.column, .data$.row))`. By default, the data
+includes six columns, each prefixed with a dot for caution.
+
+* `.slice_row`: the slice row number
+
+* `.slice_column`: the slice column number
+
+* `.row` and `.column`: the row and column coordinates
+
+* `.row_index` and `.column_index`: the row and column index of the original
+   matrix.
+  
+```{r}
+draw(ggheat(small_mat, function(p) {
+  p + scale_fill_viridis_c()
+}))
+```
+
+You can add more geoms.
+```{r}
+draw(
+  ggheat(small_mat, function(p) {
+    p + geom_text(aes(label = sprintf("%d * %d", .row_index, .column_index)))
+  })
+)
+```
+
+All the functionalities of the `ComplexHeatmap::Heatmap` function can be used as is.
+```{r}
+draw(ggheat(small_mat, function(p) {
+  p + scale_fill_viridis_c()
+}, column_km = 2L))
+```
+
+```{r}
+draw(ggheat(small_mat, function(p) {
+  p + scale_fill_viridis_c()
+}, column_km = 2L, row_km = 3))
+```
+
+The row names and column names should be controlled by the
+`ComplexHeatmap::Heatmap` function, while the legends should be controlled by
+`ggplot2`. However, the default legend name is taken from
+`ComplexHeatmap::Heatmap` in order to maintain consistency. Nevertheless, you
+can directly override it in `ggfn`.
+```{r}
+draw(ggheat(small_mat, function(p) {
+  p + scale_fill_viridis_c()
+}, column_km = 2L, row_km = 3, row_names_gp = gpar(col = "red")))
+```
+
+```{r}
+draw(
+  ggheat(small_mat, function(p) {
+    p + scale_fill_viridis_c()
+  },
+  column_km = 2L, row_km = 3, row_names_gp = gpar(col = "red"),
+  name = "ComplexHeatmap"
+  )
+)
+```
+
+```{r}
+draw(
+  ggheat(small_mat, function(p) {
+    p + scale_fill_viridis_c(name = "ggplot2")
+  },
+  column_km = 2L, row_km = 3, row_names_gp = gpar(col = "red"),
+  name = "ComplexHeatmap"
+  )
+)
+```
+
+## gganno
+Both `gganno` and `gganno2` perform identical functions, but `gganno` is not
+compatible with direct integration with `ComplexHeatmap::Heatmap`.  In such
+cases, only an empty annotation region can be added. On the other hand,
+`gganno2` can be seamlessly combined with both `ComplexHeatmap::Heatmap` and
+`ggheat`, although legends will not be extracted.
+
+The same with `ggheat`, the essential parameter of `gganno` is also `ggfn`,
+which accepts a ggplot2 object equipped with a default data and mappings
+established by `ggplot(data, aes(.data$x))`. The original matrix will be
+converted into a data.frame with another 3 columns added: 
+
+* `.slice`: the slice row (which = "row") or column (which = "column")
+  number. 
+
+* `.x`: indicating the x-axis coordinates (always aligned in parallel with
+  the heatmap). The internal will flip the coordinates if if the annotation
+  pertains to rows. 
+
+* `.index`: denoting the row index of the original matrix, where rows are
+  uniformly considered as observations and columns as variables. 
+  
+
+In general, we should just use `ggheat` and `gganno`.
+```{r}
+anno_data <- sample(1:10, nrow(small_mat))
+draw(ggheat(small_mat,
+  top_annotation = HeatmapAnnotation(
+    foo = gganno(
+      # Note: vector will be converted one-column data.frame
+      # tittle::as_tibble will automatically add column names `...1`
+      matrix = anno_data,
+      function(p) {
+        p + geom_point(aes(.x, ...1))
+      },
+      which = "column"
+    ), which = "column"
+  )
+))
+```
+
+Legends will also be extracted, in the similar manner like passing them into
+`annotation_legend_list`. 
+```{r}
+draw(ggheat(small_mat,
+  top_annotation = HeatmapAnnotation(
+    foo = gganno(
+      # Note: vector will be converted one-column data.frame
+      # tittle::as_tibble will automatically add column names `...1`
+      matrix = anno_data,
+      function(p) {
+        p + geom_bar(aes(y = ...1, fill = factor(.x)), stat = "identity")
+      },
+      which = "column", height = unit(5, "cm")
+    ), which = "column"
+  )
+), merge_legends = TRUE)
+```
+
+
+```{r}
+draw(ggheat(small_mat,
+  top_annotation = HeatmapAnnotation(
+    foo = gganno(
+      matrix = anno_data,
+      function(p) {
+        p + geom_point(aes(y = ...1))
+      },
+      which = "column", height = unit(5, "cm")
+    ), which = "column"
+  ),
+  bottom_annotation = HeatmapAnnotation(
+    foo = gganno(
+      function(p) {
+        p + aes(y = ...1) +
+          geom_text(aes(label = .index)) +
+          scale_y_reverse()
+      },
+      matrix = anno_data,
+      which = "column", height = unit(5, "cm")
+    ),
+    which = "column"
+  ),
+  left_annotation = HeatmapAnnotation(
+    foo = gganno(
+      function(p) {
+        p + aes(y = ...1) +
+          geom_text(aes(label = .index)) +
+          scale_y_reverse()
+      },
+      matrix = anno_data,
+      which = "row", width = unit(5, "cm")
+    ),
+    which = "row"
+  )
+), merge_legends = TRUE)
+```
+
+Finally, let's see the difference between `gganno2` and `gganno`.
+
+
+`gganno2` will not extract the legend.
+```{r}
+anno_data <- sample(1:10, nrow(small_mat))
+draw(ggheat(small_mat,
+  top_annotation = HeatmapAnnotation(
+    foo = gganno2(
+      # Note: vector will be converted one-column data.frame
+      # tittle::as_tibble will automatically add column names `...1`
+      matrix = anno_data,
+      function(p) {
+        p + geom_bar(aes(y = ...1, fill = factor(.x)), stat = "identity")
+      },
+      which = "column"
+    ), which = "column"
+  )
+), merge_legends = TRUE)
+```
+
+But `gganno2` can work with `Heatmap` function.
+```{r}
+anno_data <- sample(1:10, nrow(small_mat))
+draw(Heatmap(small_mat,
+  top_annotation = HeatmapAnnotation(
+    foo = gganno2(
+      # Note: vector will be converted one-column data.frame
+      # tittle::as_tibble will automatically add column names `...1`
+      matrix = anno_data,
+      function(p) {
+        p + geom_point(aes(.x, ...1))
+      },
+      which = "column"
+    ), which = "column"
+  )
+), merge_legends = TRUE)
+```
+`gganno` will just add a blank region in `Heatmap` function.
+```{r}
+draw(Heatmap(small_mat,
+  top_annotation = HeatmapAnnotation(
+    foo = gganno(
+      # Note: vector will be converted one-column data.frame
+      # tittle::as_tibble will automatically add column names `...1`
+      matrix = anno_data,
+      function(p) {
+        p + geom_bar(aes(y = ...1, fill = factor(.x)), stat = "identity")
+      },
+      which = "column"
+    ), which = "column"
+  )
+), merge_legends = TRUE)
+```
