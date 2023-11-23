@@ -306,8 +306,7 @@ draw(ggheat(small_mat,
     foo = gganno(
       function(p) {
         p + aes(y = V1) +
-          geom_text(aes(label = .index)) +
-          scale_y_reverse()
+          geom_text(aes(label = .index))
       },
       matrix = anno_data,
       which = "column", height = unit(2, "cm")
@@ -329,8 +328,7 @@ draw(ggheat(small_mat,
     foo = gganno(
       function(p) {
         p + aes(x = V1) +
-          geom_text(aes(label = .index)) +
-          scale_x_reverse()
+          geom_text(aes(label = .index))
       },
       matrix = anno_data,
       which = "row", width = unit(3, "cm")

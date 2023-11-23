@@ -22,7 +22,7 @@
 #'   number.
 #' - `.x`/`.y`: indicating the x-axis (or y-axis) coordinates. Don't use
 #'   [coord_flip][ggplot2::coord_flip] to flip coordinates as it may disrupt
-#'   internal operations. 
+#'   internal operations.
 #' - `.index`: denoting the row index of the original matrix, where rows are
 #'   uniformly considered as observations and columns as variables.
 #'
@@ -161,16 +161,17 @@ draw_gganno <- function(anno, heat_matrix, order_list, which, id) {
         scale_fn <- ggplot2::scale_x_continuous
     }
     if (with_slice) {
+        p <- p + do.call(ggplot2::facet_grid, facet_params)
         # ".slice" and ".x"/".y"
         scales <- lapply(split(data, data$.slice), function(subdata) {
-            n <- max(subdata[[orientation]])
-            limits <- c(0.5, n + 0.5)
-            breaks <- seq_len(n)
+            limits <- range(subdata[[orientation]])
             labels <- row_nms[subdata$.index][order(subdata[[orientation]])]
-            labels <- labels[!duplicated(labels)]
+            labels <- unique(labels)
             do.call(scale_fn, list(
-                limits = limits, breaks = breaks,
-                labels = labels, expand = ggplot2::expansion()
+                limits = c(limits[1L] - 0.5, limits[2L] + 0.5),
+                breaks = sort(unique(subdata[[orientation]])),
+                labels = labels,
+                expand = ggplot2::expansion()
             ))
         })
         if (which == "row") {
@@ -178,14 +179,14 @@ draw_gganno <- function(anno, heat_matrix, order_list, which, id) {
         } else {
             p <- p + ggh4x::facetted_pos_scales(x = scales)
         }
-        p <- p + do.call(ggplot2::facet_grid, facet_params)
     } else {
+        limits <- range(data[[orientation]])
         labels <- row_nms[data$.index][order(data[[orientation]])]
-        labels <- labels[!duplicated(labels)]
+        labels <- unique(labels)
         p <- p + do.call(scale_fn, list(
-            limits = c(0.5, max(data[[orientation]]) + 0.5),
-            breaks = seq_len(max(data[[orientation]])),
-            labels = labels, expand = ggplot2::expansion()
+            limits = c(limits[1L] - 0.5, limits[2L] + 0.5),
+            breaks = coord$.x, labels = labels,
+            expand = ggplot2::expansion()
         ))
     }
     if (isTRUE(anno@debug)) {
