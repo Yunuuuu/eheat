@@ -14,7 +14,6 @@ Imports:
     ComplexHeatmap,
     ggplot2,
     rlang (>= 1.1.0),
-    dplyr (>= 1.1.0),
     gtable,
     tidyr,
     methods,
@@ -37,3 +36,7 @@ Collate:
     'utils-complexheatmap.R'
     'utils-grid.R'
     'utils.R'
+VignetteBuilder: knitr
+Suggests: 
+    knitr,
+    rmarkdown

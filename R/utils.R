@@ -30,6 +30,7 @@ build_matrix <- function(matrix, arg = rlang::caller_arg(matrix)) {
         if (is.atomic(matrix)) {
             cli::cli_alert_info("convert simple vector {.arg matrix} to one-column matrix")
             matrix <- matrix(matrix, ncol = 1L)
+            colnames(matrix) <- "V1"
         } else {
             cli::cli_abort("{.arg {arg}} must be a {.cls matrix}, a simple vector, or a {.cls data.frame}.")
         }

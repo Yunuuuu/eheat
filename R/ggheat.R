@@ -180,6 +180,8 @@
 #' - `.row_index` and `.column_index`: the row and column index of the original
 #'   matrix.
 #' 
+#' @note Maintaining the internal limits along the heatmap to align well with
+#' `ComplexHeatmap` is important.
 #' @details
 #' The initialization function only applies parameter checking and fill values to the slots with some validation.
 #'
