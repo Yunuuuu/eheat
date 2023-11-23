@@ -106,10 +106,7 @@ cheat_check_gp <- function(gp) {
     gp
 }
 
-guide_from_gg <- function(gg, direction = NULL) {
-    grDevices::pdf(NULL)
-    on.exit(grDevices::dev.off())
-    gt <- ggplot2::ggplotGrob(gg)
+guide_from_gtable <- function(gt, direction = NULL) {
     guides <- gtable::gtable_filter(gt, "guide-box")
     lapply(guides$grobs, function(x) {
         guide <- gtable::gtable_filter(x, "guides")
@@ -125,4 +122,8 @@ guide_from_gg <- function(gg, direction = NULL) {
             direction = match.arg(direction, c("vertical", "horizontal"))
         )
     })
+}
+
+guide_from_gg <- function(gg, direction = NULL) {
+    guide_from_gtable(ggplot2::ggplotGrob(gg, direction = direction))
 }

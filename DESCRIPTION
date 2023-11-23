@@ -23,3 +23,17 @@ Imports:
 ByteCompile: true
 URL: https://github.com/Yunuuuu/eheat
 BugReports: https://github.com/Yunuuuu/eheat/issues
+Collate: 
+    'anno-.R'
+    'anno-fn.R'
+    'eheat-package.R'
+    'ggheat.R'
+    'gganno.R'
+    'import-standalone-assert.R'
+    'import-standalone-cli.R'
+    'import-standalone-obj-type.R'
+    'prepare.R'
+    'utils-assert.R'
+    'utils-complexheatmap.R'
+    'utils-grid.R'
+    'utils.R'
