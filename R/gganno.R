@@ -69,18 +69,14 @@ gganno2 <- function(
             # https://github.com/jokergoo/ComplexHeatmap/blob/master/R/HeatmapList-draw_component.R
             # trace back into `draw_heatmap_list()`
             order_list <- cheat_get_order_list("ht_main")
-            order_list <- switch(which,
-                row = order_list$row_order_list,
-                column = order_list$column_order_list
-            )
-            ddraw <<- draw_gganno(anno, NULL, order_list, which = which)$draw_fn
+            ddraw <<- draw_gganno(anno, order_list, NULL, "gganno2")$draw_fn
         }
         ddraw(index, k, n)
     }
     new_anno(
         n = nrow(anno@matrix), draw_fn = draw_fn, ylim = NULL,
         subset_rule = list(), subsettable = FALSE,
-        which = which, width = width, height = height,
+        which = anno@which, width = width, height = height,
         show_name = FALSE, name = "gganno2"
     )
 }
@@ -102,12 +98,17 @@ methods::setClass(
     contains = "AnnotationFunction"
 )
 
-draw_gganno <- function(anno, heat_matrix, order_list, which, id) {
+draw_gganno <- function(anno, order_list, heat_matrix, id) {
+    which <- anno@which
     matrix <- anno@matrix %||% switch(which,
         row = heat_matrix,
         column = t(heat_matrix)
     )
     row_nms <- rownames(matrix)
+    order_list <- switch(which,
+        row = order_list$row_order_list,
+        column = order_list$column_order_list
+    )
     data <- tibble::as_tibble(matrix, .name_repair = "minimal") # nolint
     if (length(order_list) > 1L) {
         with_slice <- TRUE
@@ -181,7 +182,7 @@ draw_gganno <- function(anno, heat_matrix, order_list, which, id) {
             )
         } else {
             p <- p + ggh4x::facetted_pos_scales(
-                x = scales, 
+                x = scales,
                 y = p$scales$get_scales("y")
             )
         }

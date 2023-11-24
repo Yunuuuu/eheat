@@ -14,6 +14,7 @@ methods::setMethod(
 
 prepare_ggheat <- function(object) {
     rect_gp <- object@matrix_param$gp
+    # To prevent the internal rect drawing of ComplexHeatmap
     object@matrix_param$gp$type <- "none"
     order_list <- list(
         row = object@row_order_list,
@@ -106,9 +107,7 @@ prepare_ggheat <- function(object) {
             cols = ggplot2::vars(.data$.slice_column),
             scales = "free", space = "free"
         ) +
-            ggh4x::facetted_pos_scales(
-                x = scales$.column, y = scales$.row
-            )
+            ggh4x::facetted_pos_scales(x = scales$.column, y = scales$.row)
     } else {
         xlabels <- col_nms[data$.column_index][order(data$.column)]
         xlabels <- xlabels[!duplicated(xlabels)]
@@ -178,24 +177,18 @@ prepare_ggheat <- function(object) {
 
 prepare_gganno <- function(object) {
     full_order_list <- list(
-        row = object@row_order_list,
-        column = object@column_order_list
+        row_order_list = object@row_order_list,
+        column_order_list = object@column_order_list
     )
     annotation_legend_list <- NULL
     for (side in c("left", "right", "top", "bottom")) {
         annotation <- methods::slot(object, sprintf("%s_annotation", side))
         if (is.null(annotation)) next
-        which <- switch(side,
-            left = ,
-            right = "row",
-            "column"
-        )
-        order_list <- full_order_list[[which]]
         for (i in seq_along(annotation@anno_list)) {
             anno <- annotation@anno_list[[i]]@fun
             if (!inherits(anno, "ggAnnotationFunction")) next
             anno <- draw_gganno(
-                anno, object@matrix, order_list, which,
+                anno, full_order_list, object@matrix,
                 id = names(annotation@anno_list)[i]
             )
             annotation@anno_list[[i]]@fun@fun <- anno$draw_fn

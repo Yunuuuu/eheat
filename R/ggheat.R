@@ -163,7 +163,7 @@
 #'   drawn.
 #' @param ggparams Other arguments passed to `ggfn`.
 #' @param debug In the event that it is set to TRUE, the
-#' [ggplot][ggplot2::ggplot] object gracefully yielded by ggfn, during the
+#' [ggplot][ggplot2::ggplot] object gracefully yielded by `ggfn`, during the
 #' execution of [draw][ComplexHeatmap::draw], shall be returned directly.
 #' Alternatively, one may opt to impart a function (whereas a formula would also
 #' be deemed acceptable) to be carried out conjointly with the
@@ -173,7 +173,8 @@
 #' 
 #' `ggfn` accept a ggplot2 object with a default data and mapping created by 
 #' `ggplot(data, aes(.data$.column, .data$.row))`.
-#' the data contains 6 columns: 
+#' the data contains 7 columns: 
+#' - `.slice`: slice number, combine `.slice_row` and `.slice_column`.
 #' - `.slice_row`: the slice row number
 #' - `.slice_column`: the slice column number
 #' - `.row` and `.column`: the row and column coordinates
@@ -200,6 +201,7 @@
 ggheat <- function(matrix, ggfn = NULL, ..., ggparams = list(), debug = FALSE) {
     matrix <- build_matrix(matrix)
     ggfn <- allow_lambda(ggfn)
+    debug <- allow_lambda(debug)
     out <- ComplexHeatmap::Heatmap(matrix = matrix, ...)
     out <- methods::as(out, "ggHeatmap")
     out@ggfn <- ggfn

@@ -212,8 +212,9 @@ Maintaining the internal limits along the heatmap to align well with
 
 \code{ggfn} accept a ggplot2 object with a default data and mapping created by
 \code{ggplot(data, aes(.data$.column, .data$.row))}.
-the data contains 6 columns:
+the data contains 7 columns:
 \itemize{
+\item \code{.slice}: slice number, combine \code{.slice_row} and \code{.slice_column}.
 \item \code{.slice_row}: the slice row number
 \item \code{.slice_column}: the slice column number
 \item \code{.row} and \code{.column}: the row and column coordinates
