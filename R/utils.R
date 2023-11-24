@@ -143,7 +143,7 @@ is_discrete <- function(x) {
 }
 
 trace_data <- function(
-    name, 
+    name,
     has_fn = function(env, name) {
         exists(name, envir = env, inherits = FALSE)
     },
@@ -169,4 +169,18 @@ trace_data <- function(
 
 data_frame0 <- function(...) {
     tibble::tibble(..., .name_repair = "minimal")
+}
+
+recycle_scalar <- function(x, length, arg = rlang::caller_arg(x)) {
+    l <- length(x)
+    if (l == 1L || l == length) {
+        rep_len(x, length)
+    } else {
+        if (length != 1L) {
+            msg <- sprintf("1 or %d", length) # nolint
+        } else {
+            msg <- "1"
+        }
+        cli::cli_abort("length of {.arg {arg}} can only be {msg}")
+    }
 }
