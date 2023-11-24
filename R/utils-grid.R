@@ -30,6 +30,20 @@ recycle_gp <- function(gp, n) {
     gp
 }
 
+grid_vp_size <- function() {
+    current_vp <- grid::current.viewport()$name
+    if (current_vp == "ROOT") {
+        grid::unit(graphics::par("din"), "in")
+    } else {
+        grid::upViewport()
+        on.exit(grid::downViewport(current_vp))
+        grid::unit.c(
+            grid::convertWidth(grid::unit(1, "npc"), "mm"),
+            grid::convertHeight(grid::unit(1, "npc"), "mm")
+        )
+    }
+}
+
 # https://stackoverflow.com/questions/29535760/fit-ggplot-exactly-to-viewport-size
 fit_panel <- function(gt, vp, elements = c("b", "t", "l", "r")) {
     # Convert the plot to a grob
@@ -49,7 +63,7 @@ fit_panel <- function(gt, vp, elements = c("b", "t", "l", "r")) {
         # Viewport for left axis and label
         lab_l <- gtable::gtable_filter(gt, "ylab-l")
         axis_l <- gtable::gtable_filter(gt, "axis-l")
-        left <- safe_bind(cbind, lab_l, axis_l)
+        left <- gt_bind(cbind, lab_l, axis_l)
 
         if (length(left)) {
             # Get their width
@@ -70,7 +84,7 @@ fit_panel <- function(gt, vp, elements = c("b", "t", "l", "r")) {
         # Viewport for right axis and label
         lab_r <- gtable::gtable_filter(gt, "ylab-r")
         axis_r <- gtable::gtable_filter(gt, "axis-r")
-        right <- safe_bind(cbind, axis_r, lab_r)
+        right <- gt_bind(cbind, axis_r, lab_r)
         if (length(right)) {
             # Get their width
             w <- grid::convertX(sum(right$widths), "mm")
@@ -90,7 +104,7 @@ fit_panel <- function(gt, vp, elements = c("b", "t", "l", "r")) {
         # Viewport for bottom axis and label
         axis_b <- gtable::gtable_filter(gt, "axis-b")
         lab_b <- gtable::gtable_filter(gt, "xlab-b")
-        bottom <- safe_bind(rbind, axis_b, lab_b)
+        bottom <- gt_bind(rbind, axis_b, lab_b)
         if (length(bottom)) {
             # Get their width / height
             h <- grid::convertX(sum(bottom$heights), "mm")
@@ -109,7 +123,7 @@ fit_panel <- function(gt, vp, elements = c("b", "t", "l", "r")) {
         # Viewport for top axis and label
         axis_t <- gtable::gtable_filter(gt, "axis-t")
         lab_t <- gtable::gtable_filter(gt, "xlab-t")
-        top <- safe_bind(rbind, lab_t, axis_t)
+        top <- gt_bind(rbind, lab_t, axis_t)
         if (length(top)) {
             # Get their width / height
             h <- grid::convertX(sum(top$heights), "mm")
@@ -125,7 +139,7 @@ fit_panel <- function(gt, vp, elements = c("b", "t", "l", "r")) {
     }
 }
 
-safe_bind <- function(fn, ...) {
+gt_bind <- function(fn, ...) {
     dots <- list(...)
     dots <- dots[lengths(dots) > 0L]
     if (length(dots) > 1) {
@@ -137,12 +151,12 @@ safe_bind <- function(fn, ...) {
     }
 }
 
-unify_panel_size <- function(gt, width, height) {
+gt_unify_panel <- function(gt, width, height) {
     panels <- grep("panel", gt$layout$name)
-    set_size(gt, width, height, panels)
+    gt_set_size(gt, width, height, panels)
 }
 
-set_size <- function(gt, width, height, index = NULL) {
+gt_set_size <- function(gt, width, height, index = NULL) {
     index_w <- unique(gt$layout$l[index])
     index_h <- unique(gt$layout$t[index])
     nw <- length(index_w)
@@ -154,7 +168,7 @@ set_size <- function(gt, width, height, index = NULL) {
 
 is_zero_grob <- function(x) inherits(x, "zeroGrob")
 
-trim_zero_grob <- function(x) {
+gt_trim_zero_grob <- function(x) {
     matches <- !vapply(x$grobs, is_zero_grob, logical(1L))
     x$layout <- x$layout[matches, , drop = FALSE]
     x$grobs <- x$grobs[matches]
@@ -162,11 +176,11 @@ trim_zero_grob <- function(x) {
 }
 
 # gtable_split_by_panel <- function(gt) {
-#     gt <- subset_gtable(
+#     gt <- gt_subset(
 #         gt, !grepl("background", .subset2(gt$layout, "name"))
 #     )
 #     matches <- grepl("panel", .subset2(gt$layout, "name"))
-#     panels <- subset_gtable(gt, matches)
+#     panels <- gt_subset(gt, matches)
 #     if (length(panels) == 0L) {
 #         cli::cli_abort("No {.field panels} found")
 #     } else if (length(panels) == 1L) {
@@ -174,7 +188,7 @@ trim_zero_grob <- function(x) {
 #     }
 #     p_layout <- panels$layout
 #     p_nms <- .subset2(p_layout, "name")
-#     others <- subset_gtable(gt, !matches)
+#     others <- gt_subset(gt, !matches)
 #     o_layout <- others$layout
 #     lapply(p_nms, function(nm) {
 #         current_p_layout <- p_layout[p_layout$name == nm, , drop = FALSE]
@@ -191,7 +205,7 @@ trim_zero_grob <- function(x) {
 #     })
 # }
 
-subset_gtable <- function(gt, i) {
+gt_subset <- function(gt, i) {
     gt$layout <- gt$layout[i, , drop = FALSE]
     gt$grobs <- gt$grobs[i]
     gt

@@ -177,7 +177,7 @@ drawn.
 \item{ggparams}{Other arguments passed to \code{ggfn}.}
 
 \item{debug}{In the event that it is set to TRUE, the
-\link[ggplot2:ggplot]{ggplot} object gracefully yielded by ggfn, during the
+\link[ggplot2:ggplot]{ggplot} object gracefully yielded by \code{ggfn}, during the
 execution of \link[ComplexHeatmap:draw-dispatch]{draw}, shall be returned directly.
 Alternatively, one may opt to impart a function (whereas a formula would also
 be deemed acceptable) to be carried out conjointly with the

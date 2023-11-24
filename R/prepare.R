@@ -158,11 +158,11 @@ prepare_ggheat <- function(object) {
             kc <- draw_body_env$kc
             pattern <- sprintf("panel-%d-%d", kr, kc)
             fit_panel(
-                trim_zero_grob(gtable::gtable_filter(gt, pattern)),
+                gt_trim_zero_grob(gtable::gtable_filter(gt, pattern)),
                 vp = vp
             )
         } else {
-            fit_panel(trim_zero_grob(gt), vp = vp, elements = NULL)
+            fit_panel(gt_trim_zero_grob(gt), vp = vp, elements = NULL)
         }
     }
     if (!(is.null(object@ggfn) && identical(rect_gp$type, "none"))) {

@@ -226,11 +226,11 @@ draw_gganno <- function(anno, order_list, heat_matrix, id) {
             }
             pattern <- paste0(sprintf(pattern, k), collapse = "|")
             fit_panel(
-                trim_zero_grob(gtable::gtable_filter(gt, pattern)),
+                gt_trim_zero_grob(gtable::gtable_filter(gt, pattern)),
                 vp = vp
             )
         } else {
-            fit_panel(trim_zero_grob(gt), vp = vp, elements = NULL)
+            fit_panel(gt_trim_zero_grob(gt), vp = vp, elements = NULL)
         }
     }
     list(legend = guide_from_gtable(gt), draw_fn = draw_fn)

@@ -51,7 +51,7 @@ very compact anonymous functions (lambdas) with up to two inputs.}
 \item{height}{The height of the plotting region (the viewport) that the annotation is drawn. If it is a column annotation, the width must be an absolute unit.}
 
 \item{debug}{In the event that it is set to TRUE, the
-\link[ggplot2:ggplot]{ggplot} object gracefully yielded by ggfn, during the
+\link[ggplot2:ggplot]{ggplot} object gracefully yielded by \code{ggfn}, during the
 execution of \link[ComplexHeatmap:draw-dispatch]{draw}, shall be returned directly.
 Alternatively, one may opt to impart a function (whereas a formula would also
 be deemed acceptable) to be carried out conjointly with the
