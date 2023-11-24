@@ -48,7 +48,7 @@ library(ComplexHeatmap)
 Let's begin by creating some example data, following code was copied from
 ComplexHeatmap book directly
 
-```{r}
+```{r prepare_data}
 set.seed(123)
 nr1 <- 4
 nr2 <- 8
@@ -60,19 +60,19 @@ nc3 <- 10
 nc <- nc1 + nc2 + nc3
 mat <- cbind(
   rbind(
-    matrix(rnorm(nr1 * nc1, mean = 1, sd = 0.5), nr = nr1),
-    matrix(rnorm(nr2 * nc1, mean = 0, sd = 0.5), nr = nr2),
-    matrix(rnorm(nr3 * nc1, mean = 0, sd = 0.5), nr = nr3)
+    matrix(rnorm(nr1 * nc1, mean = 1, sd = 0.5), nrow = nr1),
+    matrix(rnorm(nr2 * nc1, mean = 0, sd = 0.5), nrow = nr2),
+    matrix(rnorm(nr3 * nc1, mean = 0, sd = 0.5), nrow = nr3)
   ),
   rbind(
-    matrix(rnorm(nr1 * nc2, mean = 0, sd = 0.5), nr = nr1),
-    matrix(rnorm(nr2 * nc2, mean = 1, sd = 0.5), nr = nr2),
-    matrix(rnorm(nr3 * nc2, mean = 0, sd = 0.5), nr = nr3)
+    matrix(rnorm(nr1 * nc2, mean = 0, sd = 0.5), nrow = nr1),
+    matrix(rnorm(nr2 * nc2, mean = 1, sd = 0.5), nrow = nr2),
+    matrix(rnorm(nr3 * nc2, mean = 0, sd = 0.5), nrow = nr3)
   ),
   rbind(
-    matrix(rnorm(nr1 * nc3, mean = 0.5, sd = 0.5), nr = nr1),
-    matrix(rnorm(nr2 * nc3, mean = 0.5, sd = 0.5), nr = nr2),
-    matrix(rnorm(nr3 * nc3, mean = 1, sd = 0.5), nr = nr3)
+    matrix(rnorm(nr1 * nc3, mean = 0.5, sd = 0.5), nrow = nr1),
+    matrix(rnorm(nr2 * nc3, mean = 0.5, sd = 0.5), nrow = nr2),
+    matrix(rnorm(nr3 * nc3, mean = 1, sd = 0.5), nrow = nr3)
   )
 )
 mat <- mat[sample(nr, nr), sample(nc, nc)] # random shuffle rows and columns
@@ -81,12 +81,17 @@ colnames(mat) <- paste0("column", seq_len(nc))
 small_mat <- mat[1:9, 1:9]
 ``` 
 
-The central functions of the `eheat` package are `ggheat` and `gganno`. These two functions encompass all the necessary functionalities. `ggheat` serves as a substitute for the `ComplexHeatmap::Heatmap` function, while `gganno` replaces all the `anno_*` functions within the ComplexHeatmap package, offering a comprehensive solution for our requirements.
+The central functions of the `eheat` package are `ggheat` and `gganno`. These
+two functions encompass all the necessary functionalities. `ggheat` serves as a
+substitute for the `ComplexHeatmap::Heatmap` function, while `gganno` replaces
+all the `anno_*` functions within the ComplexHeatmap package, offering a
+comprehensive solution for our requirements. One of the key advantages of using ggplot2 in ComplexHeatmap is the ease of plotting statistical annotations. Another benefit is that the legends can be internally extracted from the ggplot2 plot, eliminating the need for manual addition of legends.
 
 ## ggheat
-Using `ggheat`, it is effortless to create a simple Heatmap. 
+Using `ggheat`, it is effortless to create a simple Heatmap. The default color
+mapping was not consistent between ComplexHeatmap and ggplot2.
 
-```{r}
+```{r heat_single}
 draw(ggheat(small_mat))
 ```
 
@@ -95,20 +100,45 @@ You do not need to explicitly specify the color mapping as you can utilize the
 extracted from `ggplot2`. The essential parameter of `ggheat` is `ggfn`, which
 accepts a ggplot2 object equipped with a default data and mappings established
 via `ggplot(data, aes(.data$.column, .data$.row))`. By default, the data
-includes six columns, each prefixed with a dot for caution.
+includes 7 columns, each prefixed with a dot for caution.
 
-* `.slice_row`: the slice row number
+* `.slice`: slice number, combine `.slice_row` and `.slice_column`.
 
-* `.slice_column`: the slice column number
+* `.slice_row`: the slice row number.
 
-* `.row` and `.column`: the row and column coordinates
+* `.slice_column`: the slice column number.
+
+* `.row` and `.column`: the row and column coordinates.
 
 * `.row_index` and `.column_index`: the row and column index of the original
-   matrix.
+
+```{r heat_data}
+pdf(NULL)
+draw(ggheat(small_mat, function(x) {
+  print(head(x$data))
+  x
+}))
+dev.off()
+```
   
+The richness of the `scale_*` function in ggplot2 makes it easy to modify the color mapping according to our needs.
 ```{r}
 draw(ggheat(small_mat, function(p) {
-  p + scale_fill_viridis_c()
+  # will use zero as midpoint
+  p + scale_fill_gradient2()
+}))
+```
+
+```{r}
+draw(ggheat(small_mat, function(p) {
+  p + scale_fill_viridis_c(option = "magma")
+}))
+```
+
+Legends can be controlled by `guide_*` function in ggplot2.
+```{r}
+draw(ggheat(small_mat, function(p) {
+  p + scale_fill_viridis_c(guide = guide_colorbar(direction = "horizontal"))
 }))
 ```
 
@@ -116,8 +146,50 @@ You can add more geoms.
 ```{r}
 draw(
   ggheat(small_mat, function(p) {
-    p + geom_text(aes(label = sprintf("%d * %d", .row_index, .column_index)))
+    p +
+      geom_text(aes(label = sprintf("%d * %d", .row_index, .column_index)))
   })
+)
+```
+
+You can also use the same way in ComplexHeatmap to prevent the internal rect
+filling by setting `rect_gp = gpar(type = "none")`. The clustering is still
+applied but nothing in drawn on the heatmap body. 
+```{r}
+draw(
+  ggheat(small_mat, rect_gp = gpar(type = "none"))
+)
+```
+
+Note that the background is different between ggplot2 and ComplexHeatmap.
+However, the theme system in ggplot2 makes it easy to modify and customize the
+background according to our preferences. 
+```{r}
+draw(
+  ggheat(small_mat, function(p) {
+    p +
+      geom_text(aes(label = sprintf("%d * %d", .row_index, .column_index))) +
+      theme_bw()
+  }, rect_gp = gpar(type = "none"))
+)
+```
+
+You can customize it easily use `geom_tile`.
+```{r}
+draw(
+  ggheat(small_mat, function(p) {
+    p +
+      geom_tile(
+        aes(fill = values),
+        width = 1L, height = 1L,
+        data = ~ dplyr::filter(p$data, .row <= .column)
+      ) +
+      geom_text(
+        aes(label = sprintf("%d * %d", .row_index, .column_index)),
+        data = ~ dplyr::filter(p$data, .row >= .column)
+      ) +
+      theme_bw()
+  }, rect_gp = gpar(type = "none"))
 )
 ```
 
@@ -132,6 +204,17 @@ draw(ggheat(small_mat, function(p) {
 draw(ggheat(small_mat, function(p) {
   p + scale_fill_viridis_c()
 }, column_km = 2L, row_km = 3))
+```
+
+We can combine `layer_fun` or `cell_fun` from ComplexHeatmap with `ggfn`
+```{r}
+draw(
+  ggheat(small_mat,
+    layer_fun = function(...) {
+      grid.rect(gp = gpar(lwd = 2, fill = "transparent", col = "red"))
+    }, column_km = 2L, row_km = 3
+  )
+)
 ```
 
 The row names and column names should be controlled by the
@@ -176,8 +259,8 @@ cases, only an empty annotation region can be added. On the other hand,
 
 The same with `ggheat`, the essential parameter of `gganno` is also `ggfn`,
 which accepts a ggplot2 object equipped with a default data and mappings
-established by `ggplot(data, aes(.data$x))`. The original matrix will be
-converted into a data.frame with another 3 columns added: 
+established by `ggplot(data, aes(.data$.x (or .data$.y)))`. The original matrix
+will be converted into a data.frame with another 3 columns added: 
 
 * `.slice`: the slice row (which = "row") or column (which = "column")
   number. 
@@ -191,7 +274,7 @@ operations.
   
 
 In general, we should just use `ggheat` and `gganno`.
-```{r}
+```{r anno_point}
 anno_data <- sample(1:10, nrow(small_mat))
 draw(ggheat(small_mat,
   top_annotation = HeatmapAnnotation(
@@ -201,8 +284,7 @@ draw(ggheat(small_mat,
       matrix = anno_data,
       function(p) {
         p + geom_point(aes(.x, V1))
-      },
-      which = "column"
+      }
     ), which = "column"
   )
 ))
@@ -210,20 +292,75 @@ draw(ggheat(small_mat,
 
 Legends will also be extracted, in the similar manner like passing them into
 `annotation_legend_list`. 
-```{r}
+```{r anno_bar}
 draw(ggheat(small_mat,
   top_annotation = HeatmapAnnotation(
     foo = gganno(
       matrix = anno_data,
       function(p) {
         p + geom_bar(aes(y = V1, fill = factor(.index)), stat = "identity")
-      },
-      which = "column", height = unit(5, "cm")
+      }, height = unit(5, "cm")
     ), which = "column"
   )
 ), merge_legends = TRUE)
 ```
 
+```{r anno_box}
+draw(ggheat(small_mat,
+  top_annotation = HeatmapAnnotation(
+    foo = gganno(
+      matrix = anno_data,
+      function(p) {
+        p + geom_boxplot(aes(y = V1, fill = factor(.slice)))
+      }, height = unit(5, "cm")
+    ), which = "column"
+  ), column_km = 2L
+), merge_legends = TRUE)
+```
+
+```{r anno_violin}
+box_matrix1 <- matrix(rnorm(ncol(small_mat)^2L, 10), nrow = ncol(small_mat))
+colnames(box_matrix1) <- rep_len("group1", ncol(small_mat))
+box_matrix2 <- matrix(rnorm(ncol(small_mat)^2L, 20), nrow = ncol(small_mat))
+colnames(box_matrix2) <- rep_len("group2", ncol(small_mat))
+draw(ggheat(small_mat,
+  top_annotation = HeatmapAnnotation(
+    foo = gganno(
+      matrix = cbind(box_matrix1, box_matrix2),
+      function(p) {
+        long_data <- ~ tidyr::pivot_longer(.x, starts_with("group"),
+          names_to = "group"
+        )
+        p +
+          geom_violin(
+            aes(
+              y = value, fill = factor(group),
+              color = factor(.slice),
+              group = paste(.slice, .index, group, sep = "-")
+            ),
+            data = long_data
+          ) +
+          geom_boxplot(
+            aes(
+              y = value, fill = factor(group),
+              color = factor(.slice),
+              group = paste(.slice, .index, group, sep = "-")
+            ),
+            width = 0.2,
+            position = position_dodge(width = 0.9),
+            data = long_data
+          ) +
+          scale_fill_brewer(
+            name = "Group", type = "qual", palette = "Set3"
+          ) +
+          scale_color_brewer(
+            name = "Slice", type = "qual", palette = "Set1"
+          )
+      }, height = unit(3, "cm")
+    ), which = "column"
+  ), column_km = 2L
+), merge_legends = TRUE)
+```
 
 ```{r, fig.height=8}
 draw(ggheat(small_mat,
@@ -232,8 +369,7 @@ draw(ggheat(small_mat,
       matrix = anno_data,
       function(p) {
         p + aes(y = V1) + geom_text(aes(label = .index))
-      },
-      which = "column", height = unit(2, "cm")
+      }, height = unit(2, "cm")
     ), which = "column"
   ),
   bottom_annotation = HeatmapAnnotation(
@@ -255,7 +391,7 @@ draw(ggheat(small_mat,
           geom_text(aes(label = .index))
       },
       matrix = anno_data,
-      which = "row", width = unit(3, "cm")
+      width = unit(3, "cm")
     ),
     which = "row"
   ),
@@ -267,7 +403,7 @@ draw(ggheat(small_mat,
           scale_x_continuous(limits = rev)
       },
       matrix = anno_data,
-      which = "row", width = unit(3, "cm")
+      width = unit(3, "cm")
     ),
     which = "row"
   ),
@@ -280,15 +416,13 @@ Finally, let's see the difference between `gganno2` and `gganno`.
 
 `gganno2` will not extract the legend.
 ```{r}
-anno_data <- sample(1:10, nrow(small_mat))
 draw(ggheat(small_mat,
   top_annotation = HeatmapAnnotation(
     foo = gganno2(
       matrix = anno_data,
       function(p) {
         p + geom_bar(aes(y = V1, fill = factor(.index)), stat = "identity")
-      },
-      which = "column"
+      }
     ), which = "column"
   )
 ), merge_legends = TRUE)
@@ -303,8 +437,7 @@ draw(Heatmap(small_mat,
       matrix = anno_data,
       function(p) {
         p + geom_point(aes(.x, V1))
-      },
-      which = "column"
+      }
     ), which = "column"
   )
 ), merge_legends = TRUE)
@@ -318,8 +451,7 @@ draw(Heatmap(small_mat,
       matrix = anno_data,
       function(p) {
         p + geom_bar(aes(y = V1, fill = factor(.index)), stat = "identity")
-      },
-      which = "column"
+      }
     ), which = "column"
   )
 ), merge_legends = TRUE)

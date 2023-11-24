@@ -71,39 +71,21 @@ nc3 <- 10
 nc <- nc1 + nc2 + nc3
 mat <- cbind(
   rbind(
-    matrix(rnorm(nr1 * nc1, mean = 1, sd = 0.5), nr = nr1),
-    matrix(rnorm(nr2 * nc1, mean = 0, sd = 0.5), nr = nr2),
-    matrix(rnorm(nr3 * nc1, mean = 0, sd = 0.5), nr = nr3)
+    matrix(rnorm(nr1 * nc1, mean = 1, sd = 0.5), nrow = nr1),
+    matrix(rnorm(nr2 * nc1, mean = 0, sd = 0.5), nrow = nr2),
+    matrix(rnorm(nr3 * nc1, mean = 0, sd = 0.5), nrow = nr3)
   ),
   rbind(
-    matrix(rnorm(nr1 * nc2, mean = 0, sd = 0.5), nr = nr1),
-    matrix(rnorm(nr2 * nc2, mean = 1, sd = 0.5), nr = nr2),
-    matrix(rnorm(nr3 * nc2, mean = 0, sd = 0.5), nr = nr3)
+    matrix(rnorm(nr1 * nc2, mean = 0, sd = 0.5), nrow = nr1),
+    matrix(rnorm(nr2 * nc2, mean = 1, sd = 0.5), nrow = nr2),
+    matrix(rnorm(nr3 * nc2, mean = 0, sd = 0.5), nrow = nr3)
   ),
   rbind(
-    matrix(rnorm(nr1 * nc3, mean = 0.5, sd = 0.5), nr = nr1),
-    matrix(rnorm(nr2 * nc3, mean = 0.5, sd = 0.5), nr = nr2),
-    matrix(rnorm(nr3 * nc3, mean = 1, sd = 0.5), nr = nr3)
+    matrix(rnorm(nr1 * nc3, mean = 0.5, sd = 0.5), nrow = nr1),
+    matrix(rnorm(nr2 * nc3, mean = 0.5, sd = 0.5), nrow = nr2),
+    matrix(rnorm(nr3 * nc3, mean = 1, sd = 0.5), nrow = nr3)
   )
 )
-#> Warning in matrix(rnorm(nr1 * nc1, mean = 1, sd = 0.5), nr = nr1): partial
-#> argument match of 'nr' to 'nrow'
-#> Warning in matrix(rnorm(nr2 * nc1, mean = 0, sd = 0.5), nr = nr2): partial
-#> argument match of 'nr' to 'nrow'
-#> Warning in matrix(rnorm(nr3 * nc1, mean = 0, sd = 0.5), nr = nr3): partial
-#> argument match of 'nr' to 'nrow'
-#> Warning in matrix(rnorm(nr1 * nc2, mean = 0, sd = 0.5), nr = nr1): partial
-#> argument match of 'nr' to 'nrow'
-#> Warning in matrix(rnorm(nr2 * nc2, mean = 1, sd = 0.5), nr = nr2): partial
-#> argument match of 'nr' to 'nrow'
-#> Warning in matrix(rnorm(nr3 * nc2, mean = 0, sd = 0.5), nr = nr3): partial
-#> argument match of 'nr' to 'nrow'
-#> Warning in matrix(rnorm(nr1 * nc3, mean = 0.5, sd = 0.5), nr = nr1): partial
-#> argument match of 'nr' to 'nrow'
-#> Warning in matrix(rnorm(nr2 * nc3, mean = 0.5, sd = 0.5), nr = nr2): partial
-#> argument match of 'nr' to 'nrow'
-#> Warning in matrix(rnorm(nr3 * nc3, mean = 1, sd = 0.5), nr = nr3): partial
-#> argument match of 'nr' to 'nrow'
 mat <- mat[sample(nr, nr), sample(nc, nc)] # random shuffle rows and columns
 rownames(mat) <- paste0("row", seq_len(nr))
 colnames(mat) <- paste0("column", seq_len(nc))
@@ -115,40 +97,93 @@ These two functions encompass all the necessary functionalities.
 `ggheat` serves as a substitute for the `ComplexHeatmap::Heatmap`
 function, while `gganno` replaces all the `anno_*` functions within the
 ComplexHeatmap package, offering a comprehensive solution for our
-requirements.
+requirements. One of the key advantages of using ggplot2 in
+ComplexHeatmap is the ease of plotting statistical annotations. Another
+benefit is that the legends can be internally extracted from the ggplot2
+plot, eliminating the need for manual addition of legends.
 
 ## ggheat
 
-Using `ggheat`, it is effortless to create a simple Heatmap.
+Using `ggheat`, it is effortless to create a simple Heatmap. The default
+color mapping was not consistent between ComplexHeatmap and ggplot2.
 
 ``` r
 draw(ggheat(small_mat))
 ```
 
-<img src="man/figures/README-unnamed-chunk-6-1.png" width="100%" />
+<img src="man/figures/README-heat_single-1.png" width="100%" />
 
 You do not need to explicitly specify the color mapping as you can
 utilize the `scale_*` function directly from ggplot2. All guide legends
 will directly extracted from `ggplot2`. The essential parameter of
 `ggheat` is `ggfn`, which accepts a ggplot2 object equipped with a
 default data and mappings established via `ggplot(data,
-aes(.data$.column, .data$.row))`. By default, the data includes six
+aes(.data$.column, .data$.row))`. By default, the data includes 7
 columns, each prefixed with a dot for caution.
 
-  - `.slice_row`: the slice row number
+  - `.slice`: slice number, combine `.slice_row` and `.slice_column`.
 
-  - `.slice_column`: the slice column number
+  - `.slice_row`: the slice row number.
 
-  - `.row` and `.column`: the row and column coordinates
+  - `.slice_column`: the slice column number.
+
+  - `.row` and `.column`: the row and column coordinates.
 
   - `.row_index` and `.column_index`: the row and column index of the
-    original matrix.
+    original
 
 <!-- end list -->
 
 ``` r
+pdf(NULL)
+draw(ggheat(small_mat, function(x) {
+  print(head(x$data))
+  x
+}))
+#>   .row_index .column_index .slice_row .slice_column .row .column .slice
+#> 1          1             1          1             1    2       1   r1c1
+#> 2          1             2          1             1    2       8   r1c1
+#> 3          1             3          1             1    2       6   r1c1
+#> 4          1             4          1             1    2       2   r1c1
+#> 5          1             5          1             1    2       3   r1c1
+#> 6          1             6          1             1    2       7   r1c1
+#>       values
+#> 1  0.9047416
+#> 2 -0.3522982
+#> 3  0.5016096
+#> 4  1.2676994
+#> 5  0.8251229
+#> 6  0.1621522
+dev.off()
+#> png 
+#>   2
+```
+
+The richness of the `scale_*` function in ggplot2 makes it easy to
+modify the color mapping according to our needs.
+
+``` r
 draw(ggheat(small_mat, function(p) {
-  p + scale_fill_viridis_c()
+  # will use zero as midpoint
+  p + scale_fill_gradient2()
+}))
+```
+
+<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
+
+``` r
+draw(ggheat(small_mat, function(p) {
+  p + scale_fill_viridis_c(option = "magma")
+}))
+```
+
+<img src="man/figures/README-unnamed-chunk-6-1.png" width="100%" />
+
+Legends can be controlled by `guide_*` function in ggplot2.
+
+``` r
+draw(ggheat(small_mat, function(p) {
+  p + scale_fill_viridis_c(guide = guide_colorbar(direction = "horizontal"))
 }))
 ```
 
@@ -159,12 +194,63 @@ You can add more geoms.
 ``` r
 draw(
   ggheat(small_mat, function(p) {
-    p + geom_text(aes(label = sprintf("%d * %d", .row_index, .column_index)))
+    p +
+      geom_text(aes(label = sprintf("%d * %d", .row_index, .column_index)))
   })
 )
 ```
 
 <img src="man/figures/README-unnamed-chunk-8-1.png" width="100%" />
+
+You can also use the same way in ComplexHeatmap to prevent the internal
+rect filling by setting `rect_gp = gpar(type = "none")`. The clustering
+is still applied but nothing in drawn on the heatmap body.
+
+``` r
+draw(
+  ggheat(small_mat, rect_gp = gpar(type = "none"))
+)
+```
+
+<img src="man/figures/README-unnamed-chunk-9-1.png" width="100%" />
+
+Note that the background is different between ggplot2 and
+ComplexHeatmap. However, the theme system in ggplot2 makes it easy to
+modify and customize the background according to our preferences.
+
+``` r
+draw(
+  ggheat(small_mat, function(p) {
+    p +
+      geom_text(aes(label = sprintf("%d * %d", .row_index, .column_index))) +
+      theme_bw()
+  }, rect_gp = gpar(type = "none"))
+)
+```
+
+<img src="man/figures/README-unnamed-chunk-10-1.png" width="100%" />
+
+You can customize it easily use `geom_tile`.
+
+``` r
+draw(
+  ggheat(small_mat, function(p) {
+    p +
+      geom_tile(
+        aes(fill = values),
+        width = 1L, height = 1L,
+        data = ~ dplyr::filter(p$data, .row <= .column)
+      ) +
+      geom_text(
+        aes(label = sprintf("%d * %d", .row_index, .column_index)),
+        data = ~ dplyr::filter(p$data, .row >= .column)
+      ) +
+      theme_bw()
+  }, rect_gp = gpar(type = "none"))
+)
+```
+
+<img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" />
 
 All the functionalities of the `ComplexHeatmap::Heatmap` function can be
 used as is.
@@ -175,7 +261,7 @@ draw(ggheat(small_mat, function(p) {
 }, column_km = 2L))
 ```
 
-<img src="man/figures/README-unnamed-chunk-9-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" />
 
 ``` r
 draw(ggheat(small_mat, function(p) {
@@ -183,7 +269,21 @@ draw(ggheat(small_mat, function(p) {
 }, column_km = 2L, row_km = 3))
 ```
 
-<img src="man/figures/README-unnamed-chunk-10-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-13-1.png" width="100%" />
+
+We can combine `layer_fun` or `cell_fun` from ComplexHeatmap with `ggfn`
+
+``` r
+draw(
+  ggheat(small_mat,
+    layer_fun = function(...) {
+      grid.rect(gp = gpar(lwd = 2, fill = "transparent", col = "red"))
+    }, column_km = 2L, row_km = 3
+  )
+)
+```
+
+<img src="man/figures/README-unnamed-chunk-14-1.png" width="100%" />
 
 The row names and column names should be controlled by the
 `ComplexHeatmap::Heatmap` function, while the legends should be
@@ -197,7 +297,7 @@ draw(ggheat(small_mat, function(p) {
 }, column_km = 2L, row_km = 3, row_names_gp = gpar(col = "red")))
 ```
 
-<img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-15-1.png" width="100%" />
 
 ``` r
 draw(
@@ -210,7 +310,7 @@ draw(
 )
 ```
 
-<img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-16-1.png" width="100%" />
 
 ``` r
 draw(
@@ -223,7 +323,7 @@ draw(
 )
 ```
 
-<img src="man/figures/README-unnamed-chunk-13-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-17-1.png" width="100%" />
 
 ## gganno
 
@@ -236,8 +336,9 @@ extracted.
 
 The same with `ggheat`, the essential parameter of `gganno` is also
 `ggfn`, which accepts a ggplot2 object equipped with a default data and
-mappings established by `ggplot(data, aes(.data$x))`. The original
-matrix will be converted into a data.frame with another 3 columns added:
+mappings established by `ggplot(data, aes(.data$.x (or .data$.y)))`. The
+original matrix will be converted into a data.frame with another 3
+columns added:
 
   - `.slice`: the slice row (which = “row”) or column (which = “column”)
     number.
@@ -261,15 +362,14 @@ draw(ggheat(small_mat,
       matrix = anno_data,
       function(p) {
         p + geom_point(aes(.x, V1))
-      },
-      which = "column"
+      }
     ), which = "column"
   )
 ))
 #> ℹ convert simple vector `matrix` to one-column matrix
 ```
 
-<img src="man/figures/README-unnamed-chunk-14-1.png" width="100%" />
+<img src="man/figures/README-anno_point-1.png" width="100%" />
 
 Legends will also be extracted, in the similar manner like passing them
 into `annotation_legend_list`.
@@ -281,15 +381,76 @@ draw(ggheat(small_mat,
       matrix = anno_data,
       function(p) {
         p + geom_bar(aes(y = V1, fill = factor(.index)), stat = "identity")
-      },
-      which = "column", height = unit(5, "cm")
+      }, height = unit(5, "cm")
     ), which = "column"
   )
 ), merge_legends = TRUE)
 #> ℹ convert simple vector `matrix` to one-column matrix
 ```
 
-<img src="man/figures/README-unnamed-chunk-15-1.png" width="100%" />
+<img src="man/figures/README-anno_bar-1.png" width="100%" />
+
+``` r
+draw(ggheat(small_mat,
+  top_annotation = HeatmapAnnotation(
+    foo = gganno(
+      matrix = anno_data,
+      function(p) {
+        p + geom_boxplot(aes(y = V1, fill = factor(.slice)))
+      }, height = unit(5, "cm")
+    ), which = "column"
+  ), column_km = 2L
+), merge_legends = TRUE)
+#> ℹ convert simple vector `matrix` to one-column matrix
+```
+
+<img src="man/figures/README-anno_box-1.png" width="100%" />
+
+``` r
+box_matrix1 <- matrix(rnorm(ncol(small_mat)^2L, 10), nrow = ncol(small_mat))
+colnames(box_matrix1) <- rep_len("group1", ncol(small_mat))
+box_matrix2 <- matrix(rnorm(ncol(small_mat)^2L, 20), nrow = ncol(small_mat))
+colnames(box_matrix2) <- rep_len("group2", ncol(small_mat))
+draw(ggheat(small_mat,
+  top_annotation = HeatmapAnnotation(
+    foo = gganno(
+      matrix = cbind(box_matrix1, box_matrix2),
+      function(p) {
+        long_data <- ~ tidyr::pivot_longer(.x, starts_with("group"),
+          names_to = "group"
+        )
+        p +
+          geom_violin(
+            aes(
+              y = value, fill = factor(group),
+              color = factor(.slice),
+              group = paste(.slice, .index, group, sep = "-")
+            ),
+            data = long_data
+          ) +
+          geom_boxplot(
+            aes(
+              y = value, fill = factor(group),
+              color = factor(.slice),
+              group = paste(.slice, .index, group, sep = "-")
+            ),
+            width = 0.2,
+            position = position_dodge(width = 0.9),
+            data = long_data
+          ) +
+          scale_fill_brewer(
+            name = "Group", type = "qual", palette = "Set3"
+          ) +
+          scale_color_brewer(
+            name = "Slice", type = "qual", palette = "Set1"
+          )
+      }, height = unit(3, "cm")
+    ), which = "column"
+  ), column_km = 2L
+), merge_legends = TRUE)
+```
+
+<img src="man/figures/README-anno_violin-1.png" width="100%" />
 
 ``` r
 draw(ggheat(small_mat,
@@ -298,8 +459,7 @@ draw(ggheat(small_mat,
       matrix = anno_data,
       function(p) {
         p + aes(y = V1) + geom_text(aes(label = .index))
-      },
-      which = "column", height = unit(2, "cm")
+      }, height = unit(2, "cm")
     ), which = "column"
   ),
   bottom_annotation = HeatmapAnnotation(
@@ -321,7 +481,7 @@ draw(ggheat(small_mat,
           geom_text(aes(label = .index))
       },
       matrix = anno_data,
-      which = "row", width = unit(3, "cm")
+      width = unit(3, "cm")
     ),
     which = "row"
   ),
@@ -333,7 +493,7 @@ draw(ggheat(small_mat,
           scale_x_continuous(limits = rev)
       },
       matrix = anno_data,
-      which = "row", width = unit(3, "cm")
+      width = unit(3, "cm")
     ),
     which = "row"
   ),
@@ -349,29 +509,27 @@ draw(ggheat(small_mat,
 #> ℹ Try adding `scales = "free_y"` to the facet.
 ```
 
-<img src="man/figures/README-unnamed-chunk-16-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-18-1.png" width="100%" />
 
 Finally, let’s see the difference between `gganno2` and `gganno`.
 
 `gganno2` will not extract the legend.
 
 ``` r
-anno_data <- sample(1:10, nrow(small_mat))
 draw(ggheat(small_mat,
   top_annotation = HeatmapAnnotation(
     foo = gganno2(
       matrix = anno_data,
       function(p) {
         p + geom_bar(aes(y = V1, fill = factor(.index)), stat = "identity")
-      },
-      which = "column"
+      }
     ), which = "column"
   )
 ), merge_legends = TRUE)
 #> ℹ convert simple vector `matrix` to one-column matrix
 ```
 
-<img src="man/figures/README-unnamed-chunk-17-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-19-1.png" width="100%" />
 
 But `gganno2` can work with `Heatmap` function.
 
@@ -383,15 +541,14 @@ draw(Heatmap(small_mat,
       matrix = anno_data,
       function(p) {
         p + geom_point(aes(.x, V1))
-      },
-      which = "column"
+      }
     ), which = "column"
   )
 ), merge_legends = TRUE)
 #> ℹ convert simple vector `matrix` to one-column matrix
 ```
 
-<img src="man/figures/README-unnamed-chunk-18-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-20-1.png" width="100%" />
 
 `gganno` will just add a blank region in `Heatmap` function.
 
@@ -402,12 +559,11 @@ draw(Heatmap(small_mat,
       matrix = anno_data,
       function(p) {
         p + geom_bar(aes(y = V1, fill = factor(.index)), stat = "identity")
-      },
-      which = "column"
+      }
     ), which = "column"
   )
 ), merge_legends = TRUE)
 #> ℹ convert simple vector `matrix` to one-column matrix
 ```
 
-<img src="man/figures/README-unnamed-chunk-19-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-21-1.png" width="100%" />
