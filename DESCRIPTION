@@ -25,6 +25,7 @@ BugReports: https://github.com/Yunuuuu/eheat/issues
 Collate: 
     'anno-.R'
     'anno-fn.R'
+    'attach.R'
     'eheat-package.R'
     'ggheat.R'
     'gganno.R'
@@ -36,7 +37,9 @@ Collate:
     'utils-complexheatmap.R'
     'utils-grid.R'
     'utils.R'
+    'zzz.R'
 VignetteBuilder: knitr
 Suggests: 
+    dplyr,
     knitr,
     rmarkdown
