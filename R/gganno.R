@@ -225,13 +225,18 @@ draw_gganno <- function(anno, order_list, heat_matrix, id) {
                 }
             }
             pattern <- paste0(sprintf(pattern, k), collapse = "|")
-            fit_panel(
-                gt_trim_zero_grob(gtable::gtable_filter(gt, pattern)),
-                vp = vp
-            )
         } else {
-            fit_panel(gt_trim_zero_grob(gt), vp = vp, elements = NULL)
+            if (which == "row") {
+                pattern <- c("panel", "axis-t", "axis-b", "lab-t", "lab-b")
+            } else {
+                pattern <- c("panel", "axis-l", "axis-r", "lab-l", "lab-r")
+            }
+            pattern <- paste0(pattern, collapse = "|")
         }
+        fit_panel(
+            gt_trim_zero_grob(gtable::gtable_filter(gt, pattern)),
+            vp = vp
+        )
     }
     list(legend = guide_from_gtable(gt), draw_fn = draw_fn)
 }
