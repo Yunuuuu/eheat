@@ -40,8 +40,6 @@ pak::pkg_install("Yunuuuu/eheat")
 
 ```{r setup}
 library(eheat)
-library(ggplot2)
-library(ComplexHeatmap)
 ```
 
 
