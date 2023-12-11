@@ -25,38 +25,40 @@ prepare_ggheat <- function(object) {
     } else {
         with_slice <- FALSE
     }
-
-    # prepare data for ggplot2
+    # backup row and column index and use long-data
     matrix <- object@matrix
     row_nms <- rownames(matrix)
     col_nms <- colnames(matrix)
-    data <- tibble::as_tibble(matrix, .name_repair = "minimal")
+    data <- as_tibble0(matrix, rownames = NULL)
     colnames(data) <- seq_len(ncol(data))
     data$.row_index <- seq_len(nrow(data))
     data <- tidyr::pivot_longer(data,
         cols = !".row_index",
-        names_to = ".column_index", values_to = "values"
+        names_to = ".column_index",
+        values_to = "values"
     )
     data$.column_index <- as.integer(data$.column_index)
-    update_data <- do.call(rbind, cheat_full_slice_index(order_list))
-    update_data$.slice <- sprintf(
-        "r%dc%d", update_data$.slice_row, update_data$.slice_column
+
+    # prepare slice panels
+    slice_list <- cheat_full_slice_index(order_list)
+
+    # prepare data for ggplot2 --------------------------
+    coords <- lapply(slice_list, function(data) {
+        data$.slice <- sprintf(
+            "r%dc%d", data$.slice_row, data$.slice_column
+        )
+        # reverse y-axis as ggplot2 and ComplexHeatmap draw in different
+        # direction, but we cannot use scale_y_reverse, I don't know why?
+        # It won't draw anything if we use `scale_y_reverse`.
+        data$.row <- reverse_trans(data$.row)
+        data
+    })
+    coords <- do.call(rbind, coords)
+    data <- merge(coords, data,
+        by = c(".row_index", ".column_index"),
+        all = FALSE
     )
 
-    # reverse y-axis as ggplot2 and ComplexHeatmap draw in different
-    # direction, but we cannot use scale_y_reverse, I don't know why?
-    # It won't draw anything if we use `scale_y_reverse`.
-    update_data <- lapply(
-        split(update_data, update_data$.slice_row),
-        function(subdata) {
-            subdata$.row <- reverse_trans(subdata$.row)
-            subdata
-        }
-    )
-    update_data <- do.call(rbind, update_data)
-    data <- merge(update_data, data,
-        by = c(".row_index", ".column_index"), all = FALSE
-    )
     p <- ggplot2::ggplot(data, ggplot2::aes(.data$.column, .data$.row))
     if (!identical(rect_gp$type, "none")) {
         p <- p + ggplot2::geom_tile(
@@ -72,60 +74,29 @@ prepare_ggheat <- function(object) {
             )
         }
     }
+    # prepare scales
+    scales <- lapply(c("row", "column"), function(i) {
+        if (i == "row") {
+            # cannot use reverse
+            fn <- ggplot2::scale_y_continuous
+            labels <- row_nms
+        } else {
+            fn <- ggplot2::scale_x_continuous
+            labels <- col_nms
+        }
+        cols <- sprintf(c(".slice_%s", ".%s", ".%s_index"), i)
+        cheat_scales(coords[cols], labels, scale_fn = fn)
+    })
+    names(scales) <- c("row", "column")
     if (with_slice) {
-        scales <- imap(
-            c(.row = ".slice_row", .column = ".slice_column"),
-            function(x, i) {
-                lapply(split(data, data[[x]]), function(subdata) {
-                    n <- max(subdata[[i]])
-                    limits <- c(0.5, n + 0.5)
-                    breaks <- seq_len(n)
-                    if (i == ".row") {
-                        # cannot use reverse
-                        fn <- ggplot2::scale_y_continuous
-                        labels <- row_nms[subdata$.row_index][
-                            order(subdata$.row)
-                        ]
-                    } else {
-                        fn <- ggplot2::scale_x_continuous
-                        labels <- col_nms[subdata$.column_index][
-                            order(subdata$.column)
-                        ]
-                    }
-                    labels <- labels[!duplicated(labels)]
-                    do.call(fn, list(
-                        limits = limits,
-                        breaks = breaks,
-                        labels = labels,
-                        expand = ggplot2::expansion()
-                    ))
-                })
-            }
-        )
         p <- p + ggplot2::facet_grid(
             rows = ggplot2::vars(.data$.slice_row),
             cols = ggplot2::vars(.data$.slice_column),
             scales = "free", space = "free"
         ) +
-            ggh4x::facetted_pos_scales(x = scales$.column, y = scales$.row)
+            ggh4x::facetted_pos_scales(x = scales$column, y = scales$row)
     } else {
-        xlabels <- col_nms[data$.column_index][order(data$.column)]
-        xlabels <- xlabels[!duplicated(xlabels)]
-        ylabels <- row_nms[data$.row_index][order(data$.row)]
-        ylabels <- ylabels[!duplicated(ylabels)]
-        p <- p +
-            ggplot2::scale_x_continuous(
-                limits = c(0.5, ncol(matrix) + 0.5),
-                breaks = seq_len(ncol(matrix)),
-                labels = xlabels,
-                expand = ggplot2::expansion()
-            ) +
-            ggplot2::scale_y_continuous(
-                limits = c(0.5, nrow(matrix) + 0.5),
-                breaks = seq_len(nrow(matrix)),
-                labels = ylabels,
-                expand = ggplot2::expansion()
-            )
+        p <- p + scales$column[[1L]] + scales$row[[1L]]
     }
     if (isTRUE(object@debug)) {
         cli::cli_inform(

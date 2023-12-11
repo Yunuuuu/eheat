@@ -104,18 +104,18 @@ draw_gganno <- function(anno, order_list, heat_matrix, id) {
         row = heat_matrix,
         column = t(heat_matrix)
     )
-    row_nms <- rownames(matrix)
+    labels <- rownames(matrix)
     order_list <- switch(which,
         row = order_list$row_order_list,
         column = order_list$column_order_list
     )
-    data <- tibble::as_tibble(matrix, .name_repair = "minimal") # nolint
+    data <- as_tibble0(matrix, rownames = NULL) # nolint
     if (length(order_list) > 1L) {
         with_slice <- TRUE
     } else {
         with_slice <- FALSE
     }
-    coord <- data_frame0(
+    coords <- data_frame0(
         .slice = rep(
             seq_along(order_list),
             times = lengths(order_list)
@@ -123,7 +123,7 @@ draw_gganno <- function(anno, order_list, heat_matrix, id) {
         .index = unlist(order_list, recursive = FALSE, use.names = FALSE),
         .x = seq_along(.data$.index)
     )
-    data <- cbind(coord, data[match(coord$.index, seq_len(nrow(data))), ])
+    data <- cbind(coords, data[match(coords$.index, seq_len(nrow(data))), ])
     if (which == "row") {
         orientation <- ".y"
         data <- rename(data, c(.x = ".y"))
@@ -133,7 +133,7 @@ draw_gganno <- function(anno, order_list, heat_matrix, id) {
                 subdata
             })
             data <- do.call(rbind, data)
-            data <- tibble::as_tibble(data, .name_repair = "minimal")
+            data <- as_tibble0(data, rownames = NULL)
         } else {
             data$.y <- reverse_trans(data$.y)
         }
@@ -161,20 +161,10 @@ draw_gganno <- function(anno, order_list, heat_matrix, id) {
         )
         scale_fn <- ggplot2::scale_x_continuous
     }
+    # prepare scales
+    scales <- cheat_scales(coords[c(1L, 3:2)], labels, scale_fn = scale_fn)
     if (with_slice) {
         p <- p + do.call(ggplot2::facet_grid, facet_params)
-        # ".slice" and ".x"/".y"
-        scales <- lapply(split(data, data$.slice), function(subdata) {
-            limits <- range(subdata[[orientation]])
-            labels <- row_nms[subdata$.index][order(subdata[[orientation]])]
-            labels <- unique(labels)
-            do.call(scale_fn, list(
-                limits = c(limits[1L] - 0.5, limits[2L] + 0.5),
-                breaks = sort(unique(subdata[[orientation]])),
-                labels = labels,
-                expand = ggplot2::expansion()
-            ))
-        })
         if (which == "row") {
             p <- p + ggh4x::facetted_pos_scales(
                 x = p$scales$get_scales("x"),
@@ -187,14 +177,7 @@ draw_gganno <- function(anno, order_list, heat_matrix, id) {
             )
         }
     } else {
-        limits <- range(data[[orientation]])
-        labels <- row_nms[data$.index][order(data[[orientation]])]
-        labels <- unique(labels)
-        p <- p + do.call(scale_fn, list(
-            limits = c(limits[1L] - 0.5, limits[2L] + 0.5),
-            breaks = coord$.x, labels = labels,
-            expand = ggplot2::expansion()
-        ))
+        p <- p + scales[[1L]]
     }
     if (isTRUE(anno@debug)) {
         cli::cli_inform(

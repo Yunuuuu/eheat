@@ -104,29 +104,6 @@ reverse_trans <- function(x) {
     sum(range(x, na.rm = TRUE)) - x
 }
 
-stop_input_type <- function(
-    x, what,
-    null_ok = FALSE,
-    show_value = TRUE,
-    show_length = FALSE,
-    ...,
-    arg = rlang::caller_arg(x),
-    call = rlang::caller_env()) {
-    if (null_ok) {
-        what <- c(what, style_code("NULL"))
-    }
-    if (length(what)) {
-        what <- oxford_comma(what, final = "or")
-    }
-    msg <- sprintf(
-        "%s must be %s, not %s.",
-        style_arg(arg),
-        what,
-        obj_type_friendly(x, value = show_value, length = show_length)
-    )
-    rlang::abort(msg, ..., call = call, arg = arg)
-}
-
 # List of all aesthetics known to ggplot
 # (In the future, .all_aesthetics should be removed in favor
 # of direct assignment to ggplot_global$all_aesthetics, see below.)
@@ -165,6 +142,10 @@ trace_data <- function(
         pos <- pos + 1L
     }
     FALSE
+}
+
+as_tibble0 <- function(data, ...) {
+    tibble::as_tibble(data, ..., .name_repair = "minimal")
 }
 
 data_frame0 <- function(...) {
