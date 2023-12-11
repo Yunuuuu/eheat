@@ -8,11 +8,12 @@ URL: https://github.com/Yunuuuu/eheat
 BugReports: https://github.com/Yunuuuu/eheat/issues
 License: MIT + file LICENSE
 Encoding: UTF-8
+Depends:
+    ComplexHeatmap,
+    ggplot2
 Imports: 
     grid,
     cli,
-    ComplexHeatmap,
-    ggplot2,
     rlang (>= 1.1.0),
     gtable,
     tidyr,
@@ -27,7 +28,6 @@ Remotes: Yunuuuu/ComplexHeatmap
 Collate: 
     'anno-.R'
     'anno-fn.R'
-    'attach.R'
     'eheat-package.R'
     'ggheat.R'
     'gganno.R'
@@ -39,7 +39,6 @@ Collate:
     'utils-complexheatmap.R'
     'utils-grid.R'
     'utils.R'
-    'zzz.R'
 ByteCompile: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
