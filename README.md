@@ -92,7 +92,7 @@ color mapping was not consistent between ComplexHeatmap and ggplot2.
 draw(ggheat(small_mat))
 ```
 
-<img src="man/figures/README-heat_single-1.png" width="100%" />
+<img src="man/figures/README-ggheat-1.png" width="100%" />
 
 You do not need to explicitly specify the color mapping as you can
 utilize the `scale_*` function directly from ggplot2. All guide legends
@@ -150,7 +150,7 @@ draw(ggheat(small_mat, function(p) {
 }))
 ```
 
-<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
+<img src="man/figures/README-ggheat_scale1-1.png" width="100%" />
 
 ``` r
 draw(ggheat(small_mat, function(p) {
@@ -158,7 +158,7 @@ draw(ggheat(small_mat, function(p) {
 }))
 ```
 
-<img src="man/figures/README-unnamed-chunk-6-1.png" width="100%" />
+<img src="man/figures/README-ggheat_scale2-1.png" width="100%" />
 
 Legends can be controlled by `guide_*` function in ggplot2.
 
@@ -168,7 +168,7 @@ draw(ggheat(small_mat, function(p) {
 }))
 ```
 
-<img src="man/figures/README-unnamed-chunk-7-1.png" width="100%" />
+<img src="man/figures/README-ggheat_legend-1.png" width="100%" />
 
 You can add more geoms.
 
@@ -181,19 +181,17 @@ draw(
 )
 ```
 
-<img src="man/figures/README-unnamed-chunk-8-1.png" width="100%" />
+<img src="man/figures/README-ggheat_geom-1.png" width="100%" />
 
 You can also use the same way in ComplexHeatmap to prevent the internal
 rect filling by setting `rect_gp = gpar(type = "none")`. The clustering
 is still applied but nothing in drawn on the heatmap body.
 
 ``` r
-draw(
-  ggheat(small_mat, rect_gp = gpar(type = "none"))
-)
+draw(ggheat(small_mat, rect_gp = gpar(type = "none")))
 ```
 
-<img src="man/figures/README-unnamed-chunk-9-1.png" width="100%" />
+<img src="man/figures/README-blank_rect-1.png" width="100%" />
 
 Note that the background is different between ggplot2 and
 ComplexHeatmap. However, the theme system in ggplot2 makes it easy to
@@ -209,7 +207,7 @@ draw(
 )
 ```
 
-<img src="man/figures/README-unnamed-chunk-10-1.png" width="100%" />
+<img src="man/figures/README-ggheat_background-1.png" width="100%" />
 
 You can customize it easily use `geom_tile`.
 
@@ -231,7 +229,7 @@ draw(
 )
 ```
 
-<img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" />
+<img src="man/figures/README-ggheat_customize_rect-1.png" width="100%" />
 
 All the functionalities of the `ComplexHeatmap::Heatmap` function can be
 used as is.
@@ -242,7 +240,7 @@ draw(ggheat(small_mat, function(p) {
 }, column_km = 2L))
 ```
 
-<img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" />
+<img src="man/figures/README-Heatmap_arg1-1.png" width="100%" />
 
 ``` r
 draw(ggheat(small_mat, function(p) {
@@ -250,7 +248,7 @@ draw(ggheat(small_mat, function(p) {
 }, column_km = 2L, row_km = 3))
 ```
 
-<img src="man/figures/README-unnamed-chunk-13-1.png" width="100%" />
+<img src="man/figures/README-Heatmap_arg2-1.png" width="100%" />
 
 ``` r
 draw(ggheat(small_mat, function(p) {
@@ -260,7 +258,7 @@ draw(ggheat(small_mat, function(p) {
 }, column_km = 2L, row_km = 3))
 ```
 
-<img src="man/figures/README-unnamed-chunk-14-1.png" width="100%" />
+<img src="man/figures/README-Heatmap_arg3-1.png" width="100%" />
 
 We can combine `layer_fun` or `cell_fun` from ComplexHeatmap with `ggfn`
 
@@ -274,7 +272,7 @@ draw(
 )
 ```
 
-<img src="man/figures/README-unnamed-chunk-15-1.png" width="100%" />
+<img src="man/figures/README-Heatmap_arg4-1.png" width="100%" />
 
 The row names and column names are controlled by the
 `ComplexHeatmap::Heatmap` function.
@@ -285,7 +283,7 @@ draw(ggheat(small_mat, function(p) {
 }, column_km = 2L, row_km = 3, row_names_gp = gpar(col = "red")))
 ```
 
-<img src="man/figures/README-unnamed-chunk-16-1.png" width="100%" />
+<img src="man/figures/README-ggheat_rownames-1.png" width="100%" />
 
 While the legends are controlled by `ggplot2`. However, the default
 legend name is taken from `ComplexHeatmap::Heatmap` in order to maintain
@@ -302,7 +300,7 @@ draw(
 )
 ```
 
-<img src="man/figures/README-unnamed-chunk-17-1.png" width="100%" />
+<img src="man/figures/README-ggheat_legend_name1-1.png" width="100%" />
 
 Nevertheless, you can directly override it in `ggfn`.
 
@@ -317,7 +315,7 @@ draw(
 )
 ```
 
-<img src="man/figures/README-unnamed-chunk-18-1.png" width="100%" />
+<img src="man/figures/README-ggheat_legend_name2-1.png" width="100%" />
 
 ## gganno
 
@@ -503,29 +501,11 @@ draw(ggheat(small_mat,
 #> ℹ Try adding `scales = "free_y"` to the facet.
 ```
 
-<img src="man/figures/README-unnamed-chunk-19-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
 
 Finally, let’s see the difference between `gganno2` and `gganno`.
 
-`gganno2` will not extract the legend.
-
-``` r
-draw(ggheat(small_mat,
-  top_annotation = HeatmapAnnotation(
-    foo = gganno2(
-      matrix = anno_data,
-      function(p) {
-        p + geom_bar(aes(y = V1, fill = factor(.index)), stat = "identity")
-      }
-    ), which = "column"
-  )
-), merge_legends = TRUE)
-#> ℹ convert simple vector `matrix` to one-column matrix
-```
-
-<img src="man/figures/README-unnamed-chunk-20-1.png" width="100%" />
-
-But `gganno2` can work with `Heatmap` function.
+`gganno2` can work with `Heatmap` function.
 
 ``` r
 anno_data <- sample(1:10, nrow(small_mat))
@@ -542,7 +522,7 @@ draw(Heatmap(small_mat,
 #> ℹ convert simple vector `matrix` to one-column matrix
 ```
 
-<img src="man/figures/README-unnamed-chunk-21-1.png" width="100%" />
+<img src="man/figures/README-Heatmap_gganno2-1.png" width="100%" />
 
 `gganno` will just add a blank region in `Heatmap` function.
 
@@ -560,4 +540,22 @@ draw(Heatmap(small_mat,
 #> ℹ convert simple vector `matrix` to one-column matrix
 ```
 
-<img src="man/figures/README-unnamed-chunk-22-1.png" width="100%" />
+<img src="man/figures/README-Heatmap_gganno-1.png" width="100%" />
+
+But `gganno2` will not extract the legend.
+
+``` r
+draw(ggheat(small_mat,
+  top_annotation = HeatmapAnnotation(
+    foo = gganno2(
+      matrix = anno_data,
+      function(p) {
+        p + geom_bar(aes(y = V1, fill = factor(.index)), stat = "identity")
+      }
+    ), which = "column"
+  )
+), merge_legends = TRUE)
+#> ℹ convert simple vector `matrix` to one-column matrix
+```
+
+<img src="man/figures/README-ggheat_gganno2-1.png" width="100%" />
