@@ -252,6 +252,16 @@ draw(ggheat(small_mat, function(p) {
 
 <img src="man/figures/README-unnamed-chunk-13-1.png" width="100%" />
 
+``` r
+draw(ggheat(small_mat, function(p) {
+  p +
+    geom_text(aes(label = sprintf("%d * %d", .row_index, .column_index))) +
+    scale_fill_viridis_c()
+}, column_km = 2L, row_km = 3))
+```
+
+<img src="man/figures/README-unnamed-chunk-14-1.png" width="100%" />
+
 We can combine `layer_fun` or `cell_fun` from ComplexHeatmap with `ggfn`
 
 ``` r
@@ -264,13 +274,10 @@ draw(
 )
 ```
 
-<img src="man/figures/README-unnamed-chunk-14-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-15-1.png" width="100%" />
 
-The row names and column names should be controlled by the
-`ComplexHeatmap::Heatmap` function, while the legends should be
-controlled by `ggplot2`. However, the default legend name is taken from
-`ComplexHeatmap::Heatmap` in order to maintain consistency.
-Nevertheless, you can directly override it in `ggfn`.
+The row names and column names are controlled by the
+`ComplexHeatmap::Heatmap` function.
 
 ``` r
 draw(ggheat(small_mat, function(p) {
@@ -278,7 +285,11 @@ draw(ggheat(small_mat, function(p) {
 }, column_km = 2L, row_km = 3, row_names_gp = gpar(col = "red")))
 ```
 
-<img src="man/figures/README-unnamed-chunk-15-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-16-1.png" width="100%" />
+
+While the legends are controlled by `ggplot2`. However, the default
+legend name is taken from `ComplexHeatmap::Heatmap` in order to maintain
+consistency.
 
 ``` r
 draw(
@@ -291,7 +302,9 @@ draw(
 )
 ```
 
-<img src="man/figures/README-unnamed-chunk-16-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-17-1.png" width="100%" />
+
+Nevertheless, you can directly override it in `ggfn`.
 
 ``` r
 draw(
@@ -304,7 +317,7 @@ draw(
 )
 ```
 
-<img src="man/figures/README-unnamed-chunk-17-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-18-1.png" width="100%" />
 
 ## gganno
 
@@ -490,7 +503,7 @@ draw(ggheat(small_mat,
 #> ℹ Try adding `scales = "free_y"` to the facet.
 ```
 
-<img src="man/figures/README-unnamed-chunk-18-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-19-1.png" width="100%" />
 
 Finally, let’s see the difference between `gganno2` and `gganno`.
 
@@ -510,7 +523,7 @@ draw(ggheat(small_mat,
 #> ℹ convert simple vector `matrix` to one-column matrix
 ```
 
-<img src="man/figures/README-unnamed-chunk-19-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-20-1.png" width="100%" />
 
 But `gganno2` can work with `Heatmap` function.
 
@@ -529,7 +542,7 @@ draw(Heatmap(small_mat,
 #> ℹ convert simple vector `matrix` to one-column matrix
 ```
 
-<img src="man/figures/README-unnamed-chunk-20-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-21-1.png" width="100%" />
 
 `gganno` will just add a blank region in `Heatmap` function.
 
@@ -547,4 +560,4 @@ draw(Heatmap(small_mat,
 #> ℹ convert simple vector `matrix` to one-column matrix
 ```
 
-<img src="man/figures/README-unnamed-chunk-21-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-22-1.png" width="100%" />

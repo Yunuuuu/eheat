@@ -204,6 +204,14 @@ draw(ggheat(small_mat, function(p) {
 }, column_km = 2L, row_km = 3))
 ```
 
+```{r}
+draw(ggheat(small_mat, function(p) {
+  p +
+    geom_text(aes(label = sprintf("%d * %d", .row_index, .column_index))) +
+    scale_fill_viridis_c()
+}, column_km = 2L, row_km = 3))
+```
+
 We can combine `layer_fun` or `cell_fun` from ComplexHeatmap with `ggfn`
 ```{r}
 draw(
@@ -215,17 +223,16 @@ draw(
 )
 ```
 
-The row names and column names should be controlled by the
-`ComplexHeatmap::Heatmap` function, while the legends should be controlled by
-`ggplot2`. However, the default legend name is taken from
-`ComplexHeatmap::Heatmap` in order to maintain consistency. Nevertheless, you
-can directly override it in `ggfn`.
+The row names and column names are controlled by the `ComplexHeatmap::Heatmap`
+function. 
 ```{r}
 draw(ggheat(small_mat, function(p) {
   p + scale_fill_viridis_c()
 }, column_km = 2L, row_km = 3, row_names_gp = gpar(col = "red")))
 ```
 
+While the legends are controlled by `ggplot2`. However, the default legend name
+is taken from `ComplexHeatmap::Heatmap` in order to maintain consistency. 
 ```{r}
 draw(
   ggheat(small_mat, function(p) {
@@ -237,6 +244,7 @@ draw(
 )
 ```
 
+Nevertheless, you can directly override it in `ggfn`.
 ```{r}
 draw(
   ggheat(small_mat, function(p) {

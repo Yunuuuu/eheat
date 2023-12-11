@@ -38,6 +38,12 @@ cheat_get_order_list <- function(name, pos = 2L, return_env = FALSE) {
 }
 
 cheat_full_slice_index <- function(order_list) {
+    row_full <- unlist(order_list$row, recursive = FALSE, use.names = FALSE)
+    row_full <- structure(seq_along(row_full), names = row_full)
+    column_full <- unlist(order_list$column,
+        recursive = FALSE, use.names = FALSE
+    )
+    column_full <- structure(seq_along(column_full), names = column_full)
     out <- vector("list")
     for (i in seq_along(order_list$row)) {
         row_order <- order_list$row[[i]]
@@ -49,10 +55,10 @@ cheat_full_slice_index <- function(order_list) {
             out[[sprintf("r%dc%d", i, j)]] <- data_frame0(
                 .slice_row = i,
                 .slice_column = j,
-                .row = expand_idx[[1L]],
-                .column = expand_idx[[2L]],
-                .row_index = row_order[.data$.row], # nolint
-                .column_index = column_order[.data$.column] # nolint
+                .row_index = row_order[expand_idx[[1L]]],
+                .column_index = column_order[expand_idx[[2L]]],
+                .row = row_full[as.character(.data$.row_index)],
+                .column = column_full[as.character(.data$.column_index)]
             )
         }
     }
@@ -126,4 +132,24 @@ guide_from_gtable <- function(gt, direction = NULL) {
 
 guide_from_gg <- function(gg, direction = NULL) {
     guide_from_gtable(ggplot2::ggplotGrob(gg, direction = direction))
+}
+
+# column order in slice, coord, raw_index
+cheat_scales <- function(data, lables, scale_fn) {
+    lapply(split(data, data[[1L]]), function(slice_data) {
+        slice_data <- slice_data[2:3]
+        slice_data <- unique(slice_data)
+        slice_data <- slice_data[order(slice_data[[1L]]), ]
+        breaks <- slice_data[[1L]]
+        limits <- range(breaks)
+        limits[1L] <- limits[1L] - 0.5
+        limits[2L] <- limits[2L] + 0.5
+        labels <- lables[slice_data[[2L]]]
+        do.call(scale_fn, list(
+            limits = limits,
+            breaks = breaks,
+            labels = labels,
+            expand = ggplot2::expansion()
+        ))
+    })
 }
