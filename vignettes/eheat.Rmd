@@ -89,7 +89,7 @@ comprehensive solution for our requirements. One of the key advantages of using 
 Using `ggheat`, it is effortless to create a simple Heatmap. The default color
 mapping was not consistent between ComplexHeatmap and ggplot2.
 
-```{r heat_single}
+```{r ggheat}
 draw(ggheat(small_mat))
 ```
 
@@ -110,7 +110,7 @@ includes 7 columns, each prefixed with a dot for caution.
 
 * `.row_index` and `.column_index`: the row and column index of the original
 
-```{r heat_data}
+```{r ggheat_data}
 pdf(NULL)
 draw(ggheat(small_mat, function(x) {
   print(head(x$data))
@@ -120,28 +120,28 @@ dev.off()
 ```
   
 The richness of the `scale_*` function in ggplot2 makes it easy to modify the color mapping according to our needs.
-```{r}
+```{r ggheat_scale1}
 draw(ggheat(small_mat, function(p) {
   # will use zero as midpoint
   p + scale_fill_gradient2()
 }))
 ```
 
-```{r}
+```{r ggheat_scale2}
 draw(ggheat(small_mat, function(p) {
   p + scale_fill_viridis_c(option = "magma")
 }))
 ```
 
 Legends can be controlled by `guide_*` function in ggplot2.
-```{r}
+```{r ggheat_legend}
 draw(ggheat(small_mat, function(p) {
   p + scale_fill_viridis_c(guide = guide_colorbar(direction = "horizontal"))
 }))
 ```
 
 You can add more geoms.
-```{r}
+```{r ggheat_geom}
 draw(
   ggheat(small_mat, function(p) {
     p +
@@ -153,16 +153,14 @@ draw(
 You can also use the same way in ComplexHeatmap to prevent the internal rect
 filling by setting `rect_gp = gpar(type = "none")`. The clustering is still
 applied but nothing in drawn on the heatmap body. 
-```{r}
-draw(
-  ggheat(small_mat, rect_gp = gpar(type = "none"))
-)
+```{r blank_rect}
+draw(ggheat(small_mat, rect_gp = gpar(type = "none")))
 ```
 
 Note that the background is different between ggplot2 and ComplexHeatmap.
 However, the theme system in ggplot2 makes it easy to modify and customize the
 background according to our preferences. 
-```{r}
+```{r ggheat_background}
 draw(
   ggheat(small_mat, function(p) {
     p +
@@ -173,7 +171,7 @@ draw(
 ```
 
 You can customize it easily use `geom_tile`.
-```{r}
+```{r ggheat_customize_rect}
 draw(
   ggheat(small_mat, function(p) {
     p +
@@ -192,19 +190,19 @@ draw(
 ```
 
 All the functionalities of the `ComplexHeatmap::Heatmap` function can be used as is.
-```{r}
+```{r Heatmap_arg1}
 draw(ggheat(small_mat, function(p) {
   p + scale_fill_viridis_c()
 }, column_km = 2L))
 ```
 
-```{r}
+```{r Heatmap_arg2}
 draw(ggheat(small_mat, function(p) {
   p + scale_fill_viridis_c()
 }, column_km = 2L, row_km = 3))
 ```
 
-```{r}
+```{r Heatmap_arg3}
 draw(ggheat(small_mat, function(p) {
   p +
     geom_text(aes(label = sprintf("%d * %d", .row_index, .column_index))) +
@@ -213,7 +211,7 @@ draw(ggheat(small_mat, function(p) {
 ```
 
 We can combine `layer_fun` or `cell_fun` from ComplexHeatmap with `ggfn`
-```{r}
+```{r Heatmap_arg4}
 draw(
   ggheat(small_mat,
     layer_fun = function(...) {
@@ -225,7 +223,7 @@ draw(
 
 The row names and column names are controlled by the `ComplexHeatmap::Heatmap`
 function. 
-```{r}
+```{r ggheat_rownames}
 draw(ggheat(small_mat, function(p) {
   p + scale_fill_viridis_c()
 }, column_km = 2L, row_km = 3, row_names_gp = gpar(col = "red")))
@@ -233,7 +231,7 @@ draw(ggheat(small_mat, function(p) {
 
 While the legends are controlled by `ggplot2`. However, the default legend name
 is taken from `ComplexHeatmap::Heatmap` in order to maintain consistency. 
-```{r}
+```{r ggheat_legend_name1}
 draw(
   ggheat(small_mat, function(p) {
     p + scale_fill_viridis_c()
@@ -245,7 +243,7 @@ draw(
 ```
 
 Nevertheless, you can directly override it in `ggfn`.
-```{r}
+```{r ggheat_legend_name2}
 draw(
   ggheat(small_mat, function(p) {
     p + scale_fill_viridis_c(name = "ggplot2")
@@ -419,23 +417,8 @@ draw(ggheat(small_mat,
 
 Finally, let's see the difference between `gganno2` and `gganno`.
 
-
-`gganno2` will not extract the legend.
-```{r}
-draw(ggheat(small_mat,
-  top_annotation = HeatmapAnnotation(
-    foo = gganno2(
-      matrix = anno_data,
-      function(p) {
-        p + geom_bar(aes(y = V1, fill = factor(.index)), stat = "identity")
-      }
-    ), which = "column"
-  )
-), merge_legends = TRUE)
-```
-
-But `gganno2` can work with `Heatmap` function.
-```{r}
+`gganno2` can work with `Heatmap` function.
+```{r Heatmap_gganno2}
 anno_data <- sample(1:10, nrow(small_mat))
 draw(Heatmap(small_mat,
   top_annotation = HeatmapAnnotation(
@@ -450,7 +433,7 @@ draw(Heatmap(small_mat,
 ```
 
 `gganno` will just add a blank region in `Heatmap` function.
-```{r}
+```{r Heatmap_gganno}
 draw(Heatmap(small_mat,
   top_annotation = HeatmapAnnotation(
     foo = gganno(
@@ -462,3 +445,18 @@ draw(Heatmap(small_mat,
   )
 ), merge_legends = TRUE)
 ```
+
+But `gganno2` will not extract the legend.
+```{r ggheat_gganno2}
+draw(ggheat(small_mat,
+  top_annotation = HeatmapAnnotation(
+    foo = gganno2(
+      matrix = anno_data,
+      function(p) {
+        p + geom_bar(aes(y = V1, fill = factor(.index)), stat = "identity")
+      }
+    ), which = "column"
+  )
+), merge_legends = TRUE)
+```
+
