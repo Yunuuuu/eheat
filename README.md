@@ -33,8 +33,27 @@ pak::pkg_install("Yunuuuu/eheat")
 
 ``` r
 library(eheat)
-#> ── Attaching core eheat packages ─────────────────────────── eheat 0.0.0.9000 ──
-#> ✔ ComplexHeatmap 2.15.4     ✔ ggplot2        3.4.3
+#> Loading required package: ComplexHeatmap
+#> Loading required package: grid
+#> ========================================
+#> ComplexHeatmap version 2.15.4
+#> Bioconductor page: http://bioconductor.org/packages/ComplexHeatmap/
+#> Github page: https://github.com/jokergoo/ComplexHeatmap
+#> Documentation: http://jokergoo.github.io/ComplexHeatmap-reference
+#> 
+#> If you use it in published research, please cite either one:
+#> - Gu, Z. Complex Heatmap Visualization. iMeta 2022.
+#> - Gu, Z. Complex heatmaps reveal patterns and correlations in multidimensional 
+#>     genomic data. Bioinformatics 2016.
+#> 
+#> 
+#> The new InteractiveComplexHeatmap package can directly export static 
+#> complex heatmaps into an interactive Shiny app with zero effort. Have a try!
+#> 
+#> This message can be suppressed by:
+#>   suppressPackageStartupMessages(library(ComplexHeatmap))
+#> ========================================
+#> Loading required package: ggplot2
 ```
 
 Let’s begin by creating some example data, following code was copied
