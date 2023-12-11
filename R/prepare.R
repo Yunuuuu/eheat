@@ -1,8 +1,8 @@
 #' Prepare the Heatmap
 #' @inherit ComplexHeatmap::prepare
-#' @method prepare ggHeatmap
 #' @importFrom ComplexHeatmap prepare
 #' @export
+#' @method prepare ggHeatmap
 #' @rdname prepare
 methods::setMethod(
     f = "prepare", signature = "ggHeatmap",
@@ -139,7 +139,8 @@ prepare_ggheat <- function(object) {
     if (!(is.null(object@ggfn) && identical(rect_gp$type, "none"))) {
         object@matrix_param$layer_fun <- gglayer
         object@heatmap_legend_list <- c(
-            guide_from_gtable(gt), object@heatmap_legend_list
+            guide_from_gtable(gt),
+            prepare_legend_list(object@heatmap_legend_list)
         )
         object@heatmap_param$show_heatmap_legend <- FALSE
     }
@@ -163,14 +164,20 @@ prepare_gganno <- function(object) {
                 id = names(annotation@anno_list)[i]
             )
             annotation@anno_list[[i]]@fun@fun <- anno$draw_fn
-            annotation_legend_list <- c(
-                annotation_legend_list, anno$legend
-            )
+            annotation_legend_list <- c(annotation_legend_list, anno$legend)
         }
         methods::slot(object, sprintf("%s_annotation", side)) <- annotation
     }
     object@annotation_legend_list <- c(
-        annotation_legend_list, object@annotation_legend_list
+        annotation_legend_list,
+        prepare_legend_list(object@annotation_legend_list)
     )
     object
+}
+
+prepare_legend_list <- function(x) {
+    if (length(x) > 0L && inherits(x, c("Legends", "grob"))) {
+        x <- list(x)
+    }
+    x
 }
