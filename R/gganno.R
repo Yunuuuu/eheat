@@ -98,6 +98,8 @@ methods::setClass(
     contains = "AnnotationFunction"
 )
 
+#' @importFrom ggplot2 ggplot
+#' @importFrom ggplot2 aes
 draw_gganno <- function(anno, order_list, heat_matrix, id) {
     which <- anno@which
     matrix <- anno@matrix %||% switch(which,
@@ -137,10 +139,10 @@ draw_gganno <- function(anno, order_list, heat_matrix, id) {
         } else {
             data$.y <- reverse_trans(data$.y)
         }
-        p <- ggplot2::ggplot(data, ggplot2::aes(y = .data$.y))
+        p <- ggplot(data, aes(y = .data$.y))
     } else {
         orientation <- ".x"
-        p <- ggplot2::ggplot(data, ggplot2::aes(x = .data$.x))
+        p <- ggplot(data, aes(x = .data$.x))
     }
     p <- rlang::inject(anno@ggfn(p, !!!anno@ggparams))
     if (!ggplot2::is.ggplot(p)) {

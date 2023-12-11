@@ -59,10 +59,10 @@ prepare_ggheat <- function(object) {
         all = FALSE
     )
 
-    p <- ggplot2::ggplot(data, ggplot2::aes(.data$.column, .data$.row))
+    p <- ggplot(data, aes(.data$.column, .data$.row))
     if (!identical(rect_gp$type, "none")) {
         p <- p + ggplot2::geom_tile(
-            ggplot2::aes(.data$.column, .data$.row, fill = .data$values),
+            aes(.data$.column, .data$.row, fill = .data$values),
             width = 1L, height = 1L
         ) + ggplot2::labs(fill = object@name)
     }
