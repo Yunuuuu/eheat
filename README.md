@@ -4,7 +4,6 @@
 # eheat
 
 <!-- badges: start -->
-
 <!-- badges: end -->
 
 This package serves as a bridge between the ggplot2 and ComplexHeatmap
@@ -117,22 +116,20 @@ You do not need to explicitly specify the color mapping as you can
 utilize the `scale_*` function directly from ggplot2. All guide legends
 will directly extracted from `ggplot2`. The essential parameter of
 `ggheat` is `ggfn`, which accepts a ggplot2 object equipped with a
-default data and mappings established via `ggplot(data,
-aes(.data$.column, .data$.row))`. By default, the data includes 7
-columns, each prefixed with a dot for caution.
+default data and mappings established via
+`ggplot(data, aes(.data$.column, .data$.row))`. By default, the data
+includes 7 columns, each prefixed with a dot for caution.
 
-  - `.slice`: slice number, combine `.slice_row` and `.slice_column`.
+- `.slice`: slice number, combine `.slice_row` and `.slice_column`.
 
-  - `.slice_row`: the slice row number.
+- `.slice_row`: the slice row number.
 
-  - `.slice_column`: the slice column number.
+- `.slice_column`: the slice column number.
 
-  - `.row` and `.column`: the row and column coordinates.
+- `.row` and `.column`: the row and column coordinates.
 
-  - `.row_index` and `.column_index`: the row and column index of the
-    original
-
-<!-- end list -->
+- `.row_index` and `.column_index`: the row and column index of the
+  original
 
 ``` r
 pdf(NULL)
@@ -154,6 +151,9 @@ draw(ggheat(small_mat, function(x) {
 #> 4  1.2676994
 #> 5  0.8251229
 #> 6  0.1621522
+```
+
+``` r
 dev.off()
 #> png 
 #>   2
@@ -351,15 +351,15 @@ mappings established by `ggplot(data, aes(.data$.x (or .data$.y)))`. The
 original matrix will be converted into a data.frame with another 3
 columns added:
 
-  - `.slice`: the slice row (which = “row”) or column (which = “column”)
-    number.
+- `.slice`: the slice row (which = “row”) or column (which = “column”)
+  number.
 
-  - `.x`/`.y`: indicating the x-axis (or y-axis) coordinates. Don’t use
-    `ggplot2::coord_flip` to flip coordinates as it may disrupt internal
-    operations.
+- `.x`/`.y`: indicating the x-axis (or y-axis) coordinates. Don’t use
+  `ggplot2::coord_flip` to flip coordinates as it may disrupt internal
+  operations.
 
-  - `.index`: denoting the row index of the original matrix, where rows
-    are uniformly considered as observations and columns as variables.
+- `.index`: denoting the row index of the original matrix, where rows
+  are uniformly considered as observations and columns as variables.
 
 In general, we should just use `ggheat` and `gganno`.
 
@@ -520,7 +520,7 @@ draw(ggheat(small_mat,
 #> ℹ Try adding `scales = "free_y"` to the facet.
 ```
 
-<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-7-1.png" width="100%" />
 
 Finally, let’s see the difference between `gganno2` and `gganno`.
 
