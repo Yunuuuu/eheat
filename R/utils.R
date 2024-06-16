@@ -28,7 +28,7 @@ build_matrix <- function(matrix, arg = rlang::caller_arg(matrix)) {
         matrix <- as.matrix(matrix)
     } else if (!is.matrix(matrix)) {
         if (is.atomic(matrix)) {
-            cli::cli_alert_info("convert simple vector {.arg matrix} to one-column matrix")
+            cli::cli_alert_info("convert simple vector to one-column matrix")
             matrix <- matrix(matrix, ncol = 1L)
             colnames(matrix) <- "V1"
         } else {
