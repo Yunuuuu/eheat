@@ -114,7 +114,8 @@ cheat_check_gp <- function(gp) {
 
 guide_from_gtable <- function(gt, direction = NULL) {
     guides <- gtable::gtable_filter(gt, "guide-box")
-    lapply(guides$grobs, function(x) {
+    outs <- lapply(guides$grobs, function(x) {
+        if (grid::is.grob(x) && inherits(x, "zeroGrob")) return(NULL) # styler: off
         guide <- gtable::gtable_filter(x, "guides")
         attr(guide, "width") <- sum(guide$widths)
         attr(guide, "height") <- sum(guide$heights)
@@ -128,6 +129,7 @@ guide_from_gtable <- function(gt, direction = NULL) {
             direction = match.arg(direction, c("vertical", "horizontal"))
         )
     })
+    outs[!vapply(outs, is.null, logical(1L))]
 }
 
 guide_from_gg <- function(gg, direction = NULL) {
