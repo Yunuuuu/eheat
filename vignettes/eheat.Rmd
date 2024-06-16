@@ -417,7 +417,7 @@ draw(ggheat(small_mat,
 
 Finally, let's see the difference between `gganno2` and `gganno`.
 
-`gganno2` can work with `Heatmap` function.
+`gganno2` can work with `Heatmap` function, while `gganno` cannot work with `Heatmap` function.
 ```{r Heatmap_gganno2}
 anno_data <- sample(1:10, nrow(small_mat))
 draw(Heatmap(small_mat,
@@ -432,21 +432,7 @@ draw(Heatmap(small_mat,
 ), merge_legends = TRUE)
 ```
 
-`gganno` will just add a blank region in `Heatmap` function.
-```{r Heatmap_gganno}
-draw(Heatmap(small_mat,
-  top_annotation = HeatmapAnnotation(
-    foo = gganno(
-      matrix = anno_data,
-      function(p) {
-        p + geom_bar(aes(y = V1, fill = factor(.index)), stat = "identity")
-      }
-    ), which = "column"
-  )
-), merge_legends = TRUE)
-```
-
-But `gganno2` will not extract the legend.
+But `gganno2` cannot extract the legend.
 ```{r ggheat_gganno2}
 draw(ggheat(small_mat,
   top_annotation = HeatmapAnnotation(

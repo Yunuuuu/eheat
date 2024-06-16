@@ -2,8 +2,8 @@
 % Please edit documentation in R/eheat-package.R
 \docType{package}
 \name{eheat-package}
+\alias{eheat}
 \alias{eheat-package}
-\alias{_PACKAGE}
 \title{eheat: Extented ComplexHeatmap}
 \description{
 Extented ComplexHeatmap.

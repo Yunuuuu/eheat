@@ -42,7 +42,7 @@ two arguments: \code{.x} (single argument) or \code{.x} and \code{.y} (two argum
 \code{.} placeholder can be used instead of \code{.x}.  This allows you to create
 very compact anonymous functions (lambdas) with up to two inputs.}
 
-\item{...}{Other arguments passed to \code{ggfn}.}
+\item{...}{Additional arguments passed to \code{ggfn}.}
 
 \item{which}{Whether it is drawn as a column annotation or a row annotation?}
 
@@ -93,3 +93,6 @@ uniformly considered as observations and columns as variables.
 }
 }
 
+\seealso{
+\link[=draw,ggAnnotationFunction-method]{draw-ggAnnotationFunction}
+}
