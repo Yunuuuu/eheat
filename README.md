@@ -377,7 +377,7 @@ draw(ggheat(small_mat,
     ), which = "column"
   )
 ))
-#> ℹ convert simple vector `matrix` to one-column matrix
+#> ℹ convert simple vector to one-column matrix
 ```
 
 <img src="man/figures/README-anno_point-1.png" width="100%" />
@@ -396,7 +396,7 @@ draw(ggheat(small_mat,
     ), which = "column"
   )
 ), merge_legends = TRUE)
-#> ℹ convert simple vector `matrix` to one-column matrix
+#> ℹ convert simple vector to one-column matrix
 ```
 
 <img src="man/figures/README-anno_bar-1.png" width="100%" />
@@ -412,7 +412,7 @@ draw(ggheat(small_mat,
     ), which = "column"
   ), column_km = 2L
 ), merge_legends = TRUE)
-#> ℹ convert simple vector `matrix` to one-column matrix
+#> ℹ convert simple vector to one-column matrix
 ```
 
 <img src="man/figures/README-anno_box-1.png" width="100%" />
@@ -510,10 +510,10 @@ draw(ggheat(small_mat,
   ),
   row_km = 2L, column_km = 2L,
 ), merge_legends = TRUE)
-#> ℹ convert simple vector `matrix` to one-column matrix
-#> ℹ convert simple vector `matrix` to one-column matrix
-#> ℹ convert simple vector `matrix` to one-column matrix
-#> ℹ convert simple vector `matrix` to one-column matrix
+#> ℹ convert simple vector to one-column matrix
+#> ℹ convert simple vector to one-column matrix
+#> ℹ convert simple vector to one-column matrix
+#> ℹ convert simple vector to one-column matrix
 #> Warning: Attempting to add facetted x scales, while x scales are not free.
 #> ℹ Try adding `scales = "free_x"` to the facet.
 #> Warning: Attempting to add facetted y scales, while y scales are not free.
@@ -539,7 +539,7 @@ draw(Heatmap(small_mat,
     ), which = "column"
   )
 ), merge_legends = TRUE)
-#> ℹ convert simple vector `matrix` to one-column matrix
+#> ℹ convert simple vector to one-column matrix
 ```
 
 <img src="man/figures/README-Heatmap_gganno2-1.png" width="100%" />
@@ -557,7 +557,7 @@ draw(ggheat(small_mat,
     ), which = "column"
   )
 ), merge_legends = TRUE)
-#> ℹ convert simple vector `matrix` to one-column matrix
+#> ℹ convert simple vector to one-column matrix
 ```
 
 <img src="man/figures/README-ggheat_gganno2-1.png" width="100%" />
