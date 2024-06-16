@@ -164,6 +164,9 @@ prepare_gganno <- function(object) {
                 id = names(annotation@anno_list)[i]
             )
             annotation@anno_list[[i]]@fun@fun <- anno$draw_fn
+            annotation@anno_list[[i]]@fun <- methods::as(
+                annotation@anno_list[[i]]@fun, "AnnotationFunction"
+            )
             annotation_legend_list <- c(annotation_legend_list, anno$legend)
         }
         methods::slot(object, sprintf("%s_annotation", side)) <- annotation
