@@ -37,9 +37,7 @@ gganno <- function(matrix, ggfn, ..., which = NULL, width = NULL, height = NULL,
     ggparams <- rlang::list2(...)
     out <- new_anno(
         n = nrow(matrix),
-        draw_fn = function(index, k, n) {
-            return(NULL)
-        },
+        draw_fn = function(index, k, n) NULL,
         ylim = NULL, subset_rule = list(), subsettable = FALSE,
         which = which, width = width, height = height,
         show_name = FALSE, name = "gganno"

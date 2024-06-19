@@ -127,7 +127,9 @@ trace_data <- function(
     return_fn = function(env, name) {
         get(name, envir = env, inherits = FALSE)
     },
-    pos = 2L, return_env = FALSE, all = FALSE) {
+    pos = 2L, return_env = FALSE) {
+    # the call of `trace_data` occupied one frame
+    # we trace back caller environment
     n <- sys.nframe()
     while (pos <= n) {
         env <- parent.frame(pos)

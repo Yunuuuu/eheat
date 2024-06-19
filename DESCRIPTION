@@ -24,7 +24,6 @@ Suggests:
     dplyr,
     knitr,
     rmarkdown
-Remotes: Yunuuuu/ComplexHeatmap
 Collate: 
     'anno-.R'
     'anno-fn.R'

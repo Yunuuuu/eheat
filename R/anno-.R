@@ -2,6 +2,10 @@ new_anno <- function(n, draw_fn, ylim = NULL,
                      subset_rule = list(), subsettable = TRUE,
                      width = NULL, height = NULL, show_name = TRUE,
                      which = NULL, name = NULL) {
+    # ComplexHeatmap::AnnotationFunction() will change the function
+    # environment of `anno@fun`
+    # here: we use new_anno instead, in this way, the function in the
+    #       package namespace can be used directly
     if (ht_opt$verbose) {
         cli::cli_inform("construct AnnotationFunction with {.fn {name}}")
     }
@@ -22,7 +26,8 @@ new_anno <- function(n, draw_fn, ylim = NULL,
     anno
 }
 
-anno_width_and_height <- function(which, width = NULL, height = NULL, default = unit(10, "mm")) {
+anno_width_and_height <- function(which, width = NULL, height = NULL,
+                                  default = unit(10, "mm")) {
     # height must be absolute
     params <- list(width = width, height = height)
     if (which == "row") {
