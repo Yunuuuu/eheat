@@ -6,7 +6,7 @@
 \alias{eheat-package}
 \title{eheat: Extented ComplexHeatmap}
 \description{
-Extented ComplexHeatmap.
+This package serves as a bridge between the ggplot2 and ComplexHeatmap packages. Essentially, all ggplot2 geometries and operations can be utilized in ComplexHeatmap.
 }
 \seealso{
 Useful links:
@@ -17,7 +17,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Yun Peng \email{yunyunp96@gmail.com}
+\strong{Maintainer}: Yun Peng \email{yunyunp96@163.com} (\href{https://orcid.org/0000-0003-2801-3332}{ORCID})
 
 }
 \keyword{internal}

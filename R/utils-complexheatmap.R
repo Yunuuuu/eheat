@@ -1,3 +1,5 @@
+#' @examples 
+#' ht_opt("heatmap_row_names_gp")
 #' @importFrom ComplexHeatmap ht_opt
 #' @export
 ComplexHeatmap::ht_opt

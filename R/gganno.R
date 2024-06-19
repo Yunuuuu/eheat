@@ -31,9 +31,10 @@
 #' draw(gganno(rnorm(10L), function(p) {
 #'     p + geom_point(aes(y = V1))
 #' }, height = unit(10, "cm"), width = unit(0.7, "npc")))
-#' draw(gganno2(rnorm(10L), function(p) {
-#'     p + geom_point(aes(y = V1))
-#' }, height = unit(10, "cm"), width = unit(0.7, "npc")))
+#' @return
+#' - `gganno`: A `ggAnnotationFunction` object.
+#' - `gganno2`: A [AnnotationFunction][ComplexHeatmap::AnnotationFunction]
+#'   object.
 #' @export
 #' @name gganno
 gganno <- function(matrix, ggfn, ..., which = NULL,
@@ -57,6 +58,10 @@ gganno <- function(matrix, ggfn, ..., which = NULL,
     out
 }
 
+#' @examples 
+#' draw(gganno2(rnorm(10L), function(p) {
+#'     p + geom_point(aes(y = V1))
+#' }, height = unit(10, "cm"), width = unit(0.7, "npc")))
 #' @export
 #' @rdname gganno
 gganno2 <- function(
