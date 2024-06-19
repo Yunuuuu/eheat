@@ -7,18 +7,17 @@ anno_fn <- function(
     matrix <- anno_check_matrix(allow_lambda(matrix), which, heat_matrix)
     ylim <- scale_get_limits(matrix, yscale)
     draw_fn <- allow_lambda(draw_fn)
-    dots <- rlang::list2(...)
-    if (length(dots) != sum(nzchar(names(dots)))) {
-        cli::cli_abort("All members in {.arg ...} must be named.")
+    if (...length() != sum(nzchar(...names()))) {
+        cli::cli_abort("All elements in {.arg ...} must be named.")
     }
-    # rlang::as_name(rlang::caller_call()[[1L]])
     name <- name %||% "anno_fn"
     subsettable <- subsettable %||% TRUE
+    dots <- rlang::list2(...)
     if (isTRUE(subsettable)) {
         internal_subset <- list(
             matrix = function(x, i) x[i, , drop = FALSE]
         )
-        if (length(dots) && is.null(subset_rule)) {
+        if (...length() && is.null(subset_rule)) {
             subset_rule <- lapply(dots, function(var) {
                 if (is.matrix(var)) {
                     function(x, i) {

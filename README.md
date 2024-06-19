@@ -35,7 +35,7 @@ library(eheat)
 #> Loading required package: ComplexHeatmap
 #> Loading required package: grid
 #> ========================================
-#> ComplexHeatmap version 2.15.4
+#> ComplexHeatmap version 2.20.0
 #> Bioconductor page: http://bioconductor.org/packages/ComplexHeatmap/
 #> Github page: https://github.com/jokergoo/ComplexHeatmap
 #> Documentation: http://jokergoo.github.io/ComplexHeatmap-reference
@@ -160,7 +160,7 @@ dev.off()
 ```
 
 The richness of the `scale_*` function in ggplot2 makes it easy to
-modify the color mapping according to our needs.
+modify the color mapping.
 
 ``` r
 draw(ggheat(small_mat, function(p) {
@@ -214,7 +214,7 @@ draw(ggheat(small_mat, rect_gp = gpar(type = "none")))
 
 Note that the background is different between ggplot2 and
 ComplexHeatmap. However, the theme system in ggplot2 makes it easy to
-modify and customize the background according to our preferences.
+modify and customize the background.
 
 ``` r
 draw(
@@ -293,8 +293,8 @@ draw(
 
 <img src="man/figures/README-Heatmap_arg4-1.png" width="100%" />
 
-The row names and column names are controlled by the
-`ComplexHeatmap::Heatmap` function.
+`ggheat` only takes over the heatmap body and legends.The row names and
+column names are controlled by the `ComplexHeatmap::Heatmap` function.
 
 ``` r
 draw(ggheat(small_mat, function(p) {

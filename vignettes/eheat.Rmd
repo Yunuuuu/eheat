@@ -83,7 +83,10 @@ The central functions of the `eheat` package are `ggheat` and `gganno`. These
 two functions encompass all the necessary functionalities. `ggheat` serves as a
 substitute for the `ComplexHeatmap::Heatmap` function, while `gganno` replaces
 all the `anno_*` functions within the ComplexHeatmap package, offering a
-comprehensive solution for our requirements. One of the key advantages of using ggplot2 in ComplexHeatmap is the ease of plotting statistical annotations. Another benefit is that the legends can be internally extracted from the ggplot2 plot, eliminating the need for manual addition of legends.
+comprehensive solution for our requirements. One of the key advantages of using
+ggplot2 in ComplexHeatmap is the ease of plotting statistical annotations.
+Another benefit is that the legends can be internally extracted from the ggplot2
+plot, eliminating the need for manual addition of legends.
 
 ## ggheat
 Using `ggheat`, it is effortless to create a simple Heatmap. The default color
@@ -119,7 +122,8 @@ draw(ggheat(small_mat, function(x) {
 dev.off()
 ```
   
-The richness of the `scale_*` function in ggplot2 makes it easy to modify the color mapping according to our needs.
+The richness of the `scale_*` function in ggplot2 makes it easy to modify the
+color mapping. 
 ```{r ggheat_scale1}
 draw(ggheat(small_mat, function(p) {
   # will use zero as midpoint
@@ -159,7 +163,7 @@ draw(ggheat(small_mat, rect_gp = gpar(type = "none")))
 
 Note that the background is different between ggplot2 and ComplexHeatmap.
 However, the theme system in ggplot2 makes it easy to modify and customize the
-background according to our preferences. 
+background. 
 ```{r ggheat_background}
 draw(
   ggheat(small_mat, function(p) {
@@ -189,7 +193,8 @@ draw(
 )
 ```
 
-All the functionalities of the `ComplexHeatmap::Heatmap` function can be used as is.
+All the functionalities of the `ComplexHeatmap::Heatmap` function can be used as
+is. 
 ```{r Heatmap_arg1}
 draw(ggheat(small_mat, function(p) {
   p + scale_fill_viridis_c()
@@ -221,8 +226,8 @@ draw(
 )
 ```
 
-The row names and column names are controlled by the `ComplexHeatmap::Heatmap`
-function. 
+`ggheat` only takes over the heatmap body and legends.The row names and column
+names are controlled by the `ComplexHeatmap::Heatmap` function. 
 ```{r ggheat_rownames}
 draw(ggheat(small_mat, function(p) {
   p + scale_fill_viridis_c()

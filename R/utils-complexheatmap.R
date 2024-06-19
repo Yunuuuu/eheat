@@ -11,12 +11,10 @@ cheat_which <- function(which = NULL) {
 }
 
 cheat_env_get <- function(name) {
-    cheat_env()[[name]]
+    .subset2(cheat_env(), name)
 }
 
-cheat_env <- function() {
-    ComplexHeatmap:::.ENV
-}
+cheat_env <- function() utils::getFromNamespace(".ENV", ns = "ComplexHeatmap")
 
 # get slice informations from the draw function
 cheat_get_order_list <- function(name, pos = 2L, return_env = FALSE) {
@@ -24,13 +22,14 @@ cheat_get_order_list <- function(name, pos = 2L, return_env = FALSE) {
         name = name,
         has_fn = function(env, name) {
             exists(name, envir = env, inherits = FALSE) &&
-                methods::.hasSlot(env[[name]], "row_order_list") &&
-                methods::.hasSlot(env[[name]], "column_order_list")
+                methods::.hasSlot(.subset2(env, name), "row_order_list") &&
+                methods::.hasSlot(.subset2(env, name), "column_order_list")
         },
         return_fn = function(env, name) {
+            obj <- .subset2(env, name)
             list(
-                row_order_list = env[[name]]@row_order_list,
-                column_order_list = env[[name]]@column_order_list
+                row_order_list = obj@row_order_list,
+                column_order_list = obj@column_order_list
             )
         },
         pos = pos, return_env = return_env
