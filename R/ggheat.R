@@ -196,6 +196,8 @@
 #' the ``show`` method of the `Heatmap-class` object actually plots the
 #' graphics.
 #' @return A `ggHeatmap` Object.
+#' @examples 
+#' ggheat(matrix(rnorm(81), nrow = 9))
 #' @export
 #' @name ggheat
 ggheat <- function(matrix, ggfn = NULL, ..., ggparams = list(), debug = FALSE) {

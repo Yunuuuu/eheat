@@ -31,8 +31,7 @@ The preparation of the heatmap includes following steps:
 This function is only for internal use.
 }
 \examples{
-# There is no example
-NULL
+prepare(ggheat(matrix(rnorm(81), nrow = 9)))
 }
 \author{
 Zuguang Gu <z.gu@dkfz.de>

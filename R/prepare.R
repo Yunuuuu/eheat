@@ -1,5 +1,7 @@
 #' Prepare the Heatmap
 #' @inherit ComplexHeatmap::prepare
+#' @examples 
+#' prepare(ggheat(matrix(rnorm(81), nrow = 9)))
 #' @importFrom ComplexHeatmap prepare
 #' @export
 #' @method prepare ggHeatmap

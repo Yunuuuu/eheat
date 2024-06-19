@@ -27,6 +27,13 @@
 #'
 #' @inherit ggheat
 #' @seealso [draw-ggAnnotationFunction][draw,ggAnnotationFunction-method]
+#' @examples
+#' draw(gganno(rnorm(10L), function(p) {
+#'     p + geom_point(aes(y = V1))
+#' }, height = unit(10, "cm"), width = unit(0.7, "npc")))
+#' draw(gganno2(rnorm(10L), function(p) {
+#'     p + geom_point(aes(y = V1))
+#' }, height = unit(10, "cm"), width = unit(0.7, "npc")))
 #' @export
 #' @name gganno
 gganno <- function(matrix, ggfn, ..., which = NULL,
@@ -68,6 +75,12 @@ gganno2 <- function(
             # https://github.com/jokergoo/ComplexHeatmap/blob/master/R/HeatmapList-draw_component.R
             # trace back into `draw_heatmap_list()`
             order_list <- cheat_get_order_list("ht_main")
+            if (isFALSE(order_list)) {
+                order_list <- switch(anno@which,
+                    row = list(row_order_list = list(index)),
+                    column = list(column_order_list = list(index))
+                )
+            }
             draw_fn2 <<- draw_gganno(anno, order_list, NULL, "gganno2")$draw_fn
         }
         draw_fn2(index, k, n)
@@ -98,12 +111,16 @@ methods::setClass(
 )
 
 #' Draw the ggAnnotationFunction Object
-#' 
+#'
 #' @param object The `ggAnnotationFunction-class` object.
 #' @param index Index of observations.
 #' @param ... Additional arguments passed on to
 #' [draw-AnnotationFunction][ComplexHeatmap::draw,HeatmapAnnotation-method].
 #' @return draw the annotation.
+#' @examples
+#' draw(gganno(rnorm(10L), function(p) {
+#'     p + geom_point(aes(y = V1))
+#' }, height = unit(10, "cm"), width = unit(0.7, "npc")))
 #' @export
 methods::setMethod(
     f = "draw",
