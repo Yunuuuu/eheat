@@ -4,10 +4,14 @@ pkg_nm <- function() {
     utils::packageName(topenv(environment()))
 }
 
+#' @examples 
+#' gpar(col = "red")
 #' @importFrom grid gpar
 #' @export
 grid::gpar
 
+#' @examples 
+#' unit(1, "npc")
 #' @importFrom grid unit
 #' @export
 grid::unit

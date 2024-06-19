@@ -8,6 +8,12 @@
 \alias{gpar}
 \alias{unit}
 \title{Objects exported from other packages}
+\examples{
+draw(ggheat(matrix(rnorm(81), nrow = 9)))
+ht_opt("heatmap_row_names_gp")
+gpar(col = "red")
+unit(1, "npc")
+}
 \keyword{internal}
 \description{
 These objects are imported from other packages. Follow the links

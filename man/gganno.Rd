@@ -59,6 +59,12 @@ be deemed acceptable) to be carried out conjointly with the
 }
 \value{
 A \code{ggAnnotationFunction} object.
+
+\itemize{
+\item \code{gganno}: A \code{ggAnnotationFunction} object.
+\item \code{gganno2}: A \link[ComplexHeatmap:AnnotationFunction]{AnnotationFunction}
+object.
+}
 }
 \description{
 Plot heatmaps layer by layer

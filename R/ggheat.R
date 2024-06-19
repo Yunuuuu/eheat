@@ -212,6 +212,8 @@ ggheat <- function(matrix, ggfn = NULL, ..., ggparams = list(), debug = FALSE) {
     out
 }
 
+#' @examples 
+#' draw(ggheat(matrix(rnorm(81), nrow = 9)))
 #' @importFrom ComplexHeatmap draw
 #' @export
 ComplexHeatmap::draw
