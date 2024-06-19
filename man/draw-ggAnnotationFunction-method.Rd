@@ -20,3 +20,8 @@ draw the annotation.
 \description{
 Draw the ggAnnotationFunction Object
 }
+\examples{
+draw(gganno(rnorm(10L), function(p) {
+    p + geom_point(aes(y = V1))
+}, height = unit(10, "cm"), width = unit(0.7, "npc")))
+}

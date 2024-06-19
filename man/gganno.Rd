@@ -92,6 +92,14 @@ uniformly considered as observations and columns as variables.
 }
 }
 
+\examples{
+draw(gganno(rnorm(10L), function(p) {
+    p + geom_point(aes(y = V1))
+}, height = unit(10, "cm"), width = unit(0.7, "npc")))
+draw(gganno2(rnorm(10L), function(p) {
+    p + geom_point(aes(y = V1))
+}, height = unit(10, "cm"), width = unit(0.7, "npc")))
+}
 \seealso{
 \link[=draw,ggAnnotationFunction-method]{draw-ggAnnotationFunction}
 }

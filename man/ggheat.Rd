@@ -223,3 +223,6 @@ matrix.
 }
 }
 
+\examples{
+ggheat(matrix(rnorm(81), nrow = 9))
+}
