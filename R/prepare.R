@@ -216,6 +216,9 @@ prepare_gganno <- function(object) {
                 id = names(anno_list)[i]
             )
             anno@fun <- gganno_element$draw_fn
+            # if we don't transfer anno into AnnotationFunction.  
+            # the internal will call draw method for `ggAnnotationFunction`
+            # which internally will call `draw_gganno` again
             anno_list[[i]]@fun <- methods::as(anno, "AnnotationFunction")
             ggplot_legends <- c(ggplot_legends, gganno_element$legend)
         }
