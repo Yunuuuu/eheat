@@ -4,6 +4,8 @@
 # eheat
 
 <!-- badges: start -->
+
+[![R-CMD-check](https://github.com/Yunuuuu/eheat/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Yunuuuu/eheat/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 This package serves as a bridge between the ggplot2 and ComplexHeatmap
