@@ -340,18 +340,15 @@ draw(
 
 ## gganno
 
-Both `gganno` and `gganno2` perform identical functions, but `gganno` is
-not compatible with direct integration with `ComplexHeatmap::Heatmap`.
-In such cases, only an empty annotation region can be added. On the
-other hand, `gganno2` can be seamlessly combined with both
-`ComplexHeatmap::Heatmap` and `ggheat`, although legends will not be
-extracted.
-
-The same with `ggheat`, the essential parameter of `gganno` is also
+The same with `ggheat`, the essential parameter of `gganno` is also the
 `ggfn`, which accepts a ggplot2 object equipped with a default data and
 mappings established by `ggplot(data, aes(.data$.x (or .data$.y)))`. The
 original matrix will be converted into a data.frame with another 3
 columns added:
+
+`gganno` can be seamlessly combined with both `ggheat` and
+`ComplexHeatmap::Heatmap`, although legends will not be extracted in the
+later case.
 
 - `.slice`: the slice row (which = “row”) or column (which = “column”)
   number.
@@ -524,34 +521,13 @@ draw(ggheat(small_mat,
 
 <img src="man/figures/README-unnamed-chunk-7-1.png" width="100%" />
 
-Finally, let’s see the difference between `gganno2` and `gganno`.
-
-`gganno2` can work with `Heatmap` function, while `gganno` cannot work
-with `Heatmap` function.
+But `gganno` can work with `Heatmap` function, while cannot extract the
+legend.
 
 ``` r
-anno_data <- sample(1:10, nrow(small_mat))
 draw(Heatmap(small_mat,
   top_annotation = HeatmapAnnotation(
-    foo = gganno2(
-      matrix = anno_data,
-      function(p) {
-        p + geom_point(aes(.x, V1))
-      }
-    ), which = "column"
-  )
-), merge_legends = TRUE)
-#> ℹ convert simple vector to one-column matrix
-```
-
-<img src="man/figures/README-Heatmap_gganno2-1.png" width="100%" />
-
-But `gganno2` cannot extract the legend.
-
-``` r
-draw(ggheat(small_mat,
-  top_annotation = HeatmapAnnotation(
-    foo = gganno2(
+    foo = gganno(
       matrix = anno_data,
       function(p) {
         p + geom_bar(aes(y = V1, fill = factor(.index)), stat = "identity")
@@ -562,4 +538,4 @@ draw(ggheat(small_mat,
 #> ℹ convert simple vector to one-column matrix
 ```
 
-<img src="man/figures/README-ggheat_gganno2-1.png" width="100%" />
+<img src="man/figures/README-Heatmap_gganno-1.png" width="100%" />

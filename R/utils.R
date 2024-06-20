@@ -4,13 +4,13 @@ pkg_nm <- function() {
     utils::packageName(topenv(environment()))
 }
 
-#' @examples 
+#' @examples
 #' gpar(col = "red")
 #' @importFrom grid gpar
 #' @export
 grid::gpar
 
-#' @examples 
+#' @examples
 #' unit(1, "npc")
 #' @importFrom grid unit
 #' @export
@@ -23,9 +23,7 @@ imap <- function(.x, .f, ...) {
     out
 }
 
-compact <- function(.x) {
-    Filter(length, .x)
-}
+compact <- function(.x) Filter(length, .x)
 
 build_matrix <- function(matrix, arg = rlang::caller_arg(matrix)) {
     if (inherits(matrix, "data.frame")) {

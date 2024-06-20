@@ -27,7 +27,7 @@ Suggests:
     rmarkdown
 Collate: 
     'anno-.R'
-    'anno-fn.R'
+    'anno-subsettable-.R'
     'eheat-package.R'
     'ggheat.R'
     'gganno.R'
