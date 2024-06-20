@@ -3,21 +3,10 @@
 \docType{class}
 \name{gganno}
 \alias{gganno}
-\alias{gganno2}
 \alias{ggAnnotationFunction-class}
 \title{Build AnnotationFunction Class with ggplot2}
 \usage{
 gganno(
-  matrix,
-  ggfn,
-  ...,
-  which = NULL,
-  width = NULL,
-  height = NULL,
-  debug = FALSE
-)
-
-gganno2(
   matrix,
   ggfn,
   ...,
@@ -59,12 +48,6 @@ be deemed acceptable) to be carried out conjointly with the
 }
 \value{
 A \code{ggAnnotationFunction} object.
-
-\itemize{
-\item \code{gganno}: A \code{ggAnnotationFunction} object.
-\item \code{gganno2}: A \link[ComplexHeatmap:AnnotationFunction]{AnnotationFunction}
-object.
-}
 }
 \description{
 Plot heatmaps layer by layer
@@ -100,9 +83,6 @@ uniformly considered as observations and columns as variables.
 
 \examples{
 draw(gganno(rnorm(10L), function(p) {
-    p + geom_point(aes(y = V1))
-}, height = unit(10, "cm"), width = unit(0.7, "npc")))
-draw(gganno2(rnorm(10L), function(p) {
     p + geom_point(aes(y = V1))
 }, height = unit(10, "cm"), width = unit(0.7, "npc")))
 }

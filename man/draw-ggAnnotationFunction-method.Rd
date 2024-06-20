@@ -4,15 +4,18 @@
 \alias{draw,ggAnnotationFunction-method}
 \title{Draw the ggAnnotationFunction Object}
 \usage{
-\S4method{draw}{ggAnnotationFunction}(object, index, ...)
+\S4method{draw}{ggAnnotationFunction}(object, index, k = 1L, n = 1L, ...)
 }
 \arguments{
-\item{object}{The \code{ggAnnotationFunction-class} object.}
+\item{object}{The \link[=gganno]{ggAnnotationFunction} object.}
 
-\item{index}{Index of observations.}
+\item{index}{A vector of indices.}
 
-\item{...}{Additional arguments passed on to
-\link[ComplexHeatmap:draw-HeatmapAnnotation-method]{draw-AnnotationFunction}.}
+\item{k}{The current slice index for the annotation if it is split.}
+
+\item{n}{Total number of slices.}
+
+\item{...}{Additional arguments passed on to}
 }
 \value{
 draw the annotation.

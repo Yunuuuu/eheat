@@ -1,6 +1,6 @@
 #' Prepare the Heatmap
 #' @inherit ComplexHeatmap::prepare
-#' @examples 
+#' @examples
 #' prepare(ggheat(matrix(rnorm(81), nrow = 9)))
 #' @importFrom ComplexHeatmap prepare
 #' @export
@@ -93,9 +93,7 @@ prepare_ggheat <- function(object) {
     if (!is.null(object@ggfn)) {
         p <- rlang::inject(object@ggfn(p, !!!object@ggparams))
         if (!ggplot2::is.ggplot(p)) {
-            cli::cli_abort(
-                "{.arg ggfn} must return a {.cls ggplot2} object."
-            )
+            cli::cli_abort("{.arg ggfn} must return a {.cls ggplot2} object.")
         }
     }
 
@@ -153,16 +151,14 @@ prepare_ggheat <- function(object) {
             kr <- draw_body_env$kr
             kc <- draw_body_env$kc
             pattern <- sprintf("panel-%d-%d", kr, kc)
-            fit_panel(
-                gt_trim_zero_grob(gtable::gtable_filter(gt, pattern)),
-                vp = vp
-            )
+            vp_gt <- gt_trim_zero_grob(gtable::gtable_filter(gt, pattern))
+            fit_panel(vp_gt, vp = vp, elements = NULL)
         } else {
-            fit_panel(gt_trim_zero_grob(gt), vp = vp, elements = NULL)
+            vp_gt <- gt_trim_zero_grob(gt)
+            fit_panel(vp_gt, vp = vp, elements = NULL)
         }
     }
-    if (!is.null(object@ggfn) ||
-        !identical(rect_gp$type, "none")) {
+    if (!is.null(object@ggfn) || !identical(rect_gp$type, "none")) {
         # if user provided `ggfn` or rect_gp$type is not none,
         # we should do something with `ggfn`
         object@matrix_param$layer_fun <- gglayer
@@ -171,24 +167,11 @@ prepare_ggheat <- function(object) {
         # https://github.com/jokergoo/ComplexHeatmap/pull/1139
         # object@heatmap_legend_list <- c(
         #     guide_from_gtable(gt),
-        #     prepare_legend_list(object@heatmap_legend_list)
+        #     wrap_legend(object@heatmap_legend_list)
         # )
 
         # we'll trace back into `make_layout,HeatmapList` method
-        pos <- 1L
-        while (pos <= sys.nframe()) {
-            env <- sys.frame(-pos)
-            if (exists("heatmap_legend_list", envir = env, inherits = FALSE) &&
-                identical(sys.call(-(pos + 1L))[[1L]], quote(make_layout))) {
-                # we then modify the heatmap_legend_list
-                assign("heatmap_legend_list", c(
-                    guide_from_gtable(gt),
-                    prepare_legend_list(.subset2(env, "heatmap_legend_list"))
-                ), envir = env)
-                break
-            }
-            pos <- pos + 1L
-        }
+        add_gg_legend_list("heatmap_legend_list", guide_from_gtable(gt))
 
         # we always prevent the ComplexHeatmap Heatmap body legend.
         object@heatmap_param$show_heatmap_legend <- FALSE
@@ -197,11 +180,6 @@ prepare_ggheat <- function(object) {
 }
 
 prepare_gganno <- function(object) {
-    full_order_list <- list(
-        row_order_list = object@row_order_list,
-        column_order_list = object@column_order_list
-    )
-    ggplot_legends <- NULL
     for (side in c("left", "right", "top", "bottom")) {
         anno_name <- sprintf("%s_annotation", side)
         annotation <- methods::slot(object, anno_name)
@@ -212,46 +190,54 @@ prepare_gganno <- function(object) {
             anno <- anno_list[[i]]@fun
             # if the annotation exits and is `ggAnnotationFunction`
             if (!inherits(anno, "ggAnnotationFunction")) next
+            order_list <- switch(anno@which,
+                row = object@row_order_list,
+                column = object@column_order_list
+            )
             # we initialize the ggplot2 object and extract the legends
-            gganno_element <- draw_gganno(
-                anno, full_order_list, object@matrix,
+            anno_list[[i]]@fun <- make_layout(anno, order_list,
                 id = names(anno_list)[i]
             )
-            anno@fun <- gganno_element$draw_fn
-            # if we don't transfer anno into AnnotationFunction.  
-            # the internal will call draw method for `ggAnnotationFunction`
-            # which internally will call `draw_gganno` again
-            anno_list[[i]]@fun <- methods::as(anno, "AnnotationFunction")
-            ggplot_legends <- c(ggplot_legends, gganno_element$legend)
         }
         methods::slot(object, anno_name)@anno_list <- anno_list
-    }
-    # we merge the annotation_legend_list with ggplot2 legends -----
-    # object@annotation_legend_list <- c(
-    #     annotation_legend_list,
-    #     prepare_legend_list(object@annotation_legend_list)
-    # )
-    # we'll trace back into `make_layout,HeatmapList` method
-    pos <- 1L
-    while (pos <= sys.nframe()) {
-        env <- sys.frame(-pos)
-        if (exists("annotation_legend_list", envir = env, inherits = FALSE) &&
-            identical(sys.call(-(pos + 1L))[[1L]], quote(make_layout))) {
-            # we then modify the annotation_legend_list
-            assign("annotation_legend_list", c(
-                ggplot_legends,
-                prepare_legend_list(.subset2(env, "annotation_legend_list"))
-            ), envir = env)
-            break
-        }
-        pos <- pos + 1L
     }
     object
 }
 
-prepare_legend_list <- function(x) {
-    if (length(x) > 0L && inherits(x, c("Legends", "grob"))) {
-        x <- list(x)
+# here is the magic
+add_gg_legend_list <- function(name, gg_legends, call = quote(make_layout)) {
+    if (length(gg_legends) == 0L) return(NULL) # styler: off
+    pos <- -2L
+    nframes <- -sys.nframe() + 1L # total parents
+    while (pos >= nframes) {
+        env <- sys.frame(pos) # we locate the legend environment
+        if (identical(utils::packageName(topenv(env)), "ComplexHeatmap") &&
+            exists(name, envir = env, inherits = FALSE) &&
+            # Since ComplexHeatmap function much are the S4 methods
+            # we identify the call name from the parent
+            identical(sys.call(pos - 1L)[[1L]], call)) {
+            old <- wrap_legend(.subset2(env, name))
+            index <- grep("^\\.gg_legend\\d+$", rlang::names2(old), perl = TRUE)
+            old_gg_legends <- old[index]
+            names(gg_legends) <- paste0(
+                ".__gg_legend", seq_along(gg_legends) + length(old_gg_legends)
+            )
+            # we then modify the legend list
+            assign(
+                # user provided legends always in the end
+                name, c(old_gg_legends, gg_legends, old[-index]),
+                envir = env
+            )
+            break
+        }
+        pos <- pos - 1L
     }
-    x
+}
+
+wrap_legend <- function(legend) {
+    if (length(legend) > 0L && inherits(legend, c("Legends", "grob"))) {
+        list(legend)
+    } else {
+        legend
+    }
 }

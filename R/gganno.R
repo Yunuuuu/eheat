@@ -10,7 +10,6 @@
 #' @inheritParams ggheat
 #' @param ... Additional arguments passed to `ggfn`.
 #' @inheritParams ComplexHeatmap::AnnotationFunction
-#' @return A `ggAnnotationFunction` object.
 #' @section ggfn:
 #'
 #' `ggfn` accept a ggplot2 object with a default data and mapping created by
@@ -31,10 +30,7 @@
 #' draw(gganno(rnorm(10L), function(p) {
 #'     p + geom_point(aes(y = V1))
 #' }, height = unit(10, "cm"), width = unit(0.7, "npc")))
-#' @return
-#' - `gganno`: A `ggAnnotationFunction` object.
-#' - `gganno2`: A [AnnotationFunction][ComplexHeatmap::AnnotationFunction]
-#'   object.
+#' @return A `ggAnnotationFunction` object.
 #' @export
 #' @name gganno
 gganno <- function(matrix, ggfn, ..., which = NULL,
@@ -46,8 +42,7 @@ gganno <- function(matrix, ggfn, ..., which = NULL,
     out <- new_anno(
         n = nrow(matrix),
         draw_fn = function(index, k, n) NULL,
-        ylim = NULL, subset_rule = list(), subsettable = FALSE,
-        which = which, width = width, height = height,
+        ylim = NULL, which = which, width = width, height = height,
         show_name = FALSE, name = "gganno"
     )
     out <- methods::as(out, "ggAnnotationFunction")
@@ -55,50 +50,9 @@ gganno <- function(matrix, ggfn, ..., which = NULL,
     out@ggfn <- ggfn
     out@ggparams <- ggparams
     out@debug <- debug
+    out@gginitialized <- FALSE
     out
 }
-
-#' @examples 
-#' draw(gganno2(rnorm(10L), function(p) {
-#'     p + geom_point(aes(y = V1))
-#' }, height = unit(10, "cm"), width = unit(0.7, "npc")))
-#' @export
-#' @rdname gganno
-gganno2 <- function(
-    matrix, ggfn, ..., which = NULL,
-    width = NULL, height = NULL, debug = FALSE) {
-    anno <- gganno(matrix,
-        ggfn = ggfn, ..., which = which,
-        width = width, height = height,
-        debug = debug
-    )
-    draw_fn2 <- NULL
-    draw_fn <- function(index, k, n) {
-        if (k == 1L) {
-            # only prepare ggplot data in the first run and run everytime when
-            # draw function execution
-            # https://github.com/jokergoo/ComplexHeatmap/blob/master/R/HeatmapList-draw_component.R
-            # trace back into `draw_heatmap_list()`
-            order_list <- cheat_get_order_list("ht_main")
-            if (isFALSE(order_list)) {
-                order_list <- switch(anno@which,
-                    row = list(row_order_list = list(index)),
-                    column = list(column_order_list = list(index))
-                )
-            }
-            draw_fn2 <<- draw_gganno(anno, order_list, NULL, "gganno2")$draw_fn
-        }
-        draw_fn2(index, k, n)
-    }
-    new_anno( # won't change the function environment of `draw_fn`
-        n = nrow(anno@matrix), draw_fn = draw_fn, ylim = NULL,
-        subset_rule = list(), subsettable = FALSE,
-        which = anno@which, width = width, height = height,
-        show_name = FALSE, name = "gganno2"
-    )
-}
-
-methods::setClassUnion("MatrixOrNull", c("matrix", "NULL"))
 
 #' @importClassesFrom ComplexHeatmap AnnotationFunction
 #' @export
@@ -109,18 +63,61 @@ methods::setClass(
     slots = list(
         ggfn = "FunctionOrNull",
         ggparams = "list",
-        matrix = "MatrixOrNull",
+        gginitialized = "logical",
+        matrix = "matrix",
         debug = "ANY"
     ),
     contains = "AnnotationFunction"
 )
 
+#' @importFrom ComplexHeatmap make_layout
+methods::setMethod(
+    "make_layout", "ggAnnotationFunction",
+    function(object, order_list, add_legend = TRUE,
+             heat_matrix = NULL, id = NULL) {
+        if (!object@gginitialized) {
+            if (is.null(heat_matrix) &&
+                (is.null(object@matrix) || is.function(object@matrix))) {
+                cli::cli_abort(paste(
+                    "You must provide a matrix in {.fn gganno}",
+                    "in order to draw {.cls ggAnnotationFunction} directly"
+                ))
+            }
+            if (is.null(object@matrix)) {
+                object@matrix <- switch(object@which,
+                    row = heat_matrix,
+                    column = t(heat_matrix)
+                )
+            } else if (is.function(object@matrix)) {
+                data <- switch(object@which,
+                    row = heat_matrix,
+                    column = t(heat_matrix)
+                )
+                object@matrix <- object@matrix(data)
+            }
+            gganno_element <- draw_gganno(
+                object, order_list,
+                id = id %||% "ggAnnotationFunction"
+            )
+
+            # we merge the annotation_legend_list with ggplot2 legends -----
+            # we'll trace back into `make_layout,HeatmapList` method
+            add_gg_legend_list("annotation_legend_list", gganno_element$legend)
+            object@fun <- gganno_element$draw_fn
+            object@gginitialized <- TRUE
+        }
+        object
+    }
+)
+
 #' Draw the ggAnnotationFunction Object
 #'
-#' @param object The `ggAnnotationFunction-class` object.
-#' @param index Index of observations.
+#' @param object The [ggAnnotationFunction][gganno] object.
+#' @param index A vector of indices.
+#' @param k The current slice index for the annotation if it is split.
+#' @param n Total number of slices.
 #' @param ... Additional arguments passed on to
-#' [draw-AnnotationFunction][ComplexHeatmap::draw,HeatmapAnnotation-method].
+# [draw-AnnotationFunction][ComplexHeatmap::draw,HeatmapAnnotation-method].
 #' @return draw the annotation.
 #' @examples
 #' draw(gganno(rnorm(10L), function(p) {
@@ -130,21 +127,58 @@ methods::setClass(
 methods::setMethod(
     f = "draw",
     signature = "ggAnnotationFunction",
-    definition = function(object, index, ...) {
+    definition = function(object, index, k = 1L, n = 1L, ...) {
         if (ht_opt$verbose) {
-            cli::cli_inform("annotation generated by {.fn object@fun_name}")
+            cli::cli_inform("annotation generated by {.fn {object@fun_name}}")
         }
         if (missing(index)) index <- seq_len(object@n)
-
-        order_list <- switch(object@which,
-            row = list(row_order_list = list(index)),
-            column = list(column_order_list = list(index))
+        if (k == 1L && !object@gginitialized) {
+            # This is only used by ComplexHeatmap::Heatmap function
+            # since `ggheat` will initialize `gganno` when preparing the main
+            # heatmap layout.
+            order_list <- gganno_get_order_list("ht_main", object@which)
+            if (is.null(order_list)) {
+                if (n == 1L) {
+                    order_list <- list(index)
+                } else {
+                    cli::cli_abort(
+                        "Cannot initialize {.cls ggAnnotationFunction}"
+                    )
+                }
+            }
+            object <- make_layout(object, order_list)
+        }
+        methods::callNextMethod(
+            object = object, index = index,
+            k = k, n = n, ...
         )
-        gganno_element <- draw_gganno(object, order_list, id = "gganno")
-        object@fun <- gganno_element$draw_fn
-        methods::callNextMethod(object = object, index = index, ...)
     }
 )
+
+# https://github.com/jokergoo/ComplexHeatmap/blob/7d95ca5cf533b98bd0351eecfc6805ad30c754c0/R/HeatmapList-draw_component.R#L670
+# trace back into `draw_heatmap_list()`
+# get slice informations from the draw function
+gganno_get_order_list <- function(name, axis, call = quote(draw_heatmap_list)) {
+    pos <- -2L
+    nframes <- -sys.nframe() + 1L # total parents
+    while (pos >= nframes) {
+        env <- sys.frame(pos)
+        if (identical(utils::packageName(topenv(env)), "ComplexHeatmap") &&
+            exists(name, envir = env, inherits = FALSE) &&
+            identical(sys.call(pos - 1L)[[1L]], call)) {
+            obj <- .subset2(env, name)
+            if (methods::.hasSlot(obj, "row_order_list") &&
+                methods::.hasSlot(obj, "column_order_list")) {
+                return(switch(axis,
+                    row = obj@row_order_list,
+                    column = obj@column_order_list
+                ))
+            }
+        }
+        pos <- pos - 1L
+    }
+    NULL
+}
 
 #' @importFrom ggplot2 ggplot
 #' @importFrom ggplot2 aes
@@ -155,10 +189,6 @@ draw_gganno <- function(anno, order_list, heat_matrix, id) {
         column = t(heat_matrix)
     )
     labels <- rownames(matrix)
-    order_list <- switch(which,
-        row = order_list$row_order_list,
-        column = order_list$column_order_list
-    )
     data <- as_tibble0(matrix, rownames = NULL) # nolint
     if (length(order_list) > 1L) {
         with_slice <- TRUE

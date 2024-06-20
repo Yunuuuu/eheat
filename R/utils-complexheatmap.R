@@ -18,26 +18,6 @@ cheat_env_get <- function(name) {
 
 cheat_env <- function() utils::getFromNamespace(".ENV", ns = "ComplexHeatmap")
 
-# get slice informations from the draw function
-cheat_get_order_list <- function(name, pos = 2L, return_env = FALSE) {
-    trace_data(
-        name = name,
-        has_fn = function(env, name) {
-            exists(name, envir = env, inherits = FALSE) &&
-                methods::.hasSlot(.subset2(env, name), "row_order_list") &&
-                methods::.hasSlot(.subset2(env, name), "column_order_list")
-        },
-        return_fn = function(env, name) {
-            obj <- .subset2(env, name)
-            list(
-                row_order_list = obj@row_order_list,
-                column_order_list = obj@column_order_list
-            )
-        },
-        pos = pos, return_env = return_env
-    )
-}
-
 cheat_full_slice_index <- function(order_list) {
     row_full <- unlist(order_list$row, recursive = FALSE, use.names = FALSE)
     row_full <- structure(seq_along(row_full), names = row_full)
