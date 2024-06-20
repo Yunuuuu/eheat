@@ -521,7 +521,7 @@ draw(ggheat(small_mat,
 
 <img src="man/figures/README-unnamed-chunk-7-1.png" width="100%" />
 
-But `gganno` can work with `Heatmap` function, while cannot extract the
+`gganno` can work with `Heatmap` function, while cannot extract the
 legend.
 
 ``` r
