@@ -418,7 +418,7 @@ draw(ggheat(small_mat,
 ), merge_legends = TRUE)
 ```
 
-But `gganno` can work with `Heatmap` function, while cannot extract the legend.
+`gganno` can work with `Heatmap` function, while cannot extract the legend.
 ```{r Heatmap_gganno}
 draw(Heatmap(small_mat,
   top_annotation = HeatmapAnnotation(
