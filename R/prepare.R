@@ -163,7 +163,6 @@ prepare_ggheat <- function(object) {
         # https://github.com/jokergoo/ComplexHeatmap/blob/master/R/Heatmap-draw_component.R
         # trace back into `draw_heatmap_body()`
         draw_body_env <- parent.frame()
-        vp <- grid::viewport()
         if (with_slice) {
             # we can also use grid::current.viewport()
             # and parse name to get kr or kc
@@ -173,10 +172,10 @@ prepare_ggheat <- function(object) {
             kc <- draw_body_env$kc
             pattern <- sprintf("panel-%d-%d", kr, kc)
             vp_gt <- gt_trim_zero_grob(gtable::gtable_filter(gt, pattern))
-            fit_panel(vp_gt, vp = vp, elements = NULL)
+            fit_panel(vp_gt, sides = NULL)
         } else {
             vp_gt <- gt_trim_zero_grob(gt)
-            fit_panel(vp_gt, vp = vp, elements = NULL)
+            fit_panel(vp_gt, sides = NULL)
         }
     }
     if (!is.null(object@ggfn) || !identical(rect_gp$type, "none")) {
