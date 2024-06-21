@@ -1,9 +1,3 @@
-#' @examples 
-#' ht_opt("heatmap_row_names_gp")
-#' @importFrom ComplexHeatmap ht_opt
-#' @export
-ComplexHeatmap::ht_opt
-
 cheat_which <- function(which = NULL) {
     out <- cheat_env_get("current_annotation_which")
     if (is.null(out)) {
