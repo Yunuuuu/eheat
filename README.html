@@ -874,9 +874,6 @@ ggplot2 object equipped with a default data and mappings established by
 <code>ggplot(data, aes(.data$.x (or .data$.y)))</code>. The original
 matrix will be converted into a data.frame with another 3 columns
 added:</p>
-<p><code>gganno</code> can be seamlessly combined with both
-<code>ggheat</code> and <code>ComplexHeatmap::Heatmap</code>, although
-legends will not be extracted in the later case.</p>
 <ul>
 <li><p><code>.slice</code>: the slice row (which = “row”) or column
 (which = “column”) number.</p></li>
@@ -887,6 +884,9 @@ coordinates as it may disrupt internal operations.</p></li>
 matrix, where rows are uniformly considered as observations and columns
 as variables.</p></li>
 </ul>
+<p><code>gganno</code> can be seamlessly combined with both
+<code>ggheat</code> and <code>ComplexHeatmap::Heatmap</code>, although
+legends will not be extracted in the later case.</p>
 <p>In general, we should just use <code>ggheat</code> and
 <code>gganno</code>.</p>
 <div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a>anno_data <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>, <span class="fu">nrow</span>(small_mat))</span>

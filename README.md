@@ -346,10 +346,6 @@ mappings established by `ggplot(data, aes(.data$.x (or .data$.y)))`. The
 original matrix will be converted into a data.frame with another 3
 columns added:
 
-`gganno` can be seamlessly combined with both `ggheat` and
-`ComplexHeatmap::Heatmap`, although legends will not be extracted in the
-later case.
-
 - `.slice`: the slice row (which = “row”) or column (which = “column”)
   number.
 
@@ -359,6 +355,10 @@ later case.
 
 - `.index`: denoting the row index of the original matrix, where rows
   are uniformly considered as observations and columns as variables.
+
+`gganno` can be seamlessly combined with both `ggheat` and
+`ComplexHeatmap::Heatmap`, although legends will not be extracted in the
+later case.
 
 In general, we should just use `ggheat` and `gganno`.
 
