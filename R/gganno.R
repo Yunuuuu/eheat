@@ -184,6 +184,7 @@ gganno_get_order_list <- function(name, axis, call = quote(draw_heatmap_list)) {
 #' @importFrom ggplot2 aes
 draw_gganno <- function(anno, order_list, heat_matrix, id) {
     which <- anno@which
+    # we always regard matrix row as the observations
     matrix <- anno@matrix %||% switch(which,
         row = heat_matrix,
         column = t(heat_matrix)
@@ -228,45 +229,61 @@ draw_gganno <- function(anno, order_list, heat_matrix, id) {
     if (!inherits(p$facet, "FacetNull")) {
         cli::cli_abort("Cannot set facet in {.fn ggfn} (gganno: {id})")
     }
+    if (!inherits(p$coordinates, "CoordCartesian")) {
+        cli::cli_abort(paste(
+            "Only {.fn coord_cartesian} can be used",
+            "in {.fn ggfn} (gganno: {id})"
+        ))
+    }
+    # prepare scales --------------------------------------
+    labels <- rownames(matrix) %||% ggplot2::waiver()
     if (which == "row") {
         facet_params <- list(
             rows = ggplot2::vars(.data$.slice),
             scales = "free_y", space = "free_y"
         )
-        scale_fn <- ggplot2::scale_y_continuous
+        y_scale <- cheat_scales(coords[c(1L, 3:2)], labels,
+            scale_fn = ggplot2::scale_y_continuous
+        )
+        if (!is.null(p$scales$get_scales("y"))) {
+            cli::cli_warn(
+                "will omit y-scale for row annotation (gganno: {id})"
+            )
+        }
+        if (!is.null(x_scale <- p$scales$get_scales("x"))) { # from user
+            # avoid the warning message: Attempting to add facetted x
+            # scales, while x scales are not free.
+            facet_params$scales <- "free"
+        }
+        # we always omit the position scales
+        p$scales <- p$scales$non_position_scales()
     } else {
         facet_params <- list(
             cols = ggplot2::vars(.data$.slice),
             scales = "free_x", space = "free_x"
         )
-        scale_fn <- ggplot2::scale_x_continuous
+        x_scale <- cheat_scales(coords[c(1L, 3:2)], labels,
+            scale_fn = ggplot2::scale_x_continuous
+        )
+        if (!is.null(p$scales$get_scales("x"))) {
+            cli::cli_warn(
+                "will omit x-scale for column annotation (gganno: {id})"
+            )
+        }
+        if (!is.null(y_scale <- p$scales$get_scales("y"))) { # from user
+            # avoid the warning message: Attempting to add facetted y
+            # scales, while y scales are not free.
+            facet_params$scales <- "free"
+        }
+        p$scales <- p$scales$non_position_scales()
     }
-    # prepare scales
-    labels <- rownames(matrix) %||% ggplot2::waiver()
-    scales <- cheat_scales(coords[c(1L, 3:2)], labels, scale_fn = scale_fn)
+    # add scales into ggplot2 object ---------------------
     if (with_slice) {
         p <- p + do.call(ggplot2::facet_grid, facet_params)
-        if (which == "row") {
-            if (!is.null(p$scales$get_scales("y"))) {
-                cli::cli_warn(
-                    "will omit y-scale for row annotation (gganno: {id})"
-                )
-            }
-            x_scale <- p$scales$get_scales("x") # from user
-            p$scales <- p$scales$non_position_scales()
-            p <- p + ggh4x::facetted_pos_scales(x = x_scale, y = scales)
-        } else {
-            if (!is.null(p$scales$get_scales("x"))) {
-                cli::cli_warn(
-                    "will omit x-scale for column annotation (gganno: {id})"
-                )
-            }
-            y_scale <- p$scales$get_scales("y") # from user
-            p$scales <- p$scales$non_position_scales()
-            p <- p + ggh4x::facetted_pos_scales(x = scales, y = y_scale)
-        }
+        p <- p + ggh4x::facetted_pos_scales(x = x_scale, y = y_scale)
     } else {
-        p <- p + scales[[1L]]
+        # it's safe to add `NULL` or a `list`
+        p <- p + x_scale + y_scale
     }
     if (isTRUE(anno@debug)) {
         cli::cli_inform(

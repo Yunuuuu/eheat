@@ -103,6 +103,12 @@ prepare_ggheat <- function(object) {
                 "Cannot set facet in {.fn ggfn} (ggheat: {object@name})"
             )
         }
+        if (!inherits(p$coordinates, "CoordCartesian")) {
+            cli::cli_abort(paste(
+                "Only {.fn coord_cartesian} can be used",
+                "in {.fn ggfn} (ggheat: {object@name})"
+            ))
+        }
         if (!is.null(p$scales$get_scales("x"))) {
             cli::cli_warn("will omit x-scale for ggheat: {object@name}")
         }

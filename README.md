@@ -350,8 +350,8 @@ columns added:
   number.
 
 - `.x`/`.y`: indicating the x-axis (or y-axis) coordinates. Don’t use
-  `ggplot2::coord_flip` to flip coordinates as it may disrupt internal
-  operations.
+  `ggplot2::coord_flip` to flip coordinates as it can disrupt internal
+  design.
 
 - `.index`: denoting the row index of the original matrix, where rows
   are uniformly considered as observations and columns as variables.
@@ -513,10 +513,6 @@ draw(ggheat(small_mat,
 #> ℹ convert simple vector to one-column matrix
 #> ℹ convert simple vector to one-column matrix
 #> ℹ convert simple vector to one-column matrix
-#> Warning: Attempting to add facetted x scales, while x scales are not free.
-#> ℹ Try adding `scales = "free_x"` to the facet.
-#> Warning: Attempting to add facetted y scales, while y scales are not free.
-#> ℹ Try adding `scales = "free_y"` to the facet.
 ```
 
 <img src="man/figures/README-unnamed-chunk-7-1.png" width="100%" />
