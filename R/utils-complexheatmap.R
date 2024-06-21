@@ -93,30 +93,6 @@ cheat_check_gp <- function(gp) {
     gp
 }
 
-guide_from_gtable <- function(gt, direction = NULL) {
-    guides <- gtable::gtable_filter(gt, "guide-box")
-    outs <- lapply(guides$grobs, function(x) {
-        if (grid::is.grob(x) && inherits(x, "zeroGrob")) return(NULL) # styler: off
-        guide <- gtable::gtable_filter(x, "guides")
-        attr(guide, "width") <- sum(guide$widths)
-        attr(guide, "height") <- sum(guide$heights)
-        methods::new(
-            "Legends",
-            grob = guide,
-            type = "gg_legend",
-            name = "gg",
-            n = 1L, multiple = 1L,
-            # extract information directly from ggplot2 ? how to
-            direction = match.arg(direction, c("vertical", "horizontal"))
-        )
-    })
-    outs[!vapply(outs, is.null, logical(1L))]
-}
-
-guide_from_gg <- function(gg, direction = NULL) {
-    guide_from_gtable(ggplot2::ggplotGrob(gg, direction = direction))
-}
-
 # column order in slice, coord, raw_index
 cheat_scales <- function(data, lables, scale_fn) {
     lapply(split(data, data[[1L]]), function(slice_data) {
