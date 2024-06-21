@@ -93,8 +93,23 @@ prepare_ggheat <- function(object) {
     if (!is.null(object@ggfn)) {
         p <- rlang::inject(object@ggfn(p, !!!object@ggparams))
         if (!ggplot2::is.ggplot(p)) {
-            cli::cli_abort("{.arg ggfn} must return a {.cls ggplot2} object.")
+            cli::cli_abort(paste(
+                "{.arg ggfn} (ggheat: {object@name}) must",
+                "return a {.cls ggplot2} object."
+            ))
         }
+        if (!inherits(p$facet, "FacetNull")) {
+            cli::cli_abort(
+                "Cannot set facet in {.fn ggfn} (ggheat: {object@name})"
+            )
+        }
+        if (!is.null(p$scales$get_scales("x"))) {
+            cli::cli_warn("will omit x-scale for ggheat: {object@name}")
+        }
+        if (!is.null(p$scales$get_scales("y"))) {
+            cli::cli_warn("will omit y-scale for ggheat: {object@name}")
+        }
+        p$scales <- p$scales$non_position_scales()
     }
 
     # prepare scales ------------------------------
