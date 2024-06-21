@@ -25,7 +25,7 @@
 #' won't change the function environment of `draw_fn`. So it's safe to use
 #' `new_anno` in pacakge development, particularly when dealing with internal
 #' functions in the package namespace that are likely to exist. `@@subsettable`
-#' will always be set to `FALSE`. 
+#' will always be set to `FALSE`.
 #' @examples
 #' x <- 1:10
 #' anno <- new_anno(
@@ -43,9 +43,10 @@
 #' m <- rbind(1:10, 11:20)
 #' ggheat(m, top_annotation = HeatmapAnnotation(foo = anno))
 #' ggheat(m, top_annotation = HeatmapAnnotation(foo = anno), column_km = 2)
-#' @seealso 
+#' @seealso
 #' - [new_anno_subset]
 #' - [AnnotationFunction][ComplexHeatmap::AnnotationFunction]
+#' @importFrom ComplexHeatmap ht_opt
 #' @export
 new_anno <- function(n, draw_fn, ylim = NULL,
                      width = NULL, height = NULL, show_name = TRUE,
