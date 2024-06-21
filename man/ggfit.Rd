@@ -10,14 +10,15 @@ ggfit(
   vp = NULL,
   sides = c("b", "t", "l", "r"),
   elements = c("axis", "lab", "guide"),
+  background = FALSE,
   gt = NULL
 )
 }
 \arguments{
 \item{gg}{A \link[ggplot2:ggplot]{ggplot2} object.}
 
-\item{align}{A string indicates how to align the \code{viewport}, "panel" or
-"plot".}
+\item{align}{A string indicates how to align the \code{viewport}. Must be "panel"
+or "plot".}
 
 \item{vp}{A \link[grid:viewport]{viewport} object.}
 
@@ -28,13 +29,15 @@ draw panel only.}
 specify elements for each side separately. Valid elements are "axis", "lab",
 "guide". Other elements will be ignored.}
 
+\item{background}{A boolean value indicates whether to draw the background.}
+
 \item{gt}{A \link[ggplot2:ggplotGrob]{gtable} object.}
 }
 \value{
 Draw ggplot object.
 \itemize{
-\item align = "panel": Draw ggplot object by fitting exactly the panel to \code{vp}.
-\item align = "plot": Draw ggplot object in \code{vp}.
+\item align = \code{"panel"}: Draw ggplot object by fitting exactly the panel to \code{vp}.
+\item align = \code{"plot"}: Draw ggplot object in \code{vp}.
 }
 }
 \description{

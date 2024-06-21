@@ -3,13 +3,15 @@
 #' @return Draw ggplot object in `vp`.
 #' @examples
 #' p <- ggplot(data.frame(x = 0:10, y = 0:10), aes(x, y)) +
-#'     geom_point()
+#'   geom_point() +
+#'   theme(plot.background = element_rect(fill = "red"))
 #' outerBox <- viewport(width = unit(125, "mm"), height = unit(150, "mm"))
 #' innerBox <- viewport(
 #'     x = unit(0.5, "npc"), y = unit(0.6, "npc"),
 #'     width = unit(60, "mm"), height = unit(70, "mm"), angle = -30
 #' )
 #'
+#' # No background ----------------
 #' grid.newpage()
 #' pushViewport(outerBox)
 #' grid.rect(gp = gpar(col = "red", fill = NA))
@@ -17,10 +19,20 @@
 #' pushViewport(innerBox)
 #' grid.rect(gp = gpar(col = "red", fill = NA, lwd = 2))
 #' ggfit_plot(p)
+#' 
+#' # with background --------------
+#' grid.newpage()
+#' pushViewport(outerBox)
+#' grid.rect(gp = gpar(col = "red", fill = NA))
+#' 
+#' pushViewport(innerBox)
+#' grid.rect(gp = gpar(col = "red", fill = NA, lwd = 2))
+#' ggfit_plot(p, background = TRUE)
 #' @export
 ggfit_plot <- function(gg, vp = NULL,
                        sides = c("b", "t", "l", "r"),
                        elements = c("axis", "lab", "guide"),
+                       background = FALSE,
                        gt = NULL) {
     if (is.null(gt)) {
         stopifnot(ggplot2::is.ggplot(gg))
@@ -33,14 +45,16 @@ ggfit_plot <- function(gg, vp = NULL,
     if (!is.character(elements) && !is.list(elements)) {
         stop("elements must be a character or a list of character")
     }
-    .ggfit_plot(gt, vp, sides, elements)
+    .ggfit_plot(gt, vp, sides, elements, background)
 }
 
 .ggfit_plot <- function(gt, vp = NULL,
                         sides = c("b", "t", "l", "r"),
-                        elements = c("axis", "lab", "guide")) {
+                        elements = c("axis", "lab", "guide"),
+                        background = FALSE) {
     if (is.null(vp)) vp <- grid::viewport()
     patterns <- c("panel")
+    if (isTRUE(background)) patterns <- c(patterns, "background")
     if (is.character(elements)) elements <- list(elements)
     elements <- rep_len(elements, length(sides))
     for (i in seq_along(sides)) {
