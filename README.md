@@ -477,7 +477,7 @@ draw(ggheat(small_mat,
       function(p) {
         p + aes(y = V1) +
           geom_text(aes(label = .index)) +
-          scale_y_continuous(limits = rev)
+          scale_y_reverse()
       },
       matrix = anno_data,
       which = "column", height = unit(2, "cm")
@@ -500,7 +500,7 @@ draw(ggheat(small_mat,
       function(p) {
         p + aes(x = V1) +
           geom_text(aes(label = .index)) +
-          scale_x_continuous(limits = rev)
+          scale_x_reverse()
       },
       matrix = anno_data,
       width = unit(3, "cm")
@@ -521,7 +521,7 @@ draw(ggheat(small_mat,
 
 <img src="man/figures/README-unnamed-chunk-7-1.png" width="100%" />
 
-`gganno` can work with `Heatmap` function, while cannot extract the
+`gganno` can work with `Heatmap` function, but cannot extract the
 legend.
 
 ``` r

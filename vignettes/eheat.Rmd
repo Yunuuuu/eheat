@@ -383,7 +383,7 @@ draw(ggheat(small_mat,
       function(p) {
         p + aes(y = V1) +
           geom_text(aes(label = .index)) +
-          scale_y_continuous(limits = rev)
+          scale_y_reverse()
       },
       matrix = anno_data,
       which = "column", height = unit(2, "cm")
@@ -406,7 +406,7 @@ draw(ggheat(small_mat,
       function(p) {
         p + aes(x = V1) +
           geom_text(aes(label = .index)) +
-          scale_x_continuous(limits = rev)
+          scale_x_reverse()
       },
       matrix = anno_data,
       width = unit(3, "cm")
@@ -417,7 +417,7 @@ draw(ggheat(small_mat,
 ), merge_legends = TRUE)
 ```
 
-`gganno` can work with `Heatmap` function, while cannot extract the legend.
+`gganno` can work with `Heatmap` function, but cannot extract the legend.
 ```{r Heatmap_gganno}
 draw(Heatmap(small_mat,
   top_annotation = HeatmapAnnotation(
