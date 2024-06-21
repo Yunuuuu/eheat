@@ -1,11 +1,10 @@
 #' Subsettable AnnotationFunction
 #'
-#' @inheritParams ggheat
-#' @param draw_fn A function which defines how to draw the annotation. The
-#' function should accept at least `matrix`, `index`, `k`, `n` arguments.
-#' `...` is also passed on to this function.
-#' @param ... Additional arguments passed on to `draw_fn`.
 #' @inheritParams new_anno
+#' @param draw_fn A function which defines how to draw the annotation. The
+#' function should accept at least three `index`, `k`, `n` arguments in the
+#' beginning. Names don't matter.
+#' @param ... Additional arguments passed on to `draw_fn`.
 #' @inheritParams ComplexHeatmap::AnnotationFunction
 #' @param subset_rule A list of function to subset variables in `...`.
 #' @details
@@ -18,57 +17,53 @@
 #' since the internal will set `@@subsettable` to `TRUE`.
 #' @examples
 #' anno <- new_anno_subset(
-#'     rnorm(10L),
-#'     draw_fn = function(matrix, index, k, n) {
+#'     10L, function(index, k, n, matrix) {
 #'         n <- length(index)
 #'         pushViewport(viewport(xscale = c(0.5, n + 0.5), yscale = c(0, 10)))
 #'         grid.rect()
-#'         grid.points(1:n,
-#'             matrix[index, , drop = FALSE],
-#'             default.units = "native"
-#'         )
+#'         grid.points(1:n, matrix[index], default.units = "native")
 #'         if (k == 1) grid.yaxis()
 #'         popViewport()
 #'     },
+#'     matrix = rnorm(10L),
 #'     height = unit(2, "cm")
 #' )
 #' draw(anno)
+#' draw(anno[1:2])
 #' @seealso
 #' - [new_anno]
 #' - [AnnotationFunction][ComplexHeatmap::AnnotationFunction]
 #' @inherit ComplexHeatmap::AnnotationFunction return
 #' @export
 new_anno_subset <- function(
-    matrix, draw_fn, ..., ylim = NULL, subset_rule = NULL,
+    n, draw_fn, ..., ylim = NULL, subset_rule = NULL,
     width = NULL, height = NULL, show_name = TRUE,
     which = NULL, name = NULL) {
-    matrix <- build_matrix(matrix)
     draw_fn <- allow_lambda(draw_fn)
     if (...length() != sum(nzchar(...names()))) {
         cli::cli_abort("All elements in {.arg ...} must be named.")
     }
-    name <- name %||% "anno_subset"
+    name <- name %||% "new_anno_subset"
     dots <- rlang::list2(...)
     # https://github.com/jokergoo/ComplexHeatmap/blob/7d95ca5cf533b98bd0351eecfc6805ad30c754c0/R/AnnotationFunction-class.R#L270
-    internal_subset <- list(matrix = function(x, i) x[i, , drop = FALSE])
     if (...length() && is.null(subset_rule)) {
         subset_rule <- lapply(dots, function(var) {
             if (is.matrix(var)) {
                 function(x, i) x[i, , drop = FALSE]
             } else if (inherits(var, "gpar")) {
                 subset_gp
-            } else if (is.vector(var)) {
-                if (length(var) > 1) function(x, i) x[i]
+            } else if (is.vector(var) && length(var) > 1) {
+                function(x, i) x[i]
             }
         })
     }
     if (length(subset_rule)) {
         rules <- subset_rule
-        rules_nms <- names(rules)
         subset_rule <- list(dots = function(x, i) {
+            rules_nms <- names(rules)
             imap(x, function(element, nm) {
                 if (any(nm == rules_nms)) {
-                    rule <- rules[[nm]]
+                    rule <- .subset2(rules, nm)
                     if (is.null(rule) || isFALSE(rule)) {
                         # Don't do subset
                         element
@@ -82,15 +77,10 @@ new_anno_subset <- function(
             })
         })
     }
-    subset_rule <- c(internal_subset, subset_rule)
-    which <- cheat_which(which)
     anno <- new_anno(
-        n = nrow(matrix),
+        n = n,
         draw_fn = function(index, k, n) {
-            rlang::inject(draw_fn(
-                matrix = matrix, !!!dots,
-                index = index, k = k, n = n
-            ))
+            rlang::inject(draw_fn(index, k, n, !!!dots))
         },
         ylim = ylim,
         which = which, width = width, height = height,
@@ -99,12 +89,12 @@ new_anno_subset <- function(
     anno@subsettable <- TRUE
     anno@subset_rule <- subset_rule
     # we change `var_env` into the environment of `draw_fn`
-    anno@var_env <- environment(anno@fun)
-    # Only save necessary variables for usage of `draw_fn`
+    anno@var_env <- environment(anno@fun) # should be the current environment
+    # Only save necessary variables for usage of `draw_fn` and `subset_rule`
     on.exit(rm(
         list = setdiff(
             ls(envir = anno@var_env, all.names = TRUE),
-            c("draw_fn", "matrix", "dots")
+            c("draw_fn", "dots", "rules")
         ),
         envir = anno@var_env, inherits = FALSE
     ))
