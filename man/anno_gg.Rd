@@ -14,8 +14,7 @@ anno_gg(
   width = NULL,
   height = NULL,
   show_name = FALSE,
-  which = NULL,
-  name = NULL
+  which = NULL
 )
 }
 \arguments{
@@ -42,8 +41,6 @@ specify elements for each side separately. Valid elements are "axis", "lab",
 \item{show_name}{It is used to turn off the drawing of annotation names in \code{\link[ComplexHeatmap]{HeatmapAnnotation}}. Annotations always have names associated and normally they will be drawn beside the annotation graphics to tell what the annotation is about. e.g. the annotation names put beside the points annotation graphics. However, for some of the annotations, the names are not necessarily to be drawn, such as text annotations drawn by \code{\link[ComplexHeatmap]{anno_text}} or an empty annotation drawn by \code{\link[ComplexHeatmap]{anno_empty}}. In this case, when \code{show_names} is set to \code{FALSE}, there will be no annotation names drawn for the annotation.}
 
 \item{which}{Whether it is drawn as a column annotation or a row annotation?}
-
-\item{name}{Name of the annotation, only used for message.}
 }
 \value{
 A \code{\link[ComplexHeatmap]{AnnotationFunction-class}} object which can be used in \code{\link[ComplexHeatmap]{HeatmapAnnotation}}.
