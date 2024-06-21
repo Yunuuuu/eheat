@@ -5,7 +5,7 @@
 \title{Subsettable AnnotationFunction}
 \usage{
 new_anno_subset(
-  matrix,
+  n,
   draw_fn,
   ...,
   ylim = NULL,
@@ -18,12 +18,11 @@ new_anno_subset(
 )
 }
 \arguments{
-\item{matrix}{A matrix, if it is a simple vector, it will be converted to a
-one-column matrix. Data.frame will also be coerced into matrix.}
+\item{n}{Number of observations in the annotation. It is not mandatory, but it is better to provide this information so that the higher order \code{\link[ComplexHeatmap]{HeatmapAnnotation}} knows it and it can perform check on the consistency of annotations and heatmaps.}
 
 \item{draw_fn}{A function which defines how to draw the annotation. The
-function should accept at least \code{matrix}, \code{index}, \code{k}, \code{n} arguments.
-\code{...} is also passed on to this function.}
+function should accept at least three \code{index}, \code{k}, \code{n} arguments in the
+beginning. Names don't matter.}
 
 \item{...}{Additional arguments passed on to \code{draw_fn}.}
 
@@ -58,21 +57,19 @@ since the internal will set \verb{@subsettable} to \code{TRUE}.
 }
 \examples{
 anno <- new_anno_subset(
-    rnorm(10L),
-    draw_fn = function(matrix, index, k, n) {
+    10L, function(index, k, n, matrix) {
         n <- length(index)
         pushViewport(viewport(xscale = c(0.5, n + 0.5), yscale = c(0, 10)))
         grid.rect()
-        grid.points(1:n,
-            matrix[index, , drop = FALSE],
-            default.units = "native"
-        )
+        grid.points(1:n, matrix[index], default.units = "native")
         if (k == 1) grid.yaxis()
         popViewport()
     },
+    matrix = rnorm(10L),
     height = unit(2, "cm")
 )
 draw(anno)
+draw(anno[1:2])
 }
 \seealso{
 \itemize{

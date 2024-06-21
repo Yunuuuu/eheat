@@ -54,8 +54,9 @@ new_anno <- function(n, draw_fn, ylim = NULL,
     # environment of `anno@fun`
     # here: we use new_anno instead, in this way, the function in the
     #       package namespace can be used directly
+    draw_fn <- allow_lambda(draw_fn)
     assert_string(name, null_ok = TRUE)
-    name <- name %||% ""
+    name <- name %||% "new_anno"
     if (ht_opt$verbose) {
         msg <- "construct AnnotationFunction"
         if (name == "") msg <- paste(msg, "with {.fn {name}}")
