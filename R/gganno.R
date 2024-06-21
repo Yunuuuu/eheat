@@ -312,29 +312,36 @@ draw_gganno <- function(anno, order_list, heat_matrix, id) {
             if (which == "row") {
                 pattern <- c("panel-%d-1")
                 if (k == 1L) {
-                    pattern <- c(pattern, "axis-t", "lab-t")
+                    pattern <- c(pattern, ggpatterns("t", c("axis", "lab")))
                 } else if (k == n) {
-                    pattern <- c(pattern, "axis-b", "lab-b")
+                    pattern <- c(pattern, ggpatterns("b", c("axis", "lab")))
                 }
             } else {
                 pattern <- "panel-1-%d"
                 if (k == 1L) {
-                    pattern <- c(pattern, "axis-l", "lab-l")
+                    pattern <- c(pattern, ggpatterns("l", c("axis", "lab")))
                 } else if (k == n) {
-                    pattern <- c(pattern, "axis-r", "lab-r")
+                    pattern <- c(pattern, ggpatterns("r", c("axis", "lab")))
                 }
             }
-            pattern <- paste0(sprintf(pattern, k), collapse = "|")
+            pattern <- sprintf(pattern, k)
         } else {
             if (which == "row") {
-                pattern <- c("panel", "axis-t", "axis-b", "lab-t", "lab-b")
+                pattern <- c(
+                    "panel",
+                    ggpatterns("t", c("axis", "lab")),
+                    ggpatterns("b", c("axis", "lab"))
+                )
             } else {
-                pattern <- c("panel", "axis-l", "axis-r", "lab-l", "lab-r")
+                pattern <- c(
+                    "panel",
+                    ggpatterns("l", c("axis", "lab")),
+                    ggpatterns("r", c("axis", "lab"))
+                )
             }
-            pattern <- paste0(pattern, collapse = "|")
         }
-        vp_gt <- gt_trim_zero_grob(gtable::gtable_filter(gt, pattern))
-        .ggfit_panel(vp_gt, vp = vp)
+        pattern <- paste0(pattern, collapse = "|")
+        .ggfit_panel(gtable::gtable_filter(gt, pattern), vp = vp)
     }
     list(legend = legend_from_gtable(gt), draw_fn = draw_fn)
 }
