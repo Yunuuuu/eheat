@@ -2,6 +2,7 @@
 
 export(draw)
 export(gganno)
+export(ggfit_panel)
 export(ggheat)
 export(gpar)
 export(ht_opt)

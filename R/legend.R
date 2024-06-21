@@ -19,6 +19,7 @@ legend_from_gtable <- function(gt, direction = NULL) {
     outs <- lapply(guides$grobs, function(x) {
         if (grid::is.grob(x) && inherits(x, "zeroGrob")) return(NULL) # styler: off
         guide <- gtable::gtable_filter(x, "guides")
+        if (!length(guide)) return(NULL) # styler: off
         attr(guide, "width") <- gtable::gtable_width(guide)
         attr(guide, "height") <- gtable::gtable_height(guide)
         methods::new(
