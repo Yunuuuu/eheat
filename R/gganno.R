@@ -78,8 +78,13 @@ methods::setMethod(
         if (!object@gginitialized) {
             if (is.null(heat_matrix) &&
                 (is.null(object@matrix) || is.function(object@matrix))) {
+                if (is.null(id)) {
+                    fn_id <- "{.fn ggfn}"
+                } else {
+                    fn_id <- sprintf("{.fn ggfn} (gganno: %s)", id)
+                }
                 cli::cli_abort(paste(
-                    "You must provide a matrix in {.fn gganno}",
+                    "You must provide a matrix in", fn_id,
                     "in order to draw {.cls ggAnnotationFunction} directly"
                 ))
             }
@@ -97,7 +102,7 @@ methods::setMethod(
             }
             gganno_element <- draw_gganno(
                 object, order_list,
-                id = id %||% "ggAnnotationFunction"
+                id = id %||% "draw-gganno"
             )
 
             # we merge the annotation_legend_list with ggplot2 legends -----
@@ -183,6 +188,12 @@ gganno_get_order_list <- function(name, axis, call = quote(draw_heatmap_list)) {
 #' @importFrom ggplot2 ggplot
 #' @importFrom ggplot2 aes
 draw_gganno <- function(anno, order_list, heat_matrix, id) {
+    if (is.null(id)) {
+        fn_id <- "{.fn ggfn}"
+    } else {
+        id <- sprintf("(gganno: %s)", id)
+        fn_id <- sprintf("{.fn ggfn} %s", id)
+    }
     which <- anno@which
     # we always regard matrix row as the observations
     matrix <- anno@matrix %||% switch(which,
@@ -223,16 +234,15 @@ draw_gganno <- function(anno, order_list, heat_matrix, id) {
     p <- rlang::inject(anno@ggfn(p, !!!anno@ggparams))
     if (!ggplot2::is.ggplot(p)) {
         cli::cli_abort(
-            "{.fn ggfn} (gganno: {id}) must return a {.cls ggplot2} object."
+            sprintf("%s must return a {.cls ggplot2} object.", fn_id)
         )
     }
     if (!inherits(p$facet, "FacetNull")) {
-        cli::cli_abort("Cannot set facet in {.fn ggfn} (gganno: {id})")
+        cli::cli_abort(sprintf("Cannot set facet in %s", fn_id))
     }
     if (!inherits(p$coordinates, "CoordCartesian")) {
         cli::cli_abort(paste(
-            "Only {.fn coord_cartesian} can be used",
-            "in {.fn ggfn} (gganno: {id})"
+            "Only {.fn coord_cartesian} can be used in", fn_id
         ))
     }
     # prepare scales --------------------------------------
@@ -247,7 +257,7 @@ draw_gganno <- function(anno, order_list, heat_matrix, id) {
         )
         if (!is.null(p$scales$get_scales("y"))) {
             cli::cli_warn(
-                "will omit y-scale for row annotation (gganno: {id})"
+                null_paste("will omit y-scale for row annotation", id)
             )
         }
         if (!is.null(x_scale <- p$scales$get_scales("x"))) { # from user
@@ -267,7 +277,7 @@ draw_gganno <- function(anno, order_list, heat_matrix, id) {
         )
         if (!is.null(p$scales$get_scales("x"))) {
             cli::cli_warn(
-                "will omit x-scale for column annotation (gganno: {id})"
+                null_paste("will omit x-scale for column annotation", id)
             )
         }
         if (!is.null(y_scale <- p$scales$get_scales("y"))) { # from user
@@ -286,12 +296,12 @@ draw_gganno <- function(anno, order_list, heat_matrix, id) {
         p <- p + x_scale + y_scale
     }
     if (isTRUE(anno@debug)) {
-        cli::cli_inform(
-            "Return {.cls ggplot} object from {.fn ggfn} of {id} annotation"
-        )
+        cli::cli_inform(null_paste(
+            "Return {.cls ggplot} object", sprintf("of %s", id), "directly"
+        ))
         rlang::return_from(sys.frame(1L), value = p)
     } else if (is.function(anno@debug)) {
-        cli::cli_inform("Debug from {.fn ggfn} of {id} annotation")
+        cli::cli_inform(sprintf("Debug from %s annotation", fn_id))
         anno@debug(p)
     }
 
