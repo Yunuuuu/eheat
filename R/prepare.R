@@ -187,12 +187,12 @@ prepare_ggheat <- function(object) {
         # Since ComplexHeatmap currently didn't merge
         # https://github.com/jokergoo/ComplexHeatmap/pull/1139
         # object@heatmap_legend_list <- c(
-        #     guide_from_gtable(gt),
+        #     legend_from_gtable(gt),
         #     wrap_legend(object@heatmap_legend_list)
         # )
 
         # we'll trace back into `make_layout,HeatmapList` method
-        add_gg_legend_list("heatmap_legend_list", guide_from_gtable(gt))
+        add_gg_legend_list("heatmap_legend_list", legend_from_gtable(gt))
 
         # we always prevent the ComplexHeatmap Heatmap body legend.
         object@heatmap_param$show_heatmap_legend <- FALSE
