@@ -30,6 +30,12 @@ recycle_gp <- function(gp, n) {
     gp
 }
 
+draw_grob <- function(vp, grob) {
+    grid::pushViewport(vp)
+    on.exit(grid::popViewport())
+    grid::grid.draw(grob)
+}
+
 grid_vp_size <- function() {
     current_vp <- grid::current.viewport()$name
     if (current_vp == "ROOT") {
