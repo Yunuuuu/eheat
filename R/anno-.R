@@ -28,7 +28,7 @@
 #' will always be set to `FALSE`. 
 #' @examples
 #' x <- 1:10
-#' anno1 <- new_anno(
+#' anno <- new_anno(
 #'     n = 10,
 #'     draw_fn = function(index, k, n) {
 #'         n <- length(index)
@@ -41,8 +41,8 @@
 #'     height = unit(2, "cm")
 #' )
 #' m <- rbind(1:10, 11:20)
-#' ggheat(m, top_annotation = HeatmapAnnotation(foo = anno1))
-#' ggheat(m, top_annotation = HeatmapAnnotation(foo = anno1), column_km = 2)
+#' ggheat(m, top_annotation = HeatmapAnnotation(foo = anno))
+#' ggheat(m, top_annotation = HeatmapAnnotation(foo = anno), column_km = 2)
 #' @seealso 
 #' - [new_anno_subset]
 #' - [AnnotationFunction][ComplexHeatmap::AnnotationFunction]
