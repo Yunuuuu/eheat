@@ -26,13 +26,18 @@
 #' )
 #' @seealso [ggfit]
 #' @export
-anno_gg <- function(gg, align = "panel", vp = NULL,
+anno_gg <- function(gg, align = "panel",
                     sides = c("b", "t", "l", "r"),
                     elements = c("axis", "lab", "guide"),
                     background = FALSE, gt = NULL,
                     width = NULL, height = NULL, show_name = FALSE,
-                    which = NULL, name = NULL) {
+                    which = NULL) {
     align <- match.arg(align, c("panel", "plot"))
+    force(gg)
+    force(sides)
+    force(elements)
+    force(background)
+    force(gt)
     new_anno(NA,
         function(index, k, n) {
             ggfit(gg,
@@ -41,6 +46,6 @@ anno_gg <- function(gg, align = "panel", vp = NULL,
             )
         },
         which = which, width = width, height = height,
-        show_name = show_name, name = name %||% "anno_gg"
+        show_name = show_name, name = "anno_gg"
     )
 }

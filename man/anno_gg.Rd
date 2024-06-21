@@ -7,7 +7,6 @@
 anno_gg(
   gg,
   align = "panel",
-  vp = NULL,
   sides = c("b", "t", "l", "r"),
   elements = c("axis", "lab", "guide"),
   background = FALSE,
@@ -24,8 +23,6 @@ anno_gg(
 
 \item{align}{A string indicates how to align the \code{viewport}. Must be "panel"
 or "plot".}
-
-\item{vp}{A \link[grid:viewport]{viewport} object.}
 
 \item{sides}{Which side to draw besides the panel elements. If \code{NULL}, will
 draw panel only.}
