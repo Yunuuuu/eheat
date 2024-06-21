@@ -1,7 +1,11 @@
 `%||%` <- function(x, y) if (is.null(x)) y else x
 
-pkg_nm <- function() {
-    utils::packageName(topenv(environment()))
+pkg_nm <- function() utils::packageName(topenv(environment()))
+
+null_paste <- function(..., sep = " ", collapse = NULL) {
+    dots <- list(...)
+    dots <- dots[!vapply(dots, is.null, logical(1L))]
+    do.call(paste, c(dots, list(sep = sep, collapse = collapse)))
 }
 
 #' @examples
