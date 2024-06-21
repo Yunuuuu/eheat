@@ -9,6 +9,7 @@ ggfit_plot(
   vp = NULL,
   sides = c("b", "t", "l", "r"),
   elements = c("axis", "lab", "guide"),
+  background = FALSE,
   gt = NULL
 )
 }
@@ -24,6 +25,8 @@ draw panel only.}
 specify elements for each side separately. Valid elements are "axis", "lab",
 "guide". Other elements will be ignored.}
 
+\item{background}{A boolean value indicates whether to draw the background.}
+
 \item{gt}{A \link[ggplot2:ggplotGrob]{gtable} object.}
 }
 \value{
@@ -34,13 +37,15 @@ Fit ggplot2 in a viewport
 }
 \examples{
 p <- ggplot(data.frame(x = 0:10, y = 0:10), aes(x, y)) +
-    geom_point()
+  geom_point() +
+  theme(plot.background = element_rect(fill = "red"))
 outerBox <- viewport(width = unit(125, "mm"), height = unit(150, "mm"))
 innerBox <- viewport(
     x = unit(0.5, "npc"), y = unit(0.6, "npc"),
     width = unit(60, "mm"), height = unit(70, "mm"), angle = -30
 )
 
+# No background ----------------
 grid.newpage()
 pushViewport(outerBox)
 grid.rect(gp = gpar(col = "red", fill = NA))
@@ -48,4 +53,13 @@ grid.rect(gp = gpar(col = "red", fill = NA))
 pushViewport(innerBox)
 grid.rect(gp = gpar(col = "red", fill = NA, lwd = 2))
 ggfit_plot(p)
+
+# with background --------------
+grid.newpage()
+pushViewport(outerBox)
+grid.rect(gp = gpar(col = "red", fill = NA))
+
+pushViewport(innerBox)
+grid.rect(gp = gpar(col = "red", fill = NA, lwd = 2))
+ggfit_plot(p, background = TRUE)
 }

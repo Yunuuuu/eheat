@@ -1,18 +1,19 @@
 #' Fit ggplot2 panel or plot in a viewport
 #'
 #' @param gg A [ggplot2][ggplot2::ggplot] object.
-#' @param align A string indicates how to align the `viewport`, "panel" or
-#' "plot".
+#' @param align A string indicates how to align the `viewport`. Must be "panel"
+#' or "plot".
 #' @param vp A [viewport][grid::viewport] object.
 #' @param sides Which side to draw besides the panel elements. If `NULL`, will
 #' draw panel only.
 #' @param elements Ggplot elements to draw, can be a list of a character to
 #' specify elements for each side separately. Valid elements are "axis", "lab",
 #' "guide". Other elements will be ignored.
+#' @param background A boolean value indicates whether to draw the background.
 #' @param gt A [gtable][ggplot2::ggplotGrob] object.
 #' @return Draw ggplot object.
-#' - align = "panel": Draw ggplot object by fitting exactly the panel to `vp`.
-#' - align = "plot": Draw ggplot object in `vp`.
+#' - align = `"panel"`: Draw ggplot object by fitting exactly the panel to `vp`.
+#' - align = `"plot"`: Draw ggplot object in `vp`.
 #' @examples
 #' p <- ggplot(data.frame(x = 0:10, y = 0:10), aes(x, y)) +
 #'     geom_point()
@@ -46,11 +47,12 @@
 ggfit <- function(gg, align = "panel", vp = NULL,
                   sides = c("b", "t", "l", "r"),
                   elements = c("axis", "lab", "guide"),
+                  background = FALSE,
                   gt = NULL) {
     align <- match.arg(align, c("panel", "plot"))
     if (align == "panel") {
-        ggfit_panel(gg, vp, sides = sides, elements = elements, gt = gt)
+        ggfit_panel(gg, vp, sides, elements, gt = gt)
     } else {
-        ggfit_plot(gg, vp, sides = sides, elements = elements, gt = gt)
+        ggfit_plot(gg, vp, sides, elements, background, gt = gt)
     }
 }
