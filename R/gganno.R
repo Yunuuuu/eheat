@@ -222,8 +222,11 @@ draw_gganno <- function(anno, order_list, heat_matrix, id) {
     p <- rlang::inject(anno@ggfn(p, !!!anno@ggparams))
     if (!ggplot2::is.ggplot(p)) {
         cli::cli_abort(
-            "{.fn ggfn} of {id} must return a {.cls ggplot2} object."
+            "{.fn ggfn} (gganno: {id}) must return a {.cls ggplot2} object."
         )
+    }
+    if (!inherits(p$facet, "FacetNull")) {
+        cli::cli_abort("Cannot set facet in {.fn ggfn} (gganno: {id})")
     }
     if (which == "row") {
         facet_params <- list(
@@ -244,15 +247,23 @@ draw_gganno <- function(anno, order_list, heat_matrix, id) {
     if (with_slice) {
         p <- p + do.call(ggplot2::facet_grid, facet_params)
         if (which == "row") {
-            p <- p + ggh4x::facetted_pos_scales(
-                x = p$scales$get_scales("x"), # from user
-                y = scales
-            )
+            if (!is.null(p$scales$get_scales("y"))) {
+                cli::cli_warn(
+                    "will omit y-scale for row annotation (gganno: {id})"
+                )
+            }
+            x_scale <- p$scales$get_scales("x") # from user
+            p$scales <- p$scales$non_position_scales()
+            p <- p + ggh4x::facetted_pos_scales(x = x_scale, y = scales)
         } else {
-            p <- p + ggh4x::facetted_pos_scales(
-                x = scales,
-                y = p$scales$get_scales("y") # from user
-            )
+            if (!is.null(p$scales$get_scales("x"))) {
+                cli::cli_warn(
+                    "will omit x-scale for column annotation (gganno: {id})"
+                )
+            }
+            y_scale <- p$scales$get_scales("y") # from user
+            p$scales <- p$scales$non_position_scales()
+            p <- p + ggh4x::facetted_pos_scales(x = scales, y = y_scale)
         }
     } else {
         p <- p + scales[[1L]]
