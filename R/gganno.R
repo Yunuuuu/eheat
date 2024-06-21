@@ -324,7 +324,7 @@ draw_gganno <- function(anno, order_list, heat_matrix, id) {
             pattern <- paste0(pattern, collapse = "|")
         }
         vp_gt <- gt_trim_zero_grob(gtable::gtable_filter(gt, pattern))
-        fit_panel(vp_gt, vp = vp)
+        .ggfit_panel(vp_gt, vp = vp)
     }
     list(legend = legend_from_gtable(gt), draw_fn = draw_fn)
 }
