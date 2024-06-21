@@ -127,7 +127,9 @@ cheat_scales <- function(data, lables, scale_fn) {
         limits <- range(breaks)
         limits[1L] <- limits[1L] - 0.5
         limits[2L] <- limits[2L] + 0.5
-        labels <- lables[slice_data[[2L]]]
+        if (!inherits(labels, "waiver")) {
+            labels <- lables[slice_data[[2L]]]
+        }
         do.call(scale_fn, list(
             limits = limits,
             breaks = breaks,

@@ -188,7 +188,6 @@ draw_gganno <- function(anno, order_list, heat_matrix, id) {
         row = heat_matrix,
         column = t(heat_matrix)
     )
-    labels <- rownames(matrix)
     data <- as_tibble0(matrix, rownames = NULL) # nolint
     if (length(order_list) > 1L) {
         with_slice <- TRUE
@@ -240,18 +239,19 @@ draw_gganno <- function(anno, order_list, heat_matrix, id) {
         scale_fn <- ggplot2::scale_x_continuous
     }
     # prepare scales
+    labels <- rownames(matrix) %||% ggplot2::waiver()
     scales <- cheat_scales(coords[c(1L, 3:2)], labels, scale_fn = scale_fn)
     if (with_slice) {
         p <- p + do.call(ggplot2::facet_grid, facet_params)
         if (which == "row") {
             p <- p + ggh4x::facetted_pos_scales(
-                x = p$scales$get_scales("x"),
+                x = p$scales$get_scales("x"), # from user
                 y = scales
             )
         } else {
             p <- p + ggh4x::facetted_pos_scales(
                 x = scales,
-                y = p$scales$get_scales("y")
+                y = p$scales$get_scales("y") # from user
             )
         }
     } else {
