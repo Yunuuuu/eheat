@@ -1,4 +1,10 @@
 
+- [eheat](#eheat)
+  - [Installation](#installation)
+  - [ggheat](#ggheat)
+  - [gganno](#gganno)
+  - [`anno_gg` and `anno_gg2`](#anno_gg-and-anno_gg2)
+
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 # eheat
@@ -535,3 +541,148 @@ draw(Heatmap(small_mat,
 ```
 
 <img src="man/figures/README-Heatmap_gganno-1.png" width="100%" />
+
+## `anno_gg` and `anno_gg2`
+
+Both function acts similar with other annotation function in
+ComplexHeatmap. Both accept a ggplot object and fit it in the
+ComplexHeatmap annotation area.
+
+``` r
+g <- ggplot(mpg, aes(displ, hwy, colour = class)) +
+  geom_point()
+m <- matrix(rnorm(100), 10)
+
+# anno_gg-panel: clip = "off" -------
+ggheat(m,
+  top_annotation = HeatmapAnnotation(
+    ggplot = anno_gg(g, "panel",
+      clip = "off",
+      height = unit(3, "cm"),
+      show_name = FALSE
+    )
+  )
+)
+```
+
+<img src="man/figures/README-anno_gg-panel-1.png" width="100%" />
+
+``` r
+# anno_gg-panel: clip = "on" --------
+ggheat(m,
+  top_annotation = HeatmapAnnotation(
+    ggplot = anno_gg(g, "panel",
+      clip = "on",
+      height = unit(3, "cm"),
+      show_name = FALSE
+    )
+  )
+)
+```
+
+<img src="man/figures/README-anno_gg-panel-clip-1.png" width="100%" />
+
+``` r
+# anno_gg-plot --------------------
+ggheat(m,
+  top_annotation = HeatmapAnnotation(
+    ggplot = anno_gg(g, "plot",
+      height = unit(3, "cm"),
+      show_name = FALSE
+    )
+  )
+)
+```
+
+<img src="man/figures/README-anno_gg-plot-1.png" width="100%" />
+
+``` r
+
+# anno_gg-full --------------------
+ggheat(m,
+  top_annotation = HeatmapAnnotation(
+    ggplot = anno_gg(g, "full",
+      height = unit(3, "cm"),
+      show_name = FALSE
+    )
+  )
+)
+```
+
+<img src="man/figures/README-anno_gg-plot-2.png" width="100%" />
+
+`anno_gg2` is the same with `anno_gg`, it differs in terms of its
+arguments, and allow more precise adjustment of the clip feature.
+
+``` r
+# anno_gg2-panel: margins = NULL -------
+ggheat(m,
+  top_annotation = HeatmapAnnotation(
+    ggplot = anno_gg2(g, "panel",
+      margins = NULL,
+      height = unit(6, "cm"),
+      show_name = FALSE
+    )
+  )
+)
+```
+
+<img src="man/figures/README-anno_gg2-panel1-1.png" width="100%" />
+
+``` r
+# anno_gg2-panel: margins = "l" --------
+ggheat(m,
+  top_annotation = HeatmapAnnotation(
+    ggplot = anno_gg2(g, "panel",
+      margins = "l",
+      height = unit(6, "cm"),
+      show_name = FALSE
+    )
+  )
+)
+```
+
+<img src="man/figures/README-anno_gg2-panel2-1.png" width="100%" />
+
+``` r
+# anno_gg2-panel: margins = "r" --------
+ggheat(m,
+  top_annotation = HeatmapAnnotation(
+    ggplot = anno_gg2(g, "panel",
+      margins = "r",
+      height = unit(6, "cm"),
+      show_name = FALSE
+    )
+  )
+)
+```
+
+<img src="man/figures/README-anno_gg2-panel3-1.png" width="100%" />
+
+``` r
+# anno_gg2-plot ---------------------
+ggheat(m,
+  top_annotation = HeatmapAnnotation(
+    ggplot = anno_gg2(g, "plot",
+      height = unit(6, "cm"),
+      show_name = FALSE
+    )
+  )
+)
+```
+
+<img src="man/figures/README-anno_gg2-plot-1.png" width="100%" />
+
+``` r
+# anno_gg2-full --------------------
+ggheat(m,
+  top_annotation = HeatmapAnnotation(
+    ggplot = anno_gg2(g, "full",
+      height = unit(6, "cm"),
+      show_name = FALSE
+    )
+  )
+)
+```
+
+<img src="man/figures/README-anno_gg2-full-1.png" width="100%" />

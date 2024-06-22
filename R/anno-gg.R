@@ -2,8 +2,7 @@
 #' @inheritParams ggfit
 #' @inheritParams new_anno
 #' @inherit new_anno return
-#' @seealso
-#' - [ggfit]
+#' @seealso [ggfit]
 #' @examples
 #' g <- ggplot(mpg, aes(displ, hwy, colour = class)) +
 #'     geom_point()
@@ -73,8 +72,6 @@ anno_gg <- function(gg, align_with = "full", clip = NULL, gt = NULL,
     )
 }
 
-#' @seealso
-#' - [ggfit2]
 #' @examples
 #' # anno_gg2-panel: margins = NULL -------
 #' ggheat(m,

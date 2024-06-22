@@ -6,7 +6,7 @@
 #' @param clip One of `"on"`, `"inherit"`, or `"off"`, indicating whether to
 #' clip to the extent out of the viewport, inherit the clipping region from
 #' `vp`, or turn clipping off altogether. A logical value of `TRUE` corresponds
-#' to `"on"` and `FALSE` corresponds to `"off"`. A `NULL` means `"inherit"`.
+#' to `"on"` and `FALSE` corresponds to `"off"`. Default: `"inherit"`.
 #' @param margins Which margin to draw besides the plot in the `vp` viewport.
 #' This allows for a more precise adjustment of the `clip` feature. Allowed
 #' values are `r rd_elements(MARGINS)`, When set to `NULL`, it means clip =
@@ -79,15 +79,13 @@ ggfit <- function(gg, align_with = "full", clip = NULL, vp = NULL, gt = NULL) {
     assert_clip(clip)
     assert_s3_class(vp, "viewport", null_ok = TRUE)
     # we need a valid viewport to decide the `clip` argument
-    vp <- vp %||% grid::viewport()
+    vp <- vp %||% grid::viewport(clip = grid::current.viewport()$clip)
     margins <- setup_margins(clip, vp)
     .ggfit(gt, align_with, margins, vp = vp)
 }
 
 setup_margins <- function(clip, vp) {
-    if (is.null(vp)) {
-        if (is.null(clip) || identical(clip, "inherit")) clip <- vp$clip
-    }
+    if (is.null(clip) || identical(clip, "inherit")) clip <- vp$clip
     if (isTRUE(clip) || identical(clip, "on")) {
         NULL
     } else {
@@ -163,7 +161,7 @@ ggfit2 <- function(gg, align_with = "full",
 
 .ggfit <- function(gt, align_with, margins = MARGINS,
                    elements = GG_ELEMENTS, vp = NULL) {
-    if (is.null(vp)) vp <- grid::viewport()
+    vp <- vp %||% grid::viewport(clip = grid::current.viewport()$clip)
     grid::pushViewport(vp)
     on.exit(grid::popViewport())
     if (align_with == "full") {
