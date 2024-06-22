@@ -545,7 +545,7 @@ draw(Heatmap(small_mat,
 ## `anno_gg` and `anno_gg2`
 
 Both function acts similar with other annotation function in
-ComplexHeatmap. Both accept a ggplot object and fit it in the
+ComplexHeatmap. They accept a ggplot object and fit it in the
 ComplexHeatmap annotation area.
 
 ``` r
