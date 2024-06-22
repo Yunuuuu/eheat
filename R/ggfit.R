@@ -8,28 +8,29 @@
 #' `vp`, or turn clipping off altogether. A logical value of `TRUE` corresponds
 #' to `"on"` and `FALSE` corresponds to `"off"`. A `NULL` means `"inherit"`.
 #' @param margins Which margin to draw besides the plot in the `vp` viewport.
-#' This allows for a more precise adjustment of the `clip` feature. When set to
-#' `NULL`, it means clip = `"off"`.
+#' This allows for a more precise adjustment of the `clip` feature. Allowed
+#' values are `r rd_elements(MARGINS)`, When set to `NULL`, it means clip =
+#' `"off"`. 
 #' @param elements Ggplot elements to draw, can be a list of a character to
-#' specify elements for each side separately. Valid elements are "axis", "lab",
-#' "guide". Other elements will be ignored.
+#' specify elements for each side separately. Valid elements are
+#' `r rd_elements(GG_ELEMENTS)`.
 #' @param vp A [viewport][grid::viewport] object.
 #' @param gt A [gtable][ggplot2::ggplotGrob] object.
 #' @return Fit ggplot object in the viewport.
-#' - align_with = `"panel"`: Draw ggplot object by fitting exactly the panel to
-#'   `vp`.
-#' - align_with = `"plot"`: Draw ggplot object by fitting panel, axis, and lab
-#'   in `vp`.
+#' - align_with = `"panel"`: Draw ggplot object by fitting exactly the `panel`
+#'   to `vp`.
+#' - align_with = `"plot"`: Draw ggplot object by fitting `panel`, `axis`, and
+#'   `lab` in `vp`.
 #' - align_with = `"full"`: Draw full ggplot object in `vp`.
 #' @examples
 #' p <- ggplot(data.frame(x = 0:10, y = 0:10), aes(x, y)) +
-#'   geom_point()
+#'     geom_point()
 #' outerBox <- viewport(width = unit(125, "mm"), height = unit(150, "mm"))
 #' innerBox <- viewport(
-#'   x = unit(0.5, "npc"), y = unit(0.6, "npc"),
-#'   width = unit(60, "mm"), height = unit(70, "mm"), angle = -30
+#'     x = unit(0.5, "npc"), y = unit(0.6, "npc"),
+#'     width = unit(60, "mm"), height = unit(70, "mm"), angle = -30
 #' )
-#' 
+#'
 #' # ggfit-panel: clip = "on" ------------
 #' grid.newpage()
 #' pushViewport(outerBox)
@@ -104,48 +105,48 @@ ggfit <- function(gg, align_with = "full", clip = NULL, vp = NULL, gt = NULL) {
 }
 
 #' @examples
-#' 
+#'
 #' # ggfit2-panel: margins = NULL ------------
 #' grid.newpage()
 #' pushViewport(outerBox)
 #' grid.rect(gp = gpar(col = "red", fill = NA))
-#' 
+#'
 #' pushViewport(innerBox)
 #' grid.rect(gp = gpar(col = "red", fill = NA, lwd = 2))
 #' ggfit2(p, "panel", margins = NULL)
-#' 
+#'
 #' # ggfit2-panel: margins = "b" ------------
 #' grid.newpage()
 #' pushViewport(outerBox)
 #' grid.rect(gp = gpar(col = "red", fill = NA))
-#' 
+#'
 #' pushViewport(innerBox)
 #' grid.rect(gp = gpar(col = "red", fill = NA, lwd = 2))
 #' ggfit2(p, "panel", margins = "b")
-#' 
+#'
 #' # ggfit2-panel: margins = "l" ------------
 #' grid.newpage()
 #' pushViewport(outerBox)
 #' grid.rect(gp = gpar(col = "red", fill = NA))
-#' 
+#'
 #' pushViewport(innerBox)
 #' grid.rect(gp = gpar(col = "red", fill = NA, lwd = 2))
 #' ggfit2(p, "panel", margins = "l")
-#' 
+#'
 #' # ggfit2-plot -------------
 #' grid.newpage()
 #' pushViewport(outerBox)
 #' grid.rect(gp = gpar(col = "red", fill = NA))
-#' 
+#'
 #' pushViewport(innerBox)
 #' grid.rect(gp = gpar(col = "red", fill = NA, lwd = 2))
 #' ggfit2(p, "plot")
-#' 
+#'
 #' # ggfit2-full -------------
 #' grid.newpage()
 #' pushViewport(outerBox)
 #' grid.rect(gp = gpar(col = "red", fill = NA))
-#' 
+#'
 #' pushViewport(innerBox)
 #' grid.rect(gp = gpar(col = "red", fill = NA, lwd = 2))
 #' ggfit2(p, "full")

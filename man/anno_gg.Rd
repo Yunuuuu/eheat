@@ -20,7 +20,7 @@ anno_gg2(
   gg,
   align_with = "full",
   margins = c("b", "t", "l", "r"),
-  elements = c("axis", "lab", "guide"),
+  elements = c("axis", "lab", "guide", "subtitle", "title", "caption"),
   gt = NULL,
   width = NULL,
   height = NULL,
@@ -50,12 +50,13 @@ to \code{"on"} and \code{FALSE} corresponds to \code{"off"}. A \code{NULL} means
 \item{which}{Whether it is drawn as a column annotation or a row annotation?}
 
 \item{margins}{Which margin to draw besides the plot in the \code{vp} viewport.
-This allows for a more precise adjustment of the \code{clip} feature. When set to
-\code{NULL}, it means clip = \code{"off"}.}
+This allows for a more precise adjustment of the \code{clip} feature. Allowed
+values are \code{"t"}, \code{"l"}, \code{"b"}, and \code{"r"}, When set to \code{NULL}, it means clip =
+\code{"off"}.}
 
 \item{elements}{Ggplot elements to draw, can be a list of a character to
-specify elements for each side separately. Valid elements are "axis", "lab",
-"guide". Other elements will be ignored.}
+specify elements for each side separately. Valid elements are
+\code{"axis"}, \code{"lab"}, \code{"guide"}, \code{"subtitle"}, \code{"title"}, and \code{"caption"}.}
 }
 \value{
 A \code{\link[ComplexHeatmap]{AnnotationFunction-class}} object which can be used in \code{\link[ComplexHeatmap]{HeatmapAnnotation}}.
@@ -67,14 +68,30 @@ Create a heatmap annotation with ggplot object.
 g <- ggplot(mpg, aes(displ, hwy, colour = class)) +
     geom_point()
 m <- matrix(rnorm(100), 10)
+
+# anno_gg-panel: clip = "off" -------
 ggheat(m,
     top_annotation = HeatmapAnnotation(
         ggplot = anno_gg(g, "panel",
+            clip = "off",
             height = unit(6, "cm"),
             show_name = FALSE
         )
     )
 )
+
+# anno_gg-panel: clip = "on" --------
+ggheat(m,
+    top_annotation = HeatmapAnnotation(
+        ggplot = anno_gg(g, "panel",
+            clip = "on",
+            height = unit(6, "cm"),
+            show_name = FALSE
+        )
+    )
+)
+
+# anno_gg-plot ---------------------
 ggheat(m,
     top_annotation = HeatmapAnnotation(
         ggplot = anno_gg(g, "plot",
@@ -82,6 +99,68 @@ ggheat(m,
             show_name = FALSE
         )
     )
+)
+
+# anno_gg-full --------------------
+ggheat(m,
+    top_annotation = HeatmapAnnotation(
+        ggplot = anno_gg(g, "full",
+            height = unit(6, "cm"),
+            show_name = FALSE
+        )
+    )
+)
+# anno_gg2-panel: margins = NULL -------
+ggheat(m,
+  top_annotation = HeatmapAnnotation(
+    ggplot = anno_gg2(g, "panel",
+      margins = NULL,
+      height = unit(6, "cm"),
+      show_name = FALSE
+    )
+  )
+)
+
+# anno_gg2-panel: margins = "l" --------
+ggheat(m,
+  top_annotation = HeatmapAnnotation(
+    ggplot = anno_gg2(g, "panel",
+      margins = "l",
+      height = unit(6, "cm"),
+      show_name = FALSE
+    )
+  )
+)
+
+# anno_gg2-panel: margins = "r" --------
+ggheat(m,
+  top_annotation = HeatmapAnnotation(
+    ggplot = anno_gg2(g, "panel",
+      margins = "r",
+      height = unit(6, "cm"),
+      show_name = FALSE
+    )
+  )
+)
+
+# anno_gg2-plot ---------------------
+ggheat(m,
+  top_annotation = HeatmapAnnotation(
+    ggplot = anno_gg2(g, "plot",
+      height = unit(6, "cm"),
+      show_name = FALSE
+    )
+  )
+)
+
+# anno_gg2-full --------------------
+ggheat(m,
+  top_annotation = HeatmapAnnotation(
+    ggplot = anno_gg2(g, "full",
+      height = unit(6, "cm"),
+      show_name = FALSE
+    )
+  )
 )
 }
 \seealso{

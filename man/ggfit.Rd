@@ -32,12 +32,13 @@ to \code{"on"} and \code{FALSE} corresponds to \code{"off"}. A \code{NULL} means
 \item{gt}{A \link[ggplot2:ggplotGrob]{gtable} object.}
 
 \item{margins}{Which margin to draw besides the plot in the \code{vp} viewport.
-This allows for a more precise adjustment of the \code{clip} feature. When set to
-\code{NULL}, it means clip = \code{"off"}.}
+This allows for a more precise adjustment of the \code{clip} feature. Allowed
+values are \code{"t"}, \code{"l"}, \code{"b"}, and \code{"r"}, When set to \code{NULL}, it means clip =
+\code{"off"}.}
 
 \item{elements}{Ggplot elements to draw, can be a list of a character to
-specify elements for each side separately. Valid elements are "axis", "lab",
-"guide". Other elements will be ignored.}
+specify elements for each side separately. Valid elements are
+\code{"axis"}, \code{"lab"}, \code{"guide"}, \code{"subtitle"}, \code{"title"}, and \code{"caption"}.}
 }
 \value{
 Fit ggplot object in the viewport.
@@ -54,11 +55,11 @@ Fit ggplot2 panel or plot in a viewport
 }
 \examples{
 p <- ggplot(data.frame(x = 0:10, y = 0:10), aes(x, y)) +
-  geom_point()
+    geom_point()
 outerBox <- viewport(width = unit(125, "mm"), height = unit(150, "mm"))
 innerBox <- viewport(
-  x = unit(0.5, "npc"), y = unit(0.6, "npc"),
-  width = unit(60, "mm"), height = unit(70, "mm"), angle = -30
+    x = unit(0.5, "npc"), y = unit(0.6, "npc"),
+    width = unit(60, "mm"), height = unit(70, "mm"), angle = -30
 )
 
 # ggfit-panel: clip = "on" ------------
