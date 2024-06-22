@@ -435,7 +435,7 @@ draw(Heatmap(small_mat,
 
 ## `anno_gg` and `anno_gg2`
 Both function acts similar with other annotation function in ComplexHeatmap.
-Both accept a ggplot object and fit it in the ComplexHeatmap annotation area.
+They accept a ggplot object and fit it in the ComplexHeatmap annotation area.
 
 ```{r anno_gg-panel, fig.height=4, fig.width=5}
 g <- ggplot(mpg, aes(displ, hwy, colour = class)) +
