@@ -42,6 +42,7 @@ Collate:
     'utils-complexheatmap.R'
     'utils-grid.R'
     'utils-gtable.R'
+    'utils-rd.R'
     'utils.R'
 ByteCompile: true
 Roxygen: list(markdown = TRUE)
