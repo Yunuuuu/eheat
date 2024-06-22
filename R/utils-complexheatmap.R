@@ -1,3 +1,13 @@
+#' Creates a gTree object from the Heatmap
+#' @param x A [HeatmapList-class][ComplexHeatmap::HeatmapList-class] object.
+#' @inheritDotParams grid::grid.grabExpr -expr
+#' @return A [gTree][grid::gTree] object.
+#' @examples
+#' h <- ggheat(matrix(rnorm(100), 10))
+#' cheat_grob(h)
+#' @export
+cheat_grob <- function(x, ...) grid::grid.grabExpr(expr = draw(x), ...)
+
 cheat_which <- function(which = NULL) {
     out <- cheat_env_get("current_annotation_which")
     if (is.null(out)) {
@@ -6,9 +16,7 @@ cheat_which <- function(which = NULL) {
     out
 }
 
-cheat_env_get <- function(name) {
-    .subset2(cheat_env(), name)
-}
+cheat_env_get <- function(name) .subset2(cheat_env(), name)
 
 cheat_env <- function() utils::getFromNamespace(".ENV", ns = "ComplexHeatmap")
 

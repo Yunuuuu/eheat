@@ -9,7 +9,6 @@
 #' ggheat(m,
 #'     top_annotation = HeatmapAnnotation(
 #'         ggplot = anno_gg(g, "panel",
-#'             background = TRUE,
 #'             height = unit(6, "cm"),
 #'             show_name = FALSE
 #'         )
@@ -18,31 +17,54 @@
 #' ggheat(m,
 #'     top_annotation = HeatmapAnnotation(
 #'         ggplot = anno_gg(g, "plot",
-#'             background = TRUE,
 #'             height = unit(6, "cm"),
 #'             show_name = FALSE
 #'         )
 #'     )
 #' )
-#' @seealso [ggfit]
+#' @seealso 
+#' - [ggfit]
 #' @export
-anno_gg <- function(gg, align = "panel",
-                    sides = c("b", "t", "l", "r"),
-                    elements = c("axis", "lab", "guide"),
-                    background = FALSE, gt = NULL,
+anno_gg <- function(gg, align_with = "full", clip = NULL, gt = NULL,
                     width = NULL, height = NULL, show_name = FALSE,
                     which = NULL) {
-    align <- match.arg(align, c("panel", "plot"))
+    align_with <- match.arg(align_with, c("panel", "plot", "full"))
     force(gg)
-    force(sides)
-    force(elements)
-    force(background)
     force(gt)
     new_anno(NA,
         function(index, k, n) {
             ggfit(gg,
-                align = align, sides = sides, elements = elements,
-                background = background, gt = gt
+                align_with = align_with, clip = clip,
+                gt = gt
+            )
+        },
+        which = which, width = width, height = height,
+        show_name = show_name, name = "anno_gg"
+    )
+}
+
+#' @seealso 
+#' - [ggfit2]
+#' @export
+#' @rdname anno_gg
+anno_gg2 <- function(gg, align_with = "full",
+                     margins = c("b", "t", "l", "r"),
+                     elements = c("axis", "lab", "guide"),
+                     gt = NULL,
+                     width = NULL, height = NULL, show_name = FALSE,
+                     which = NULL) {
+    align_with <- match.arg(align_with, c("panel", "plot", "full"))
+    force(gg)
+    force(margins)
+    force(elements)
+    force(gt)
+    new_anno(NA,
+        function(index, k, n) {
+            ggfit2(gg,
+                align_with = align_with,
+                margins = margins,
+                elements = elements,
+                gt = gt
             )
         },
         which = which, width = width, height = height,
