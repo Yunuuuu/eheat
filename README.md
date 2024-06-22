@@ -1,8 +1,8 @@
 
 - [eheat](#eheat)
   - [Installation](#installation)
-  - [ggheat](#ggheat)
-  - [gganno](#gganno)
+  - [`ggheat`](#ggheat)
+  - [`gganno`](#gganno)
   - [`anno_gg` and `anno_gg2`](#anno_gg-and-anno_gg2)
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -109,7 +109,7 @@ ComplexHeatmap is the ease of plotting statistical annotations. Another
 benefit is that the legends can be internally extracted from the ggplot2
 plot, eliminating the need for manual addition of legends.
 
-## ggheat
+## `ggheat`
 
 Using `ggheat`, it is effortless to create a simple Heatmap. The default
 color mapping was not consistent between ComplexHeatmap and ggplot2.
@@ -344,7 +344,7 @@ draw(
 
 <img src="man/figures/README-ggheat_legend_name2-1.png" width="100%" />
 
-## gganno
+## `gganno`
 
 The same with `ggheat`, the essential parameter of `gganno` is also the
 `ggfn`, which accepts a ggplot2 object equipped with a default data and
@@ -620,7 +620,7 @@ ggheat(m,
   top_annotation = HeatmapAnnotation(
     ggplot = anno_gg2(g, "panel",
       margins = NULL,
-      height = unit(6, "cm"),
+      height = unit(3, "cm"),
       show_name = FALSE
     )
   )
@@ -635,7 +635,7 @@ ggheat(m,
   top_annotation = HeatmapAnnotation(
     ggplot = anno_gg2(g, "panel",
       margins = "l",
-      height = unit(6, "cm"),
+      height = unit(3, "cm"),
       show_name = FALSE
     )
   )
@@ -650,7 +650,7 @@ ggheat(m,
   top_annotation = HeatmapAnnotation(
     ggplot = anno_gg2(g, "panel",
       margins = "r",
-      height = unit(6, "cm"),
+      height = unit(3, "cm"),
       show_name = FALSE
     )
   )
@@ -664,7 +664,7 @@ ggheat(m,
 ggheat(m,
   top_annotation = HeatmapAnnotation(
     ggplot = anno_gg2(g, "plot",
-      height = unit(6, "cm"),
+      height = unit(3, "cm"),
       show_name = FALSE
     )
   )
@@ -677,8 +677,19 @@ ggheat(m,
 # anno_gg2-full --------------------
 ggheat(m,
   top_annotation = HeatmapAnnotation(
-    ggplot = anno_gg2(g, "full",
-      height = unit(6, "cm"),
+    ggplot = anno_gg2(
+      g + guides(colour = guide_legend(
+        theme = theme(
+          legend.key.size = unit(1, "mm"),
+          legend.text = element_text(size = 10),
+          legend.key.spacing = unit(0, "mm"),
+          legend.title.position = "bottom",
+          legend.key = element_blank()
+        ),
+        ncol = 2L
+      )),
+      align_with = "full",
+      height = unit(3, "cm"),
       show_name = FALSE
     )
   )
