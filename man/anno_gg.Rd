@@ -56,7 +56,8 @@ values are \code{"t"}, \code{"l"}, \code{"b"}, and \code{"r"}, When set to \code
 
 \item{elements}{Ggplot elements to draw, can be a list of a character to
 specify elements for each side separately. Valid elements are
-\code{"axis"}, \code{"lab"}, \code{"guide"}, \code{"subtitle"}, \code{"title"}, and \code{"caption"}.}
+\code{"axis"}, \code{"lab"}, \code{"guide"}, \code{"subtitle"}, \code{"title"}, and \code{"caption"}. Invalid elements will be just omitted. IF
+\code{NULL}, all valid ggplot elements will be used.}
 }
 \value{
 A \code{\link[ComplexHeatmap]{AnnotationFunction-class}} object which can be used in \code{\link[ComplexHeatmap]{HeatmapAnnotation}}.
@@ -112,55 +113,55 @@ ggheat(m,
 )
 # anno_gg2-panel: margins = NULL -------
 ggheat(m,
-  top_annotation = HeatmapAnnotation(
-    ggplot = anno_gg2(g, "panel",
-      margins = NULL,
-      height = unit(6, "cm"),
-      show_name = FALSE
+    top_annotation = HeatmapAnnotation(
+        ggplot = anno_gg2(g, "panel",
+            margins = NULL,
+            height = unit(6, "cm"),
+            show_name = FALSE
+        )
     )
-  )
 )
 
 # anno_gg2-panel: margins = "l" --------
 ggheat(m,
-  top_annotation = HeatmapAnnotation(
-    ggplot = anno_gg2(g, "panel",
-      margins = "l",
-      height = unit(6, "cm"),
-      show_name = FALSE
+    top_annotation = HeatmapAnnotation(
+        ggplot = anno_gg2(g, "panel",
+            margins = "l",
+            height = unit(6, "cm"),
+            show_name = FALSE
+        )
     )
-  )
 )
 
 # anno_gg2-panel: margins = "r" --------
 ggheat(m,
-  top_annotation = HeatmapAnnotation(
-    ggplot = anno_gg2(g, "panel",
-      margins = "r",
-      height = unit(6, "cm"),
-      show_name = FALSE
+    top_annotation = HeatmapAnnotation(
+        ggplot = anno_gg2(g, "panel",
+            margins = "r",
+            height = unit(6, "cm"),
+            show_name = FALSE
+        )
     )
-  )
 )
 
 # anno_gg2-plot ---------------------
 ggheat(m,
-  top_annotation = HeatmapAnnotation(
-    ggplot = anno_gg2(g, "plot",
-      height = unit(6, "cm"),
-      show_name = FALSE
+    top_annotation = HeatmapAnnotation(
+        ggplot = anno_gg2(g, "plot",
+            height = unit(6, "cm"),
+            show_name = FALSE
+        )
     )
-  )
 )
 
 # anno_gg2-full --------------------
 ggheat(m,
-  top_annotation = HeatmapAnnotation(
-    ggplot = anno_gg2(g, "full",
-      height = unit(6, "cm"),
-      show_name = FALSE
+    top_annotation = HeatmapAnnotation(
+        ggplot = anno_gg2(g, "full",
+            height = unit(6, "cm"),
+            show_name = FALSE
+        )
     )
-  )
 )
 }
 \seealso{

@@ -11,7 +11,7 @@ ggfit2(
   gg,
   align_with = "full",
   margins = c("b", "t", "l", "r"),
-  elements = c("axis", "lab", "guide", "subtitle", "title", "caption"),
+  elements = NULL,
   vp = NULL,
   gt = NULL
 )
@@ -38,15 +38,16 @@ values are \code{"t"}, \code{"l"}, \code{"b"}, and \code{"r"}, When set to \code
 
 \item{elements}{Ggplot elements to draw, can be a list of a character to
 specify elements for each side separately. Valid elements are
-\code{"axis"}, \code{"lab"}, \code{"guide"}, \code{"subtitle"}, \code{"title"}, and \code{"caption"}.}
+\code{"axis"}, \code{"lab"}, \code{"guide"}, \code{"subtitle"}, \code{"title"}, and \code{"caption"}. Invalid elements will be just omitted. IF
+\code{NULL}, all valid ggplot elements will be used.}
 }
 \value{
 Fit ggplot object in the viewport.
 \itemize{
-\item align_with = \code{"panel"}: Draw ggplot object by fitting exactly the panel to
-\code{vp}.
-\item align_with = \code{"plot"}: Draw ggplot object by fitting panel, axis, and lab
-in \code{vp}.
+\item align_with = \code{"panel"}: Draw ggplot object by fitting exactly the \code{panel}
+to \code{vp}.
+\item align_with = \code{"plot"}: Draw ggplot object by fitting \code{panel}, \code{axis}, and
+\code{lab} in \code{vp}.
 \item align_with = \code{"full"}: Draw full ggplot object in \code{vp}.
 }
 }
