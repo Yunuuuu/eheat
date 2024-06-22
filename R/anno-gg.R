@@ -54,12 +54,19 @@
 anno_gg <- function(gg, align_with = "full", clip = NULL, gt = NULL,
                     width = NULL, height = NULL, show_name = FALSE,
                     which = NULL) {
+    if (is.null(gt)) {
+        assert_s3_class(gg, "ggplot")
+        gt <- ggplot2::ggplotGrob(gg)
+    } else {
+        assert_s3_class(gt, "gtable")
+    }
     align_with <- match.arg(align_with, c("panel", "plot", "full"))
-    force(gg)
-    force(gt)
+    assert_clip(clip)
     new_anno(NA,
         function(index, k, n) {
-            ggfit(gg, align_with, clip, gt = gt)
+            vp <- grid::viewport()
+            margins <- setup_margins(clip, vp)
+            .ggfit(gt, align_with, margins)
         },
         which = which, width = width, height = height,
         show_name = show_name, name = "anno_gg"
@@ -71,55 +78,55 @@ anno_gg <- function(gg, align_with = "full", clip = NULL, gt = NULL,
 #' @examples
 #' # anno_gg2-panel: margins = NULL -------
 #' ggheat(m,
-#'   top_annotation = HeatmapAnnotation(
-#'     ggplot = anno_gg2(g, "panel",
-#'       margins = NULL,
-#'       height = unit(6, "cm"),
-#'       show_name = FALSE
+#'     top_annotation = HeatmapAnnotation(
+#'         ggplot = anno_gg2(g, "panel",
+#'             margins = NULL,
+#'             height = unit(6, "cm"),
+#'             show_name = FALSE
+#'         )
 #'     )
-#'   )
 #' )
-#' 
+#'
 #' # anno_gg2-panel: margins = "l" --------
 #' ggheat(m,
-#'   top_annotation = HeatmapAnnotation(
-#'     ggplot = anno_gg2(g, "panel",
-#'       margins = "l",
-#'       height = unit(6, "cm"),
-#'       show_name = FALSE
+#'     top_annotation = HeatmapAnnotation(
+#'         ggplot = anno_gg2(g, "panel",
+#'             margins = "l",
+#'             height = unit(6, "cm"),
+#'             show_name = FALSE
+#'         )
 #'     )
-#'   )
 #' )
-#' 
+#'
 #' # anno_gg2-panel: margins = "r" --------
 #' ggheat(m,
-#'   top_annotation = HeatmapAnnotation(
-#'     ggplot = anno_gg2(g, "panel",
-#'       margins = "r",
-#'       height = unit(6, "cm"),
-#'       show_name = FALSE
+#'     top_annotation = HeatmapAnnotation(
+#'         ggplot = anno_gg2(g, "panel",
+#'             margins = "r",
+#'             height = unit(6, "cm"),
+#'             show_name = FALSE
+#'         )
 #'     )
-#'   )
 #' )
-#' 
+#'
 #' # anno_gg2-plot ---------------------
 #' ggheat(m,
-#'   top_annotation = HeatmapAnnotation(
-#'     ggplot = anno_gg2(g, "plot",
-#'       height = unit(6, "cm"),
-#'       show_name = FALSE
+#'     top_annotation = HeatmapAnnotation(
+#'         ggplot = anno_gg2(g, "plot",
+#'             height = unit(6, "cm"),
+#'             show_name = FALSE
+#'         )
 #'     )
-#'   )
 #' )
-#' 
+#'
 #' # anno_gg2-full --------------------
 #' ggheat(m,
-#'   top_annotation = HeatmapAnnotation(
-#'     ggplot = anno_gg2(g, "full",
-#'       height = unit(6, "cm"),
-#'       show_name = FALSE
+#'     top_annotation = HeatmapAnnotation(
+#'         ggplot = anno_gg2(g, "full",
+#'             height = unit(6, "cm"),
+#'             show_name = FALSE
+#'         )
 #'     )
-#'   )
 #' )
 #' @export
 #' @rdname anno_gg
@@ -132,14 +139,19 @@ anno_gg2 <- function(gg, align_with = "full",
                      gt = NULL,
                      width = NULL, height = NULL, show_name = FALSE,
                      which = NULL) {
+    if (is.null(gt)) {
+        assert_s3_class(gg, "ggplot")
+        gt <- ggplot2::ggplotGrob(gg)
+    } else {
+        assert_s3_class(gt, "gtable")
+    }
     align_with <- match.arg(align_with, c("panel", "plot", "full"))
-    force(gg)
-    force(margins)
-    force(elements)
-    force(gt)
+    assert_margins(margins)
+    margins <- unique(margins)
+    elements <- setup_elements(elements, align_with, margins)
     new_anno(NA,
         function(index, k, n) {
-            ggfit2(gg, align_with, margins, elements, gt = gt)
+            .ggfit(gt, align_with, margins, elements)
         },
         which = which, width = width, height = height,
         show_name = show_name, name = "anno_gg2"

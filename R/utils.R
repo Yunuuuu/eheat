@@ -8,6 +8,8 @@ null_paste <- function(..., sep = " ", collapse = NULL) {
     do.call(paste, c(dots, list(sep = sep, collapse = collapse)))
 }
 
+is_scalar <- function(x) length(x)
+
 #' @examples
 #' gpar(col = "red")
 #' @importFrom grid gpar

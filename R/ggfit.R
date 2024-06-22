@@ -10,10 +10,11 @@
 #' @param margins Which margin to draw besides the plot in the `vp` viewport.
 #' This allows for a more precise adjustment of the `clip` feature. Allowed
 #' values are `r rd_elements(MARGINS)`, When set to `NULL`, it means clip =
-#' `"off"`. 
+#' `"off"`.
 #' @param elements Ggplot elements to draw, can be a list of a character to
 #' specify elements for each side separately. Valid elements are
-#' `r rd_elements(GG_ELEMENTS)`.
+#' `r rd_elements(GG_ELEMENTS)`. Invalid elements will be just omitted. IF
+#' `NULL`, all valid ggplot elements will be used.
 #' @param vp A [viewport][grid::viewport] object.
 #' @param gt A [gtable][ggplot2::ggplotGrob] object.
 #' @return Fit ggplot object in the viewport.
@@ -68,40 +69,30 @@
 #' ggfit(p, "full")
 #' @export
 ggfit <- function(gg, align_with = "full", clip = NULL, vp = NULL, gt = NULL) {
-    align_with <- match.arg(align_with, c("panel", "plot", "full"))
     if (is.null(gt)) {
-        stopifnot(ggplot2::is.ggplot(gg))
+        assert_s3_class(gg, "ggplot")
         gt <- ggplot2::ggplotGrob(gg)
     } else {
-        stopifnot(gtable::is.gtable(gt))
+        assert_s3_class(gt, "gtable")
     }
-    if (is.null(vp)) {
-        # we need a valid viewport to decide the `clip` argument
-        vp <- grid::viewport()
-    } else if (!inherits(vp, "viewport")) {
-        stop("vp must be a viewport")
-    }
-    if (is.character(clip)) {
-        clip <- match.arg(clip, c("on", "off", "inherit"))
-    } else if (is.logical(clip)) {
-        if (length(clip) != 1L) {
-            stop("clip must be a single bool value")
-        }
-        if (is.na(clip)) {
-            stop("clip cannot be missing")
-        }
-    } else if (!is.null(clip)) {
-        stop("clip must be a string or a boolean value")
-    }
+    align_with <- match.arg(align_with, c("panel", "plot", "full"))
+    assert_clip(clip)
+    assert_s3_class(vp, "viewport", null_ok = TRUE)
+    # we need a valid viewport to decide the `clip` argument
+    vp <- vp %||% grid::viewport()
+    margins <- setup_margins(clip, vp)
+    .ggfit(gt, align_with, margins, vp = vp)
+}
+
+setup_margins <- function(clip, vp) {
     if (is.null(vp)) {
         if (is.null(clip) || identical(clip, "inherit")) clip <- vp$clip
     }
     if (isTRUE(clip) || identical(clip, "on")) {
-        margins <- NULL
+        NULL
     } else {
-        margins <- MARGINS
+        MARGINS
     }
-    .ggfit(gt, align_with = align_with, margins = margins, vp = vp)
 }
 
 #' @examples
@@ -154,33 +145,19 @@ ggfit <- function(gg, align_with = "full", clip = NULL, vp = NULL, gt = NULL) {
 #' @rdname ggfit
 ggfit2 <- function(gg, align_with = "full",
                    margins = c("b", "t", "l", "r"),
-                   elements = c(
-                       "axis", "lab", "guide",
-                       "subtitle", "title", "caption"
-                   ),
+                   elements = NULL,
                    vp = NULL, gt = NULL) {
     if (is.null(gt)) {
-        stopifnot(ggplot2::is.ggplot(gg))
+        assert_s3_class(gg, "ggplot")
         gt <- ggplot2::ggplotGrob(gg)
     } else {
-        stopifnot(gtable::is.gtable(gt))
+        assert_s3_class(gt, "gtable")
     }
     align_with <- match.arg(align_with, c("panel", "plot", "full"))
-    if (!is.null(margins)) {
-        margins <- unique(as.character(margins))
-        if (!all(margins %in% MARGINS)) {
-            stop(sprintf(
-                "invalid margins provided, only %s are supported",
-                oxford_comma(MARGINS)
-            ))
-        }
-    }
-    if (!is.character(elements) && !is.list(elements)) {
-        stop("elements must be a character or a list of character")
-    }
-    if (!is.null(vp) && !inherits(vp, "viewport")) {
-        stop("vp must be a viewport")
-    }
+    assert_margins(margins)
+    margins <- unique(margins)
+    elements <- setup_elements(elements, align_with, margins)
+    assert_s3_class(vp, "viewport", null_ok = TRUE)
     .ggfit(gt, align_with, margins, elements, vp)
 }
 
@@ -209,15 +186,22 @@ ggfit2 <- function(gg, align_with = "full",
     # add margins around the center plot -----------
     if (!length(margins)) return(invisible(NULL)) # styler: off
     center_layout <- gtable::gtable_filter(gt, pattern, trim = FALSE)$layout
-    if (is.character(elements)) elements <- list(elements)
-    elements <- rep_len(elements, length(margins))
-    for (i in seq_along(margins)) {
-        m <- .subset2(margins, i)
+    # used by internal function
+    # for user input: we always use setup_elements to ensure the input is well
+    if (is.character(elements)) {
+        elements <- rep_len(list(elements), length(margins))
+        names(elements) <- margins
+    }
+    for (m in margins) {
         border <- gt_border(center_layout, m)
         margin <- gt_margin(gt, border, m)
         if (!length(margin)) next # If no margin
         # Only draw elements user specified, and omit invalid elements
-        e <- intersect(.subset2(elements, i), GG_ELEMENTS)
+        if (is.null(e <- .subset2(elements, m))) {
+            e <- GG_ELEMENTS
+        } else {
+            e <- intersect(e, GG_ELEMENTS)
+        }
         margin <- gtable::gtable_filter(margin, paste(e, collapse = "|"))
         if (!length(margin)) next # If no margin
 
@@ -247,6 +231,40 @@ ggfit2 <- function(gg, align_with = "full",
         )
         grid_draw(grid::viewport(x, y, width = w, height = h), margin)
     }
+}
+
+setup_elements <- function(elements, align_with, margins,
+                           arg = rlang::caller_arg(elements),
+                           call = rlang::caller_env()) {
+    if (align_with == "full") return(elements) # styler: off
+    if (length(margins) == 0L) return(elements) # styler: off
+    if (is.character(elements)) {
+        elements <- rep_len(list(elements), length(margins))
+        names(elements) <- margins
+    } else if (is.list(elements)) {
+        if (rlang::is_named(elements)) {
+            missing <- setdiff(rlang::names2(elements), margins)
+            if (length(missing)) {
+                cli::cli_warn("Unused element{?s}: {missing}", call = call)
+            }
+        } else if (length(elements) == length(margins)) {
+            names(elements) <- margins
+        } else {
+            cli::cli_abort(sprintf(
+                "unnamed {.arg {arg}} must have the same length of %s (%d)",
+                style_arg("margins"), style_val(length(margins))
+            ), call = call)
+        }
+    } else if (is.null(elements)) {
+        elements <- rep_len(list(GG_ELEMENTS), length(margins))
+        names(elements) <- margins
+    } else {
+        cli::cli_abort(
+            "{.arg {arg}} must be a character or a list of character",
+            call = call
+        )
+    }
+    elements
 }
 
 ggpatterns <- function(margin, element) {
