@@ -25,7 +25,7 @@ Must be a string of "panel", "plot", "full".}
 \item{clip}{One of \code{"on"}, \code{"inherit"}, or \code{"off"}, indicating whether to
 clip to the extent out of the viewport, inherit the clipping region from
 \code{vp}, or turn clipping off altogether. A logical value of \code{TRUE} corresponds
-to \code{"on"} and \code{FALSE} corresponds to \code{"off"}. A \code{NULL} means \code{"inherit"}.}
+to \code{"on"} and \code{FALSE} corresponds to \code{"off"}. Default: \code{"inherit"}.}
 
 \item{vp}{A \link[grid:viewport]{viewport} object.}
 
