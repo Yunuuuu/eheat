@@ -2,14 +2,25 @@
 % Please edit documentation in R/anno-gg.R
 \name{anno_gg}
 \alias{anno_gg}
+\alias{anno_gg2}
 \title{Create a heatmap annotation with ggplot object.}
 \usage{
 anno_gg(
   gg,
-  align = "panel",
-  sides = c("b", "t", "l", "r"),
+  align_with = "full",
+  clip = NULL,
+  gt = NULL,
+  width = NULL,
+  height = NULL,
+  show_name = FALSE,
+  which = NULL
+)
+
+anno_gg2(
+  gg,
+  align_with = "full",
+  margins = c("b", "t", "l", "r"),
   elements = c("axis", "lab", "guide"),
-  background = FALSE,
   gt = NULL,
   width = NULL,
   height = NULL,
@@ -20,17 +31,13 @@ anno_gg(
 \arguments{
 \item{gg}{A \link[ggplot2:ggplot]{ggplot2} object.}
 
-\item{align}{A string indicates how to align the \code{viewport}. Must be "panel"
-or "plot".}
+\item{align_with}{Which area of the object should be fit to the viewport?
+Must be a string of "panel", "plot", "full".}
 
-\item{sides}{Which side to draw besides the panel elements. If \code{NULL}, will
-draw panel only.}
-
-\item{elements}{Ggplot elements to draw, can be a list of a character to
-specify elements for each side separately. Valid elements are "axis", "lab",
-"guide". Other elements will be ignored.}
-
-\item{background}{A boolean value indicates whether to draw the background.}
+\item{clip}{One of \code{"on"}, \code{"inherit"}, or \code{"off"}, indicating whether to
+clip to the extent out of the viewport, inherit the clipping region from
+\code{vp}, or turn clipping off altogether. A logical value of \code{TRUE} corresponds
+to \code{"on"} and \code{FALSE} corresponds to \code{"off"}. A \code{NULL} means \code{"inherit"}.}
 
 \item{gt}{A \link[ggplot2:ggplotGrob]{gtable} object.}
 
@@ -41,6 +48,14 @@ specify elements for each side separately. Valid elements are "axis", "lab",
 \item{show_name}{It is used to turn off the drawing of annotation names in \code{\link[ComplexHeatmap]{HeatmapAnnotation}}. Annotations always have names associated and normally they will be drawn beside the annotation graphics to tell what the annotation is about. e.g. the annotation names put beside the points annotation graphics. However, for some of the annotations, the names are not necessarily to be drawn, such as text annotations drawn by \code{\link[ComplexHeatmap]{anno_text}} or an empty annotation drawn by \code{\link[ComplexHeatmap]{anno_empty}}. In this case, when \code{show_names} is set to \code{FALSE}, there will be no annotation names drawn for the annotation.}
 
 \item{which}{Whether it is drawn as a column annotation or a row annotation?}
+
+\item{margins}{Which margin to draw besides the plot in the \code{vp} viewport.
+This allows for a more precise adjustment of the \code{clip} feature. When set to
+\code{NULL}, it means clip = \code{"off"}.}
+
+\item{elements}{Ggplot elements to draw, can be a list of a character to
+specify elements for each side separately. Valid elements are "axis", "lab",
+"guide". Other elements will be ignored.}
 }
 \value{
 A \code{\link[ComplexHeatmap]{AnnotationFunction-class}} object which can be used in \code{\link[ComplexHeatmap]{HeatmapAnnotation}}.
@@ -55,7 +70,6 @@ m <- matrix(rnorm(100), 10)
 ggheat(m,
     top_annotation = HeatmapAnnotation(
         ggplot = anno_gg(g, "panel",
-            background = TRUE,
             height = unit(6, "cm"),
             show_name = FALSE
         )
@@ -64,7 +78,6 @@ ggheat(m,
 ggheat(m,
     top_annotation = HeatmapAnnotation(
         ggplot = anno_gg(g, "plot",
-            background = TRUE,
             height = unit(6, "cm"),
             show_name = FALSE
         )
@@ -72,5 +85,11 @@ ggheat(m,
 )
 }
 \seealso{
-\link{ggfit}
+\itemize{
+\item \link{ggfit}
+}
+
+\itemize{
+\item \link{ggfit2}
+}
 }

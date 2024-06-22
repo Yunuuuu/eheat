@@ -312,36 +312,33 @@ draw_gganno <- function(anno, order_list, heat_matrix, id) {
             if (which == "row") {
                 pattern <- c("panel-%d-1")
                 if (k == 1L) {
-                    pattern <- c(pattern, ggpatterns("t", c("axis", "lab")))
+                    m <- "t"
                 } else if (k == n) {
-                    pattern <- c(pattern, ggpatterns("b", c("axis", "lab")))
+                    m <- "b"
                 }
             } else {
                 pattern <- "panel-1-%d"
                 if (k == 1L) {
-                    pattern <- c(pattern, ggpatterns("l", c("axis", "lab")))
+                    m <- "l"
                 } else if (k == n) {
-                    pattern <- c(pattern, ggpatterns("r", c("axis", "lab")))
+                    m <- "r"
                 }
             }
             pattern <- sprintf(pattern, k)
         } else {
+            pattern <- "panel"
             if (which == "row") {
-                pattern <- c(
-                    "panel",
-                    ggpatterns("t", c("axis", "lab")),
-                    ggpatterns("b", c("axis", "lab"))
-                )
+                m <- c("t", "b")
             } else {
-                pattern <- c(
-                    "panel",
-                    ggpatterns("l", c("axis", "lab")),
-                    ggpatterns("r", c("axis", "lab"))
-                )
+                m <- c("l", "r")
             }
         }
-        pattern <- paste0(pattern, collapse = "|")
-        .ggfit_panel(gtable::gtable_filter(gt, pattern), vp = vp)
+        .ggfit(
+            gt_area(gt, pattern, margins = m),
+            align_with = "panel", margins = m,
+            elements = c("axis", "lab"),
+            vp = vp
+        )
     }
     list(legend = legend_from_gtable(gt), draw_fn = draw_fn)
 }

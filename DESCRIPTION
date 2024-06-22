@@ -32,9 +32,7 @@ Collate:
     'eheat-package.R'
     'ggheat.R'
     'gganno.R'
-    'ggfit-.R'
-    'ggfit-panel.R'
-    'ggfit-plot.R'
+    'ggfit.R'
     'import-standalone-assert.R'
     'import-standalone-cli.R'
     'import-standalone-obj-type.R'
@@ -43,6 +41,7 @@ Collate:
     'utils-assert.R'
     'utils-complexheatmap.R'
     'utils-grid.R'
+    'utils-gtable.R'
     'utils.R'
 ByteCompile: true
 Roxygen: list(markdown = TRUE)
