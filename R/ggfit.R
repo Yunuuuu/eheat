@@ -168,10 +168,7 @@ ggfit2 <- function(gg, align_with = "full",
         grid::grid.draw(gt)
         return(invisible(NULL))
     } else if (align_with == "plot") {
-        pattern <- "panel"
-        for (s in MARGINS) {
-            pattern <- c(pattern, ggpatterns(s, c("axis", "lab")))
-        }
+        pattern <- c("panel", gt_ggpatterns(MARGINS, c("axis", "lab")))
         pattern <- paste(pattern, collapse = "|")
     } else {
         pattern <- "panel"
@@ -264,31 +261,3 @@ setup_elements <- function(elements, align_with, margins,
     }
     elements
 }
-
-ggpatterns <- function(margin, element) {
-    if (any(element == "lab")) {
-        lab <- paste("lab", margin, sep = "-")
-    } else {
-        lab <- NULL
-    }
-    if (any(element == "axis")) {
-        axis <- paste("axis", margin, sep = "-")
-    } else {
-        axis <- NULL
-    }
-    if (any(element == "guide")) {
-        guide <- paste("guide-box", switch(margin,
-            l = "left",
-            r = "right",
-            b = "bottom",
-            t = "top",
-            i = "inside"
-        ), sep = "-")
-    } else {
-        guide <- NULL
-    }
-    c(lab, axis, guide, intersect(element, c("subtitle", "title", "caption")))
-}
-
-MARGINS <- c("t", "l", "b", "r")
-GG_ELEMENTS <- c("axis", "lab", "guide", "subtitle", "title", "caption")

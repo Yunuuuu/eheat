@@ -7,8 +7,7 @@
 make_legends(x, margins = NULL)
 }
 \arguments{
-\item{x}{A \link[ggplot2:ggplot]{ggplot2} object or a \link[gtable:gtable]{gtable}
-object.}
+\item{x}{A \link[ggplot2:ggplot]{ggplot2} object.}
 
 \item{margins}{Guides of which margin to draw besides the plot in the \code{vp}
 viewport. Allowed values are \code{"t"}, \code{"l"}, \code{"b"}, \code{"r"}, and \code{"i"}. "i" means the
@@ -16,7 +15,7 @@ inside legends (\code{ggplot2::theme(legend.position = "inside")}). Default:
 \code{NULL}, which indicates \code{c("t", "l", "b", "r")}.}
 }
 \value{
-A list of \link[ComplexHeatmap:Legends]{Legends} object.
+A list of \link[ComplexHeatmap:Legends-class]{Legends} object.
 }
 \description{
 Legends from ggplot2
