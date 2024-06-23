@@ -173,22 +173,26 @@ wrap_legend <- function(legend) {
 #' @param name "heatmap_legend_list" or "annotation_legend_list"
 #' @param gglegends By calling `make_legends` function.
 #' @noRd
-add_gg_legend_list <- function(name, gglegends, call = quote(make_layout)) {
+add_gg_legend_list <- function(name, gglegends, call_target = "make_layout") {
     if (length(gglegends) == 0L) return(NULL) # styler: off
-    pos <- -2L
-    nframes <- -sys.nframe() + 1L # total parents
-    while (pos >= nframes) {
-        env <- sys.frame(pos) # we locate the legend environment
-        if (identical(utils::packageName(topenv(env)), "ComplexHeatmap") &&
+    pos <- 2L
+    nframes <- sys.nframe() - 1L # total parents
+    while (pos <= nframes) {
+        env <- parent.frame(pos) # we locate the legend environment
+        if (is_from_cheat(env) &&
             exists(name, envir = env, inherits = FALSE) &&
             # Since ComplexHeatmap function much are the S4 methods
             # we identify the call name from the parent generic function
-            identical(sys.call(pos - 1L)[[1L]], call)) {
+            is_call_from(pos, call_target)) {
             old <- wrap_legend(.subset2(env, name))
-            index <- grep("^\\.gg_legend\\d+$", rlang::names2(old), perl = TRUE)
+            index <- grep("^\\.__gglegends\\d+$",
+                rlang::names2(old),
+                perl = TRUE
+            )
             old_gglegends <- old[index]
             names(gglegends) <- paste0(
-                ".__gg_legend", seq_along(gglegends) + length(old_gglegends)
+                ".__gglegends",
+                seq_along(gglegends) + length(old_gglegends)
             )
             # we then modify the legend list
             assign(
@@ -198,6 +202,10 @@ add_gg_legend_list <- function(name, gglegends, call = quote(make_layout)) {
             )
             break
         }
-        pos <- pos - 1L
+        pos <- pos + 1L
     }
+}
+
+is_from_cheat <- function(env) {
+    identical(utils::packageName(topenv(env)), "ComplexHeatmap")
 }

@@ -83,6 +83,9 @@ prepare_ggheat <- function(object) {
 
     # special case for rect_gp$type == "none" ------
     if (!identical(rect_gp$type, "none")) {
+        # https://stackoverflow.com/questions/72402570/why-doesnt-gplot2labs-overwrite-update-the-name-argument-of-scales-function
+        # ggplot2::labs has relative low priorities, so user can provide scale
+        #          name to overwrite the name
         p <- p + ggplot2::geom_tile(
             aes(.data$.column, .data$.row, fill = .data$values),
             width = 1L, height = 1L
@@ -154,6 +157,8 @@ prepare_ggheat <- function(object) {
         object@debug(p)
     }
 
+    # if user provided `ggfn` or rect_gp$type is not none,
+    # we should do something with `ggfn`
     if (is.null(object@ggfn) && identical(rect_gp$type, "none")) {
         return(object)
     }
@@ -177,21 +182,16 @@ prepare_ggheat <- function(object) {
             kr <- kc <- NULL
             # we trace back the caller environment
             # until the `draw_heatmap_body` function environment
-            pos <- -1L
-            nframes <- -sys.nframe() + 1L # total parents
-            while (pos >= nframes) {
-                env <- sys.frame(pos)
-                if (identical(
-                    utils::packageName(topenv(env)), "ComplexHeatmap"
-                ) &&
+            pos <- 1L
+            nframes <- sys.nframe() - 1L # total parents
+            while (pos <= nframes) {
+                env <- parent.frame(pos)
+                if (is_from_cheat(env) &&
                     exists("kr", envir = env, inherits = FALSE) &&
                     exists("kc", envir = env, inherits = FALSE) &&
                     # Since ComplexHeatmap function much are the S4 methods
                     # we identify the call name from the parent
-                    identical(
-                        sys.call(pos - 1L)[[1L]],
-                        quote(draw_heatmap_body)
-                    )) {
+                    is_call_from(pos, "draw_heatmap_body")) {
                     # trace back into `draw_heatmap_body()`
                     # we can also parse grid::current.viewport()$name
                     # https://github.com/jokergoo/ComplexHeatmap/blob/7d95ca5cf533b98bd0351eecfc6805ad30c754c0/R/Heatmap-draw_component.R#L44
@@ -202,7 +202,7 @@ prepare_ggheat <- function(object) {
                     kc <- .subset2(env, "kc")
                     break
                 }
-                pos <- pos - 1L
+                pos <- pos + 1L
             }
             if (is.null(kr)) {
                 cli::cli_abort(paste(
@@ -222,8 +222,6 @@ prepare_ggheat <- function(object) {
             })
         }
     }
-    # if user provided `ggfn` or rect_gp$type is not none,
-    # we should do something with `ggfn`
     object@matrix_param$layer_fun <- layer_fun_call_ggfn
     # we merge user-provided legends with ggplot2 legends
     # Since ComplexHeatmap currently didn't merge
