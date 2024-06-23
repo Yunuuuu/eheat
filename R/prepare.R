@@ -161,7 +161,7 @@ prepare_ggheat <- function(object) {
     # Now: we'll fill the ggplot2 object into heatmap body --------
     gt <- ggplot2::ggplotGrob(p)
     layer_fun <- object@matrix_param$layer_fun # user provided `layer_fun`
-    total <- sum(lengths(order_list)) # total number of heatmap body slices
+    total <- length(order_list[[1L]]) * length(order_list[[2L]])
     n <- 0L
     heatmap_body_vp_name <- sprintf("%s_heatmap_body_wrap", object@name)
     inside_guides <- get_guides(gt, margins = "i")
