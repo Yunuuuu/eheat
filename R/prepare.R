@@ -217,7 +217,7 @@ prepare_ggheat <- function(object) {
         }
         # in the last slice, we draw inside guides
         if (n == total && length(inside_guides)) {
-            cheat_decorate(heatmap_body_vp_name, {
+            .cheat_decorate(heatmap_body_vp_name, {
                 lapply(inside_guides, grid::grid.draw)
             })
         }

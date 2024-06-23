@@ -8,8 +8,43 @@
 #' @export
 cheat_grob <- function(x, ...) grid::grid.grabExpr(expr = draw(x), ...)
 
+#' Decorate ComplexHeatmap
+#' @param vp_name A valid viewport name returned by
+#' [list_components][ComplexHeatmap::list_components]
+#' @param code Codes to draw elements in the viewport.
+#' @return Decorate the viewport.
+#' @examples
+#' ggheat(matrix(rnorm(81), nrow = 9), column_km = 2L, name = "cheat_decorate")
+#' ComplexHeatmap::list_components()
+#' cheat_decorate("cheat_decorate_heatmap_body_wrap", {
+#'     grid.text("I'm from cheat_decorate",
+#'         1.5 / 10, 2.5 / 4,
+#'         default.units = "npc"
+#'     )
+#' })
+#' @export
 cheat_decorate <- function(vp_name, code) {
-    # ComplexHeatmap::list_components
+    assert_string(vp_name, empty_ok = FALSE)
+    components <- ComplexHeatmap::list_components()
+    if (!length(components)) {
+        cli::cli_abort(c(
+            "No valid ComplexHeatmap components",
+            i = "You must draw heatmap/annotation components first"
+        ))
+    }
+    if (!any(vp_name == components)) {
+        cli::cli_abort(c(
+            "Cannot find {.field {vp_name}}",
+            i = paste(
+                "check components with ",
+                "{.code ComplexHeatmap::list_components()}"
+            )
+        ))
+    }
+    eval(substitute(.cheat_decorate(vp_name, code)))
+}
+
+.cheat_decorate <- function(vp_name, code) {
     current_vp <- grid::current.viewport()$name
     on.exit(grid::seekViewport(current_vp))
     if (current_vp == "ROOT") current_vp <- "global"
