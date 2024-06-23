@@ -6,15 +6,7 @@
 \alias{ggAnnotationFunction-class}
 \title{Build AnnotationFunction Class with ggplot2}
 \usage{
-gganno(
-  matrix,
-  ggfn,
-  ...,
-  which = NULL,
-  width = NULL,
-  height = NULL,
-  debug = FALSE
-)
+gganno(matrix, ggfn, ..., which = NULL, width = NULL, height = NULL)
 }
 \arguments{
 \item{matrix}{A matrix, if it is a simple vector, it will be converted to a
@@ -38,13 +30,6 @@ very compact anonymous functions (lambdas) with up to two inputs.}
 \item{width}{The width of the plotting region (the viewport) that the annotation is drawn. If it is a row annotation, the width must be an absolute unit. Since the \code{AnnotationFunction} object is always contained by the \code{\link[ComplexHeatmap]{SingleAnnotation-class}}object, you can only set the width of row annotations or height of column annotations, while e.g. the height of the row annotation is always \code{unit(1, "npc")} which means it always fully filled in the parent \code{SingleAnnotation} and only in \code{\link[ComplexHeatmap]{SingleAnnotation}} or even \code{\link[ComplexHeatmap]{HeatmapAnnotation}} can adjust the height of the row annotations.}
 
 \item{height}{The height of the plotting region (the viewport) that the annotation is drawn. If it is a column annotation, the width must be an absolute unit.}
-
-\item{debug}{In the event that it is set to TRUE, the
-\link[ggplot2:ggplot]{ggplot} object gracefully yielded by \code{ggfn}, during the
-execution of \link[ComplexHeatmap:draw-dispatch]{draw}, shall be returned directly.
-Alternatively, one may opt to impart a function (whereas a formula would also
-be deemed acceptable) to be carried out conjointly with the
-\link[ggplot2:ggplot]{ggplot} object, as exemplified by \link{print} or \link{browser}.}
 }
 \value{
 A \code{ggAnnotationFunction} object.

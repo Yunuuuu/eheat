@@ -6,7 +6,7 @@
 \alias{ggHeatmap-class}
 \title{Extended Heatmap}
 \usage{
-ggheat(matrix, ggfn = NULL, ..., ggparams = list(), debug = FALSE)
+ggheat(matrix, ggfn = NULL, ..., ggparams = list())
 }
 \arguments{
 \item{matrix}{A matrix, if it is a simple vector, it will be converted to a
@@ -175,13 +175,6 @@ drawn.
 }}
 
 \item{ggparams}{Other arguments passed to \code{ggfn}.}
-
-\item{debug}{In the event that it is set to TRUE, the
-\link[ggplot2:ggplot]{ggplot} object gracefully yielded by \code{ggfn}, during the
-execution of \link[ComplexHeatmap:draw-dispatch]{draw}, shall be returned directly.
-Alternatively, one may opt to impart a function (whereas a formula would also
-be deemed acceptable) to be carried out conjointly with the
-\link[ggplot2:ggplot]{ggplot} object, as exemplified by \link{print} or \link{browser}.}
 }
 \value{
 A \code{ggHeatmap} Object.
