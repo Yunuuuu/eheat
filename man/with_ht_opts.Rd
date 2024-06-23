@@ -23,10 +23,6 @@ ComplexHeatmap heatmap options will always be reset with
 }
 \examples{
 with_ht_opts(
-    list(legend_title_gp = gpar(col = "red")),
-    ggheat(matrix(rnorm(81), nrow = 9))
-)
-with_ht_opts(
     list(verbose = TRUE),
     ggheat(matrix(rnorm(81), nrow = 9))
 )

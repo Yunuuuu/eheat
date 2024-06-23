@@ -59,18 +59,14 @@ with_ht_verbose <- function(code) {
 }
 
 #' Temporarily change ComplexHeatmap options.
-#' 
+#'
 #' @param opts New [ht_opt][ComplexHeatmap::ht_opt], must be a named list.
 #' @inheritParams with_ht_verbose
 #' @inherit with_ht_verbose return
 #' @note ComplexHeatmap heatmap options will always be reset with
 #' `ComplexHeatmap::ht_opt(RESET = TRUE)` when function exit.
 #' @seealso [ht_opt][ComplexHeatmap::ht_opt]
-#' @examples 
-#' with_ht_opts(
-#'     list(legend_title_gp = gpar(col = "red")),
-#'     ggheat(matrix(rnorm(81), nrow = 9))
-#' )
+#' @examples
 #' with_ht_opts(
 #'     list(verbose = TRUE),
 #'     ggheat(matrix(rnorm(81), nrow = 9))
