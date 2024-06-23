@@ -1,29 +1,29 @@
 gt_subset <- function(gt, index, trim = TRUE) {
     gt$layout <- gt$layout[index, , drop = FALSE]
-    gt$grobs <- gt$grobs[index]
+    gt$grobs <- .subset(gt$grobs, index)
     if (trim) gt <- gtable::gtable_trim(gt)
     gt
 }
 
 gt_border <- function(layout, margin) {
     switch(margin,
-        t = min(layout$t),
-        l = min(layout$l),
-        b = max(layout$b),
-        r = max(layout$r)
+        t = min(.subset2(layout, "t")),
+        l = min(.subset2(layout, "l")),
+        b = max(.subset2(layout, "b")),
+        r = max(.subset2(layout, "r"))
     )
 }
 
 gt_match_margin <- function(gt, border, margin) {
     layout <- .subset2(gt, "layout")
     if (margin == "t") {
-        layout$b < border
+        .subset2(layout, "b") < border
     } else if (margin == "l") {
-        layout$r < border
+        .subset2(layout, "r") < border
     } else if (margin == "b") {
-        layout$t > border
+        .subset2(layout, "t") > border
     } else {
-        layout$l > border
+        .subset2(layout, "l") > border
     }
 }
 
@@ -32,14 +32,14 @@ gt_margin <- function(gt, border, margin, trim = TRUE) {
     gt_subset(gt, matches, trim = trim)
 }
 
-# including both margin
+# including both center (matched by pattern) and margins
 gt_area <- function(gt, pattern, margins = NULL, fixed = FALSE, trim = TRUE) {
     layout <- .subset2(gt, "layout")
     matches <- grepl(
         pattern, .subset2(layout, "name"),
         fixed = fixed, perl = !fixed
     )
-    center_layout <- gt_subset(gt, matches, trim = FALSE)$layout
+    center_layout <- .subset2(gt_subset(gt, matches, trim = FALSE), "layout")
     for (m in margins) {
         border <- gt_border(center_layout, m)
         matches <- matches | gt_match_margin(gt, border, m)
@@ -47,21 +47,39 @@ gt_area <- function(gt, pattern, margins = NULL, fixed = FALSE, trim = TRUE) {
     gt_subset(gt, matches, trim = trim)
 }
 
-gt_height <- function(x, unit = NULL) {
-    if (length(x)) {
-        gtable::gtable_height(x)
+gt_ggpatterns <- function(margins, elements) {
+    if (any(elements == "guide")) {
+        guide <- paste("guide-box", parse_margins(margins), sep = "-")
     } else {
-        grid::unit(0, "mm")
+        guide <- NULL
     }
+    margins <- setdiff(margins, "i") # no inside elements for `lab` and `axis`
+    if (length(margins) && any(elements == "lab")) {
+        lab <- paste("lab", margins, sep = "-")
+    } else {
+        lab <- NULL
+    }
+    if (length(margins) && any(elements == "axis")) {
+        axis <- paste("axis", margins, sep = "-")
+    } else {
+        axis <- NULL
+    }
+    c(lab, axis, guide, intersect(elements, c("subtitle", "title", "caption")))
 }
 
-gt_width <- function(x) {
-    if (length(x)) {
-        gtable::gtable_width(x)
-    } else {
-        grid::unit(0, "mm")
-    }
+parse_margins <- function(margins) {
+    margin_to_direction <- c(
+        l = "left",
+        r = "right",
+        b = "bottom",
+        t = "top",
+        i = "inside"
+    )
+    margin_to_direction[margins]
 }
+
+MARGINS <- c("t", "l", "b", "r")
+GG_ELEMENTS <- c("axis", "lab", "guide", "subtitle", "title", "caption")
 
 gt_bind <- function(fn, ...) {
     dots <- list(...)
@@ -88,13 +106,6 @@ gt_set_size <- function(gt, width, height, index = NULL) {
     gt$widths[index_w] <- rep(width, nw)
     gt$heights[index_h] <- rep(height, nh)
     gt
-}
-
-gt_trim_zero_grob <- function(x) {
-    matches <- !vapply(x$grobs, is_zero_grob, logical(1L))
-    x$layout <- x$layout[matches, , drop = FALSE]
-    x$grobs <- x$grobs[matches]
-    x
 }
 
 # gtable_split_by_panel <- function(gt) {

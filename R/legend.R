@@ -1,11 +1,10 @@
 #' Legends from ggplot2
-#' @param x A [ggplot2][ggplot2::ggplot] object or a [gtable][gtable::gtable]
-#' object.
+#' @param x A [ggplot2][ggplot2::ggplot] object.
 #' @param margins Guides of which margin to draw besides the plot in the `vp`
 #' viewport. Allowed values are `r rd_elements(c(MARGINS, "i"))`. "i" means the
 #' inside legends (`ggplot2::theme(legend.position = "inside")`). Default:
 #' `NULL`, which indicates `c("t", "l", "b", "r")`.
-#' @return A list of [Legends][ComplexHeatmap::Legends] object.
+#' @return A list of [Legends][ComplexHeatmap::Legends-class] object.
 #' @seealso [ComplexHeatmap::Legend]
 #' @examples
 #' gg <- ggplot(mtcars) +
@@ -46,9 +45,8 @@ get_guides.ggplot <- function(x, ...) {
 
 #' @export
 get_guides.gtable <- function(x, margins = NULL, ...) {
-    patterns <- NULL
     margins <- margins %||% MARGINS
-    for (m in margins) patterns <- c(patterns, ggpatterns(m, "guide"))
+    patterns <- gt_ggpatterns(margins, "guide")
     g <- gtable::gtable_filter(x, paste(patterns, collapse = "|"))$grobs
     # trim zeroGrobs
     g[!vapply(g, function(x) {
