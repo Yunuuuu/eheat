@@ -10,6 +10,18 @@ null_paste <- function(..., sep = " ", collapse = NULL) {
 
 is_scalar <- function(x) length(x)
 
+#' @param n the number of generations to go back.
+#' @param name function name.
+#' @noRd
+is_call_from <- function(n, name) {
+    n <- n + 1L # `is_call_from` will generate one frame
+    call_nm <- rlang::call_name(sys.call(sys.parent(n)))
+    if (identical(call_nm, name)) return(TRUE) # styler: off
+    # For S4 methods, the call_nm should be `.local`
+    if (!identical(call_nm, ".local")) return(FALSE)  # styler: off
+    identical(rlang::call_name(sys.call(sys.parent(n + 1L))), name)
+}
+
 imap <- function(.x, .f, ...) {
     nms <- names(.x)
     out <- .mapply(.f, list(.x, nms %||% seq_along(.x)), NULL)

@@ -163,14 +163,15 @@ methods::setMethod(
 # https://github.com/jokergoo/ComplexHeatmap/blob/7d95ca5cf533b98bd0351eecfc6805ad30c754c0/R/HeatmapList-draw_component.R#L670
 # trace back into `draw_heatmap_list()`
 # get slice informations from the draw function
-gganno_get_order_list <- function(name, axis, call = quote(draw_heatmap_list)) {
-    pos <- -2L
-    nframes <- -sys.nframe() + 1L # total parents
-    while (pos >= nframes) {
-        env <- sys.frame(pos)
-        if (identical(utils::packageName(topenv(env)), "ComplexHeatmap") &&
+gganno_get_order_list <- function(name, axis,
+                                  call_target = "draw_heatmap_list") {
+    pos <- 2L
+    nframes <- sys.nframe() - 1L # total parents
+    while (pos <= nframes) {
+        env <- parent.frame(pos)
+        if (is_from_cheat(env) &&
             exists(name, envir = env, inherits = FALSE) &&
-            identical(sys.call(pos - 1L)[[1L]], call)) {
+            is_call_from(pos, call_target)) {
             obj <- .subset2(env, name)
             if (methods::.hasSlot(obj, "row_order_list") &&
                 methods::.hasSlot(obj, "column_order_list")) {
@@ -180,7 +181,7 @@ gganno_get_order_list <- function(name, axis, call = quote(draw_heatmap_list)) {
                 ))
             }
         }
-        pos <- pos - 1L
+        pos <- pos + 1L
     }
     NULL
 }
