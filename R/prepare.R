@@ -254,7 +254,9 @@ prepare_gganno <- function(object) {
                 column = object@column_order_list
             )
             # we initialize the ggplot2 object and extract the legends
-            anno_list[[i]]@fun <- make_layout(anno, order_list,
+            anno_list[[i]]@fun <- make_layout(
+                anno, order_list,
+                heat_matrix = object@matrix,
                 id = names(anno_list)[i]
             )
         }

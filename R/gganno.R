@@ -100,15 +100,17 @@ methods::setMethod(
                 )
                 object@matrix <- object@matrix(data)
             }
-            gganno_element <- draw_gganno(
-                object, order_list,
-                id = id %||% "draw-gganno"
-            )
+            gganno_elements <- draw_gganno(object, order_list, id = id)
 
             # we merge the annotation_legend_list with ggplot2 legends -----
             # we'll trace back into `make_layout,HeatmapList` method
-            add_gg_legend_list("annotation_legend_list", gganno_element$legend)
-            object@fun <- gganno_element$draw_fn
+            if (add_legend) {
+                add_gg_legend_list(
+                    "annotation_legend_list",
+                    gganno_elements$legend
+                )
+            }
+            object@fun <- gganno_elements$draw_fn
             object@gginitialized <- TRUE
         }
         object
@@ -146,12 +148,12 @@ methods::setMethod(
                 if (n == 1L) {
                     order_list <- list(index)
                 } else {
-                    cli::cli_abort(
-                        "Cannot initialize {.cls ggAnnotationFunction}"
-                    )
+                    cli::cli_abort("Cannot initialize {.cls {object@name}}")
                 }
             }
-            object <- make_layout(object, order_list)
+            # We're unable to add legends in draw function,
+            # we turn off it.
+            object <- make_layout(object, order_list, add_legend = FALSE)
         }
         methods::callNextMethod(
             object = object, index = index,
@@ -188,7 +190,7 @@ gganno_get_order_list <- function(name, axis,
 
 #' @importFrom ggplot2 ggplot
 #' @importFrom ggplot2 aes
-draw_gganno <- function(anno, order_list, heat_matrix, id) {
+draw_gganno <- function(anno, order_list, id) {
     if (is.null(id)) {
         fn_id <- "{.fn ggfn}"
     } else {
@@ -197,10 +199,7 @@ draw_gganno <- function(anno, order_list, heat_matrix, id) {
     }
     which <- anno@which
     # we always regard matrix row as the observations
-    matrix <- anno@matrix %||% switch(which,
-        row = heat_matrix,
-        column = t(heat_matrix)
-    )
+    matrix <- anno@matrix
     data <- as_tibble0(matrix, rownames = NULL) # nolint
     if (length(order_list) > 1L) {
         with_slice <- TRUE
