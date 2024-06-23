@@ -68,14 +68,7 @@ gt_ggpatterns <- function(margins, elements) {
 }
 
 parse_margins <- function(margins) {
-    margin_to_direction <- c(
-        l = "left",
-        r = "right",
-        b = "bottom",
-        t = "top",
-        i = "inside"
-    )
-    margin_to_direction[margins]
+    c(l = "left", r = "right", b = "bottom", t = "top", i = "inside")[margins]
 }
 
 MARGINS <- c("t", "l", "b", "r")
