@@ -344,6 +344,28 @@ draw(
 
 <img src="man/figures/README-ggheat_legend_name2-1.png" width="100%" />
 
+Inside guides will be kept in the panel.
+
+``` r
+draw(
+  ggheat(small_mat, function(p) {
+    p +
+      geom_tile(
+        aes(fill = values),
+        width = 1L, height = 1L,
+        data = ~ dplyr::filter(p$data, .row <= .column)
+      ) +
+      theme_bw() +
+      theme(
+        legend.position = "inside",
+        legend.position.inside = c(0.2, 0.3)
+      )
+  }, rect_gp = gpar(type = "none"), column_km = 2L, row_km = 3)
+)
+```
+
+<img src="man/figures/README-inside_legend-1.png" width="100%" />
+
 ## `gganno`
 
 The same with `ggheat`, the essential parameter of `gganno` is also the
