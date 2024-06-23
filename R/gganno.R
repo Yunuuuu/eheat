@@ -79,12 +79,12 @@ methods::setMethod(
             if (is.null(heat_matrix) &&
                 (is.null(object@matrix) || is.function(object@matrix))) {
                 if (is.null(id)) {
-                    fn_id <- "{.fn ggfn}"
+                    id <- "gganno"
                 } else {
-                    fn_id <- sprintf("{.fn ggfn} (gganno: %s)", id)
+                    id <- sprintf("gganno (%s)", id)
                 }
                 cli::cli_abort(paste(
-                    "You must provide a matrix in", fn_id,
+                    "You must provide a matrix in", id,
                     "in order to draw {.cls ggAnnotationFunction} directly"
                 ))
             }
@@ -192,6 +192,7 @@ gganno_get_order_list <- function(name, axis,
 #' @importFrom ggplot2 aes
 draw_gganno <- function(anno, order_list, id) {
     if (is.null(id)) {
+        id <- "(gganno)"
         fn_id <- "{.fn ggfn}"
     } else {
         id <- sprintf("(gganno: %s)", id)
@@ -256,9 +257,7 @@ draw_gganno <- function(anno, order_list, id) {
             scale_fn = ggplot2::scale_y_continuous
         )
         if (!is.null(p$scales$get_scales("y"))) {
-            cli::cli_warn(
-                null_paste("will omit y-scale for row annotation", id)
-            )
+            cli::cli_warn(paste("will omit y-scale for row annotation", id))
         }
         if (!is.null(x_scale <- p$scales$get_scales("x"))) { # from user
             # avoid the warning message: Attempting to add facetted x
@@ -276,9 +275,7 @@ draw_gganno <- function(anno, order_list, id) {
             scale_fn = ggplot2::scale_x_continuous
         )
         if (!is.null(p$scales$get_scales("x"))) {
-            cli::cli_warn(
-                null_paste("will omit x-scale for column annotation", id)
-            )
+            cli::cli_warn(paste("will omit x-scale for column annotation", id))
         }
         if (!is.null(y_scale <- p$scales$get_scales("y"))) { # from user
             # avoid the warning message: Attempting to add facetted y
@@ -296,8 +293,8 @@ draw_gganno <- function(anno, order_list, id) {
         p <- p + x_scale + y_scale
     }
     if (isTRUE(anno@debug)) {
-        cli::cli_inform(null_paste(
-            "Return {.cls ggplot} object", sprintf("of %s", id), "directly"
+        cli::cli_inform(paste(
+            "Return {.cls ggplot} object", sprintf("from %s", id), "directly"
         ))
         rlang::return_from(sys.frame(1L), value = p)
     } else if (is.function(anno@debug)) {
