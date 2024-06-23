@@ -36,7 +36,7 @@ cheat_decorate <- function(vp_name, code) {
         cli::cli_abort(c(
             "Cannot find {.field {vp_name}}",
             i = paste(
-                "check components with ",
+                "check components with",
                 "{.code ComplexHeatmap::list_components()}"
             )
         ))

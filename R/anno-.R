@@ -81,22 +81,24 @@ new_anno <- function(n, draw_fn, ylim = NULL,
 
 anno_width_and_height <- function(which, width = NULL, height = NULL,
                                   default = unit(10, "mm")) {
-    # height must be absolute
     params <- list(width = width, height = height)
     if (which == "row") {
+        # we flip the width and height in this way, both row and column
+        # annotation, height must be absolute
         params <- flip_gp(params)
         arg <- "width" # nolint
     } else {
         arg <- "height"
     }
-    if (is.null(params$height)) {
+    if (is.null(.subset2(params, "height"))) {
         params$height <- default
-    } else if (!ComplexHeatmap::is_abs_unit(params$height)) {
-        cli::cli_abort(
-            "{.arg {arg}} of the annotation can only be an absolute unit."
-        )
+    } else if (!ComplexHeatmap::is_abs_unit(.subset2(params, "height"))) {
+        cli::cli_abort(paste(
+            "{.arg {arg}} of the {.field {which}} annotation",
+            "must be an absolute unit."
+        ))
     }
-    if (is.null(params$width)) {
+    if (is.null(.subset2(params, "width"))) {
         params$width <- unit(1L, "npc")
     }
     if (which == "row") flip_gp(params) else params
