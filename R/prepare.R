@@ -154,46 +154,89 @@ prepare_ggheat <- function(object) {
         object@debug(p)
     }
 
+    if (is.null(object@ggfn) && identical(rect_gp$type, "none")) {
+        return(object)
+    }
+
     # Now: we'll fill the ggplot2 object into heatmap body --------
     gt <- ggplot2::ggplotGrob(p)
-    layer_fun <- object@matrix_param$layer_fun
-    gglayer <- function(j, i, x, y, w, h, fill) {
-        # combine `layer_fun` with ggfn
+    layer_fun <- object@matrix_param$layer_fun # user provided `layer_fun`
+    total <- sum(lengths(order_list)) # total number of heatmap body slices
+    n <- 0L
+    heatmap_body_vp_name <- sprintf("%s_heatmap_body_wrap", object@name)
+    inside_guides <- get_guides(gt, margins = "i")
+    # this function will be called by `draw_heatmap_body`
+    # https://github.com/jokergoo/ComplexHeatmap/blob/master/R/Heatmap-draw_component.R
+    # combine `layer_fun` with `ggfn`, in this ways, the ComplexHeatmap
+    # run layer_fun will call ggfun
+    layer_fun_call_ggfn <- function(j, i, x, y, w, h, fill) {
+        n <<- n + 1L
         if (!is.null(layer_fun)) layer_fun(j, i, x, y, w, h, fill)
-        # https://github.com/jokergoo/ComplexHeatmap/blob/master/R/Heatmap-draw_component.R
-        # trace back into `draw_heatmap_body()`
-        draw_body_env <- parent.frame()
+        # fill ggplot2 object in the heatmap body
         if (with_slice) {
-            # we can also use grid::current.viewport()
-            # and parse name to get kr or kc
-            # -kr Row slice index.
-            # -kc Column slice index.
-            kr <- draw_body_env$kr
-            kc <- draw_body_env$kc
+            kr <- kc <- NULL
+            # we trace back the caller environment
+            # until the `draw_heatmap_body` function environment
+            pos <- -1L
+            nframes <- -sys.nframe() + 1L # total parents
+            while (pos >= nframes) {
+                env <- sys.frame(pos)
+                if (identical(
+                    utils::packageName(topenv(env)), "ComplexHeatmap"
+                ) &&
+                    exists("kr", envir = env, inherits = FALSE) &&
+                    exists("kc", envir = env, inherits = FALSE) &&
+                    # Since ComplexHeatmap function much are the S4 methods
+                    # we identify the call name from the parent
+                    identical(
+                        sys.call(pos - 1L)[[1L]],
+                        quote(draw_heatmap_body)
+                    )) {
+                    # trace back into `draw_heatmap_body()`
+                    # we can also parse grid::current.viewport()$name
+                    # https://github.com/jokergoo/ComplexHeatmap/blob/7d95ca5cf533b98bd0351eecfc6805ad30c754c0/R/Heatmap-draw_component.R#L44
+                    # and parse name to get kr or kc
+                    # -kr Row slice index.
+                    # -kc Column slice index.
+                    kr <- .subset2(env, "kr")
+                    kc <- .subset2(env, "kc")
+                    break
+                }
+                pos <- pos - 1L
+            }
+            if (is.null(kr)) {
+                cli::cli_abort(paste(
+                    "{.fn layer_fun} must be run by {.fn draw_heatmap_body}",
+                    "to determine the slice number {.field kr} and {.field kc}"
+                ))
+            }
             pattern <- sprintf("panel-%d-%d", kr, kc)
             .ggfit(gtable::gtable_filter(gt, pattern), "panel", margins = NULL)
         } else {
             .ggfit(gt, "panel", margins = NULL)
         }
+        # in the last slice, we draw inside guides
+        if (n == total && length(inside_guides)) {
+            cheat_decorate(heatmap_body_vp_name, {
+                lapply(inside_guides, grid::grid.draw)
+            })
+        }
     }
-    if (!is.null(object@ggfn) || !identical(rect_gp$type, "none")) {
-        # if user provided `ggfn` or rect_gp$type is not none,
-        # we should do something with `ggfn`
-        object@matrix_param$layer_fun <- gglayer
-        # we merge user-provided legends with ggplot2 legends
-        # Since ComplexHeatmap currently didn't merge
-        # https://github.com/jokergoo/ComplexHeatmap/pull/1139
-        # object@heatmap_legend_list <- c(
-        #     legend_from_gtable(gt),
-        #     wrap_legend(object@heatmap_legend_list)
-        # )
+    # if user provided `ggfn` or rect_gp$type is not none,
+    # we should do something with `ggfn`
+    object@matrix_param$layer_fun <- layer_fun_call_ggfn
+    # we merge user-provided legends with ggplot2 legends
+    # Since ComplexHeatmap currently didn't merge
+    # https://github.com/jokergoo/ComplexHeatmap/pull/1139
+    # object@heatmap_legend_list <- c(
+    #     legend_from_gtable(gt),
+    #     wrap_legend(object@heatmap_legend_list)
+    # )
+    # we'll trace back into `make_layout,HeatmapList` method
+    add_gg_legend_list("heatmap_legend_list", make_legends(gt))
 
-        # we'll trace back into `make_layout,HeatmapList` method
-        add_gg_legend_list("heatmap_legend_list", legend_from_gtable(gt))
-
-        # we always prevent the ComplexHeatmap Heatmap body legend.
-        object@heatmap_param$show_heatmap_legend <- FALSE
-    }
+    # we always prevent the ComplexHeatmap Heatmap body legend.
+    object@heatmap_param$show_heatmap_legend <- FALSE
     object
 }
 
@@ -220,42 +263,4 @@ prepare_gganno <- function(object) {
         methods::slot(object, anno_name)@anno_list <- anno_list
     }
     object
-}
-
-# here is the magic
-add_gg_legend_list <- function(name, gg_legends, call = quote(make_layout)) {
-    if (length(gg_legends) == 0L) return(NULL) # styler: off
-    pos <- -2L
-    nframes <- -sys.nframe() + 1L # total parents
-    while (pos >= nframes) {
-        env <- sys.frame(pos) # we locate the legend environment
-        if (identical(utils::packageName(topenv(env)), "ComplexHeatmap") &&
-            exists(name, envir = env, inherits = FALSE) &&
-            # Since ComplexHeatmap function much are the S4 methods
-            # we identify the call name from the parent
-            identical(sys.call(pos - 1L)[[1L]], call)) {
-            old <- wrap_legend(.subset2(env, name))
-            index <- grep("^\\.gg_legend\\d+$", rlang::names2(old), perl = TRUE)
-            old_gg_legends <- old[index]
-            names(gg_legends) <- paste0(
-                ".__gg_legend", seq_along(gg_legends) + length(old_gg_legends)
-            )
-            # we then modify the legend list
-            assign(
-                # user provided legends always in the end
-                name, c(old_gg_legends, gg_legends, old[-index]),
-                envir = env
-            )
-            break
-        }
-        pos <- pos - 1L
-    }
-}
-
-wrap_legend <- function(legend) {
-    if (length(legend) > 0L && inherits(legend, c("Legends", "grob"))) {
-        list(legend)
-    } else {
-        legend
-    }
 }
