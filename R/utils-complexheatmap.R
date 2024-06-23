@@ -44,6 +44,50 @@ cheat_decorate <- function(vp_name, code) {
     eval(substitute(.cheat_decorate(vp_name, code)))
 }
 
+#' Make ComplexHeatmap verbose
+#' @param code Running [ggheat] or [Heatmap][ComplexHeatmap::Heatmap] function.
+#' @return The results of the evaluation of the `code` argument.
+#' @examples
+#' with_ht_verbose(ggheat(matrix(rnorm(81), nrow = 9)))
+#' @seealso [with_ht_opts]
+#' @export
+with_ht_verbose <- function(code) {
+    old <- ComplexHeatmap::ht_opt("verbose")
+    on.exit(ComplexHeatmap::ht_opt(verbose = old))
+    ComplexHeatmap::ht_opt(verbose = TRUE)
+    force(code)
+}
+
+#' Temporarily change ComplexHeatmap options.
+#' 
+#' @param opts New [ht_opt][ComplexHeatmap::ht_opt], must be a named list.
+#' @inheritParams with_ht_verbose
+#' @inherit with_ht_verbose return
+#' @note ComplexHeatmap heatmap options will always be reset with
+#' `ComplexHeatmap::ht_opt(RESET = TRUE)` when function exit.
+#' @seealso [ht_opt][ComplexHeatmap::ht_opt]
+#' @examples 
+#' with_ht_opts(
+#'     list(legend_title_gp = gpar(col = "red")),
+#'     ggheat(matrix(rnorm(81), nrow = 9))
+#' )
+#' with_ht_opts(
+#'     list(verbose = TRUE),
+#'     ggheat(matrix(rnorm(81), nrow = 9))
+#' )
+#' @export
+with_ht_opts <- function(opts, code) {
+    assert_(opts, function(x) is.list(x) && rlang::is_named(x), "a named list")
+    # nms <- rlang::names2(opts)
+    # old <- rlang::inject(ComplexHeatmap::ht_opt(!!!nms))
+    # if (is.null(old)) old <- list(old)
+    # names(old) <- nms
+    on.exit(rlang::inject(ComplexHeatmap::ht_opt(RESET = TRUE)))
+    rlang::inject(ComplexHeatmap::ht_opt(!!!opts))
+    force(code)
+}
+
+
 .cheat_decorate <- function(vp_name, code) {
     current_vp <- grid::current.viewport()$name
     on.exit(grid::seekViewport(current_vp))
