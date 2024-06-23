@@ -8,6 +8,15 @@
 #' @export
 cheat_grob <- function(x, ...) grid::grid.grabExpr(expr = draw(x), ...)
 
+cheat_decorate <- function(vp_name, code) {
+    # ComplexHeatmap::list_components
+    current_vp <- grid::current.viewport()$name
+    on.exit(grid::seekViewport(current_vp))
+    if (current_vp == "ROOT") current_vp <- "global"
+    grid::seekViewport(vp_name)
+    force(code)
+}
+
 cheat_which <- function(which = NULL) {
     out <- cheat_env_get("current_annotation_which")
     if (is.null(out)) {
@@ -115,4 +124,45 @@ cheat_scales <- function(data, lables, scale_fn) {
             expand = ggplot2::expansion()
         ))
     })
+}
+
+wrap_legend <- function(legend) {
+    if (length(legend) > 0L && inherits(legend, c("Legends", "grob"))) {
+        list(legend)
+    } else {
+        legend
+    }
+}
+
+# here is the magic
+#' @param name "heatmap_legend_list" or "annotation_legend_list"
+#' @param gglegends By calling `make_legends` function.
+#' @noRd
+add_gg_legend_list <- function(name, gglegends, call = quote(make_layout)) {
+    if (length(gglegends) == 0L) return(NULL) # styler: off
+    pos <- -2L
+    nframes <- -sys.nframe() + 1L # total parents
+    while (pos >= nframes) {
+        env <- sys.frame(pos) # we locate the legend environment
+        if (identical(utils::packageName(topenv(env)), "ComplexHeatmap") &&
+            exists(name, envir = env, inherits = FALSE) &&
+            # Since ComplexHeatmap function much are the S4 methods
+            # we identify the call name from the parent generic function
+            identical(sys.call(pos - 1L)[[1L]], call)) {
+            old <- wrap_legend(.subset2(env, name))
+            index <- grep("^\\.gg_legend\\d+$", rlang::names2(old), perl = TRUE)
+            old_gglegends <- old[index]
+            names(gglegends) <- paste0(
+                ".__gg_legend", seq_along(gglegends) + length(old_gglegends)
+            )
+            # we then modify the legend list
+            assign(
+                # user provided legends always in the end
+                name, c(old_gglegends, gglegends, old[-index]),
+                envir = env
+            )
+            break
+        }
+        pos <- pos - 1L
+    }
 }

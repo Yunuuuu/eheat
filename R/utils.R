@@ -10,18 +10,6 @@ null_paste <- function(..., sep = " ", collapse = NULL) {
 
 is_scalar <- function(x) length(x)
 
-#' @examples
-#' gpar(col = "red")
-#' @importFrom grid gpar
-#' @export
-grid::gpar
-
-#' @examples
-#' unit(1, "npc")
-#' @importFrom grid unit
-#' @export
-grid::unit
-
 imap <- function(.x, .f, ...) {
     nms <- names(.x)
     out <- .mapply(.f, list(.x, nms %||% seq_along(.x)), NULL)

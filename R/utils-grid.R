@@ -1,3 +1,15 @@
+#' @examples
+#' gpar(col = "red")
+#' @importFrom grid gpar
+#' @export
+grid::gpar
+
+#' @examples
+#' unit(1, "npc")
+#' @importFrom grid unit
+#' @export
+grid::unit
+
 # call grid function
 # Always regard `y` as coord parallelly with heatmap and `y` as coord vertically
 # with heatmap; x, x0, x1;
@@ -30,10 +42,14 @@ recycle_gp <- function(gp, n) {
     gp
 }
 
-grid_draw <- function(vp, grob) {
+with_viewport <- function(vp, code) {
     grid::pushViewport(vp)
     on.exit(grid::popViewport())
-    grid::grid.draw(grob)
+    force(code)
+}
+
+grid_draw <- function(vp, grob) {
+    with_viewport(vp, grid::grid.draw(grob))
 }
 
 is_zero_grob <- function(x) inherits(x, "zeroGrob")

@@ -1,5 +1,10 @@
 #' Legends from ggplot2
-#' @param gg A [ggplot2][ggplot2::ggplot] object.
+#' @param x A [ggplot2][ggplot2::ggplot] object or a [gtable][gtable::gtable]
+#' object.
+#' @param margins Guides of which margin to draw besides the plot in the `vp`
+#' viewport. Allowed values are `r rd_elements(c(MARGINS, "i"))`. "i" means the
+#' inside legends (`ggplot2::theme(legend.position = "inside")`). Default:
+#' `NULL`, which indicates `c("t", "l", "b", "r")`.
 #' @return A list of [Legends][ComplexHeatmap::Legends] object.
 #' @seealso [ComplexHeatmap::Legend]
 #' @examples
@@ -8,29 +13,45 @@
 #'         aes(mpg, disp, fill = factor(mpg)),
 #'         stat = "identity"
 #'     )
-#' draw(legend_from_gg(gg)[[1L]])
+#' draw(make_legends(gg)[[1L]])
 #' @export
-legend_from_gg <- function(gg) {
-    legend_from_gtable(ggplot2::ggplotGrob(gg), direction = NULL)
-}
-
-legend_from_gtable <- function(gt, direction = NULL) {
-    guides <- gtable::gtable_filter(gt, "guide-box")
-    outs <- lapply(guides$grobs, function(x) {
-        if (grid::is.grob(x) && inherits(x, "zeroGrob")) return(NULL) # styler: off
-        guide <- gtable::gtable_filter(x, "guides")
-        if (!length(guide)) return(NULL) # styler: off
-        attr(guide, "width") <- gtable::gtable_width(guide)
-        attr(guide, "height") <- gtable::gtable_height(guide)
+make_legends <- function(x, margins = NULL) {
+    lapply(get_guides(x, margins = margins), function(g) {
+        attr(g, "width") <- gtable::gtable_width(g)
+        attr(g, "height") <- gtable::gtable_height(g)
         methods::new(
             "Legends",
-            grob = guide,
-            type = "gg_legend",
+            grob = g,
+            type = "gglegend",
             name = "gg",
             n = 1L, multiple = 1L,
             # how to extract information directly from ggplot2?
-            direction = match.arg(direction, c("vertical", "horizontal"))
+            direction = "vertical"
         )
     })
-    outs[!vapply(outs, is.null, logical(1L))]
+}
+
+#' @keywords internal
+get_guides <- function(x, ...) UseMethod("get_guides")
+
+#' @export
+get_guides.default <- function(x, ...) {
+    cli::cli_abort("{.arg x} must be a {.cls ggplot} or a {.cls gtable} object")
+}
+
+#' @export
+get_guides.ggplot <- function(x, ...) {
+    get_guides(ggplot2::ggplotGrob(x), ...)
+}
+
+#' @export
+get_guides.gtable <- function(x, margins = NULL, ...) {
+    patterns <- NULL
+    margins <- margins %||% MARGINS
+    for (m in margins) patterns <- c(patterns, ggpatterns(m, "guide"))
+    g <- gtable::gtable_filter(x, paste(patterns, collapse = "|"))$grobs
+    # trim zeroGrobs
+    g[!vapply(g, function(x) {
+        grid::is.grob(x) && inherits(x, "zeroGrob")
+    }, logical(1L))]
 }
