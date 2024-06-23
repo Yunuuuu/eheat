@@ -139,7 +139,8 @@ cheat_check_gp <- function(gp) {
     gp
 }
 
-# column order in slice, coord, raw_index
+#' @param data A data.frame in the order of slice, coord, index
+#' @noRd
 cheat_scales <- function(data, lables, scale_fn) {
     lapply(split(data, data[[1L]]), function(slice_data) {
         slice_data <- slice_data[2:3]
