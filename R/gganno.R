@@ -34,10 +34,9 @@
 #' @export
 #' @name gganno
 gganno <- function(matrix, ggfn, ..., which = NULL,
-                   width = NULL, height = NULL, debug = FALSE) {
+                   width = NULL, height = NULL) {
     matrix <- build_matrix(matrix)
     ggfn <- allow_lambda(ggfn)
-    debug <- allow_lambda(debug)
     ggparams <- rlang::list2(...)
     out <- new_anno(
         n = nrow(matrix),
@@ -49,7 +48,6 @@ gganno <- function(matrix, ggfn, ..., which = NULL,
     out@matrix <- matrix
     out@ggfn <- ggfn
     out@ggparams <- ggparams
-    out@debug <- debug
     out@gginitialized <- FALSE
     out
 }
@@ -64,8 +62,7 @@ methods::setClass(
         ggfn = "FunctionOrNull",
         ggparams = "list",
         gginitialized = "logical",
-        matrix = "matrix",
-        debug = "ANY"
+        matrix = "matrix"
     ),
     contains = "AnnotationFunction"
 )
@@ -291,15 +288,6 @@ draw_gganno <- function(anno, order_list, id) {
     } else {
         # it's safe to add `NULL` or a `list`
         p <- p + x_scale + y_scale
-    }
-    if (isTRUE(anno@debug)) {
-        cli::cli_inform(paste(
-            "Return {.cls ggplot} object", sprintf("from %s", id), "directly"
-        ))
-        rlang::return_from(sys.frame(1L), value = p)
-    } else if (is.function(anno@debug)) {
-        cli::cli_inform(sprintf("Debug from %s annotation", fn_id))
-        anno@debug(p)
     }
 
     gt <- ggplot2::ggplotGrob(p) # nolint

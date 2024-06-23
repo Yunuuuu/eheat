@@ -147,15 +147,6 @@ prepare_ggheat <- function(object) {
     } else {
         p <- p + scales$column[[1L]] + scales$row[[1L]]
     }
-    if (isTRUE(object@debug)) {
-        cli::cli_inform(
-            "Return {.cls ggplot} object from {.fn ggfn} of {object@name} heatmap"
-        )
-        rlang::return_from(sys.frame(which = 1L), value = p)
-    } else if (is.function(object@debug)) {
-        cli::cli_inform("Debug from {.fn ggfn} of {object@name} heatmap")
-        object@debug(p)
-    }
 
     # if user provided `ggfn` or rect_gp$type is not none,
     # we should do something with `ggfn`

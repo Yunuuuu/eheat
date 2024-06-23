@@ -162,13 +162,6 @@
 #' - `post_fun` A function which will be executed after the heatmap list is
 #'   drawn.
 #' @param ggparams Other arguments passed to `ggfn`.
-#' @param debug In the event that it is set to TRUE, the
-#' [ggplot][ggplot2::ggplot] object gracefully yielded by `ggfn`, during the
-#' execution of [draw][ComplexHeatmap::draw], shall be returned directly.
-#' Alternatively, one may opt to impart a function (whereas a formula would also
-#' be deemed acceptable) to be carried out conjointly with the
-#' [ggplot][ggplot2::ggplot] object, as exemplified by [print] or [browser]. 
-#' 
 #' @section ggfn:
 #' 
 #' `ggfn` accept a ggplot2 object with a default data and mapping created by 
@@ -200,15 +193,13 @@
 #' ggheat(matrix(rnorm(81), nrow = 9))
 #' @export
 #' @name ggheat
-ggheat <- function(matrix, ggfn = NULL, ..., ggparams = list(), debug = FALSE) {
+ggheat <- function(matrix, ggfn = NULL, ..., ggparams = list()) {
     matrix <- build_matrix(matrix)
     ggfn <- allow_lambda(ggfn)
-    debug <- allow_lambda(debug)
     out <- ComplexHeatmap::Heatmap(matrix = matrix, ...)
     out <- methods::as(out, "ggHeatmap")
     out@ggfn <- ggfn
     out@ggparams <- ggparams
-    out@debug <- debug
     out
 }
 
@@ -225,6 +216,6 @@ methods::setClassUnion("FunctionOrNull", c("function", "NULL"))
 #' @rdname ggheat
 methods::setClass(
     "ggHeatmap",
-    slots = list(ggfn = "FunctionOrNull", ggparams = "list", debug = "ANY"),
+    slots = list(ggfn = "FunctionOrNull", ggparams = "list"),
     contains = "Heatmap"
 )
