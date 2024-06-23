@@ -306,6 +306,7 @@ draw_gganno <- function(anno, order_list, heat_matrix, id) {
     }
 
     gt <- ggplot2::ggplotGrob(p) # nolint
+    inside_guides <- get_guides(gt, margins = "i")
     draw_fn <- function(index, k, n) {
         vp <- flip_viewport(which, xscale = c(0.5, n + 0.5), yscale = c(0, 1))
         if (with_slice) {
@@ -339,6 +340,10 @@ draw_gganno <- function(anno, order_list, heat_matrix, id) {
             elements = c("axis", "lab"),
             vp = vp
         )
+        # in the last slice, we draw inside guides
+        if (k == n && length(inside_guides)) {
+            lapply(inside_guides, grid::grid.draw)
+        }
     }
     list(legend = make_legends(gt), draw_fn = draw_fn)
 }
