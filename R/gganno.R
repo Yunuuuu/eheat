@@ -340,5 +340,5 @@ draw_gganno <- function(anno, order_list, heat_matrix, id) {
             vp = vp
         )
     }
-    list(legend = legend_from_gtable(gt), draw_fn = draw_fn)
+    list(legend = make_legends(gt), draw_fn = draw_fn)
 }

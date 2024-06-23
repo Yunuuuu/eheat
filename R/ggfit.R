@@ -281,7 +281,8 @@ ggpatterns <- function(margin, element) {
             l = "left",
             r = "right",
             b = "bottom",
-            t = "top"
+            t = "top",
+            i = "inside"
         ), sep = "-")
     } else {
         guide <- NULL
