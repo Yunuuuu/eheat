@@ -295,6 +295,7 @@ draw_gganno <- function(anno, order_list, id) {
     draw_fn <- function(index, k, n) {
         vp <- flip_viewport(which, xscale = c(0.5, n + 0.5), yscale = c(0, 1))
         if (with_slice) {
+            m <- NULL
             if (which == "row") {
                 pattern <- c("panel-%d-1")
                 if (k == 1L) {
