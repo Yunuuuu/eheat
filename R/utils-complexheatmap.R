@@ -53,8 +53,8 @@ cheat_decorate <- function(vp_name, code) {
 #' @export
 with_ht_verbose <- function(code) {
     old <- ComplexHeatmap::ht_opt("verbose")
-    on.exit(ComplexHeatmap::ht_opt(verbose = old))
     ComplexHeatmap::ht_opt(verbose = TRUE)
+    on.exit(ComplexHeatmap::ht_opt(verbose = old))
     force(code)
 }
 
@@ -78,17 +78,17 @@ with_ht_opts <- function(opts, code) {
     # old <- rlang::inject(ComplexHeatmap::ht_opt(!!!nms))
     # if (is.null(old)) old <- list(old)
     # names(old) <- nms
-    on.exit(rlang::inject(ComplexHeatmap::ht_opt(RESET = TRUE)))
     rlang::inject(ComplexHeatmap::ht_opt(!!!opts))
+    on.exit(rlang::inject(ComplexHeatmap::ht_opt(RESET = TRUE)))
     force(code)
 }
 
 
 .cheat_decorate <- function(vp_name, code) {
     current_vp <- grid::current.viewport()$name
-    on.exit(grid::seekViewport(current_vp))
     if (current_vp == "ROOT") current_vp <- "global"
     grid::seekViewport(vp_name)
+    on.exit(grid::seekViewport(current_vp))
     force(code)
 }
 
