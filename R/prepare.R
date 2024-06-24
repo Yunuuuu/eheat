@@ -159,6 +159,7 @@ prepare_ggheat <- function(object) {
     layer_fun <- object@matrix_param$layer_fun # user provided `layer_fun`
     total <- length(order_list[[1L]]) * length(order_list[[2L]])
     n <- 0L
+    # https://github.com/jokergoo/ComplexHeatmap/blob/7d95ca5cf533b98bd0351eecfc6805ad30c754c0/R/Heatmap-class.R#L1730
     heatmap_body_vp_name <- sprintf("%s_heatmap_body_wrap", object@name)
     inside_guides <- get_guides(gt, margins = "i")
     # this function will be called by `draw_heatmap_body`
