@@ -3,12 +3,11 @@
 pkg_nm <- function() utils::packageName(topenv(environment()))
 
 null_paste <- function(..., sep = " ", collapse = NULL) {
-    dots <- list(...)
-    dots <- dots[!vapply(dots, is.null, logical(1L))]
+    dots <- compact(list(...))
     do.call(paste, c(dots, list(sep = sep, collapse = collapse)))
 }
 
-is_scalar <- function(x) length(x)
+is_scalar <- function(x) length(x) == 1L
 
 #' @param n the number of generations to go back.
 #' @param name function name.
@@ -29,7 +28,7 @@ imap <- function(.x, .f, ...) {
     out
 }
 
-compact <- function(.x) Filter(length, .x)
+compact <- function(.x) .x[lengths(.x) > 0L]
 
 build_matrix <- function(matrix, arg = rlang::caller_arg(matrix)) {
     if (inherits(matrix, "data.frame")) {
@@ -40,7 +39,10 @@ build_matrix <- function(matrix, arg = rlang::caller_arg(matrix)) {
             matrix <- matrix(matrix, ncol = 1L)
             colnames(matrix) <- "V1"
         } else {
-            cli::cli_abort("{.arg {arg}} must be a {.cls matrix}, a simple vector, or a {.cls data.frame}.")
+            cli::cli_abort(paste(
+                "{.arg {arg}} must be a {.cls matrix},",
+                "a simple vector, or a {.cls data.frame}."
+            ))
         }
     }
     matrix
@@ -52,9 +54,10 @@ pindex <- function(array, ...) {
     }
     dots <- list(...)
     # all index must be atomic
-    is_right <- vapply(dots, function(x) {
-        is.atomic(x) && !is.null(x)
-    }, logical(1L))
+    is_right <- vapply(
+        dots, function(x) is.atomic(x) && !is.null(x),
+        logical(1L)
+    )
     if (!all(is_right)) {
         stop("All elements in ... must be atomic (`NULL` is not allowed)")
     }
