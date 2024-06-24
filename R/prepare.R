@@ -237,6 +237,7 @@ prepare_gganno <- function(object) {
         if (is.null(annotation)) next
         # we initialize ggAnnotationFunction and extract legends
         anno_list <- annotation@anno_list
+        nms <- names(anno_list)
         for (i in seq_along(anno_list)) {
             anno <- anno_list[[i]]@fun
             # if the annotation exits and is `ggAnnotationFunction`
@@ -249,7 +250,7 @@ prepare_gganno <- function(object) {
             anno_list[[i]]@fun <- make_layout(
                 anno, order_list,
                 heat_matrix = object@matrix,
-                id = names(anno_list)[i]
+                id = .subset(nms, i)
             )
         }
         methods::slot(object, anno_name)@anno_list <- anno_list
