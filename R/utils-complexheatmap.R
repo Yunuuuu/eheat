@@ -4,9 +4,9 @@
 #' @return A [gTree][grid::gTree] object.
 #' @examples
 #' h <- ggheat(matrix(rnorm(100), 10))
-#' cheat_grob(h)
+#' eheat_grob(h)
 #' @export
-cheat_grob <- function(x, ...) grid::grid.grabExpr(expr = draw(x), ...)
+eheat_grob <- function(x, ...) grid::grid.grabExpr(expr = draw(x), ...)
 
 #' Decorate ComplexHeatmap
 #' @param vp_name A valid viewport name returned by
@@ -14,16 +14,16 @@ cheat_grob <- function(x, ...) grid::grid.grabExpr(expr = draw(x), ...)
 #' @param code Codes to draw elements in the viewport.
 #' @return Decorate the viewport.
 #' @examples
-#' ggheat(matrix(rnorm(81), nrow = 9), column_km = 2L, name = "cheat_decorate")
+#' ggheat(matrix(rnorm(81), nrow = 9), column_km = 2L, name = "eheat_decorate")
 #' ComplexHeatmap::list_components()
-#' cheat_decorate("cheat_decorate_heatmap_body_wrap", {
-#'     grid.text("I'm from cheat_decorate",
+#' eheat_decorate("eheat_decorate_heatmap_body_wrap", {
+#'     grid.text("I'm from eheat_decorate",
 #'         1.5 / 10, 2.5 / 4,
 #'         default.units = "npc"
 #'     )
 #' })
 #' @export
-cheat_decorate <- function(vp_name, code) {
+eheat_decorate <- function(vp_name, code) {
     assert_string(vp_name, empty_ok = FALSE)
     components <- ComplexHeatmap::list_components()
     if (!length(components)) {
@@ -41,7 +41,7 @@ cheat_decorate <- function(vp_name, code) {
             )
         ))
     }
-    eval(substitute(.cheat_decorate(vp_name, code)))
+    eval(substitute(.eheat_decorate(vp_name, code)))
 }
 
 #' Make ComplexHeatmap verbose
@@ -84,7 +84,7 @@ with_ht_opts <- function(opts, code) {
 }
 
 
-.cheat_decorate <- function(vp_name, code) {
+.eheat_decorate <- function(vp_name, code) {
     current_vp <- grid::current.viewport()$name
     if (current_vp == "ROOT") current_vp <- "global"
     grid::seekViewport(vp_name)
@@ -92,19 +92,19 @@ with_ht_opts <- function(opts, code) {
     force(code)
 }
 
-cheat_which <- function(which = NULL) {
-    out <- cheat_env_get("current_annotation_which")
+eheat_which <- function(which = NULL) {
+    out <- eheat_env_get("current_annotation_which")
     if (is.null(out)) {
         out <- match.arg(which, c("column", "row"))
     }
     out
 }
 
-cheat_env_get <- function(name) .subset2(cheat_env(), name)
+eheat_env_get <- function(name) .subset2(eheat_env(), name)
 
-cheat_env <- function() utils::getFromNamespace(".ENV", ns = "ComplexHeatmap")
+eheat_env <- function() utils::getFromNamespace(".ENV", ns = "ComplexHeatmap")
 
-cheat_full_slice_index <- function(order_list) {
+eheat_full_slice_index <- function(order_list) {
     row_full <- unlist(order_list$row, recursive = FALSE, use.names = FALSE)
     row_full <- structure(seq_along(row_full), names = row_full)
     column_full <- unlist(order_list$column,
@@ -132,7 +132,7 @@ cheat_full_slice_index <- function(order_list) {
     out
 }
 
-cheat_text_just <- function(rot, side) {
+eheat_text_just <- function(rot, side) {
     rot <- rot %% 180
     if (side == "left") {
         if (rot == 0) {
@@ -169,7 +169,7 @@ cheat_text_just <- function(rot, side) {
     }
 }
 
-cheat_check_gp <- function(gp) {
+eheat_check_gp <- function(gp) {
     if (!"lineheight" %in% names(gp)) {
         gp$lineheight <- 0.9
     }
@@ -181,7 +181,7 @@ cheat_check_gp <- function(gp) {
 
 #' @param data A data.frame in the order of slice, coord, index
 #' @noRd
-cheat_scales <- function(data, lables, scale_fn) {
+eheat_scales <- function(data, lables, scale_fn) {
     lapply(split(data, data[[1L]]), function(slice_data) {
         slice_data <- slice_data[2:3]
         slice_data <- unique(slice_data)
@@ -220,7 +220,7 @@ add_gg_legend_list <- function(name, gglegends, call_target = "make_layout") {
     nframes <- sys.nframe() - 1L # total parents
     while (pos <= nframes) {
         env <- parent.frame(pos) # we locate the legend environment
-        if (is_from_cheat(env) &&
+        if (is_from_eheat(env) &&
             exists(name, envir = env, inherits = FALSE) &&
             # Since ComplexHeatmap function much are the S4 methods
             # we identify the call name from the parent generic function
@@ -247,6 +247,6 @@ add_gg_legend_list <- function(name, gglegends, call_target = "make_layout") {
     }
 }
 
-is_from_cheat <- function(env) {
+is_from_eheat <- function(env) {
     identical(utils::packageName(topenv(env)), "ComplexHeatmap")
 }

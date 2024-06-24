@@ -61,7 +61,7 @@ prepare_ggheat <- function(object) {
     data$.column_index <- as.integer(data$.column_index)
 
     # prepare slice panels data ------------------------
-    slice_list <- cheat_full_slice_index(order_list)
+    slice_list <- eheat_full_slice_index(order_list)
 
     # prepare data for ggplot2 --------------------------
     coords <- lapply(slice_list, function(data) {
@@ -132,7 +132,7 @@ prepare_ggheat <- function(object) {
         }
         cols <- sprintf(c(".slice_%s", ".%s", ".%s_index"), axis)
         # prepapre scales for each slice panel
-        cheat_scales(coords[cols], labels, scale_fn = fn)
+        eheat_scales(coords[cols], labels, scale_fn = fn)
     })
     names(scales) <- c("row", "column")
 
@@ -178,7 +178,7 @@ prepare_ggheat <- function(object) {
             nframes <- sys.nframe() - 1L # total parents
             while (pos <= nframes) {
                 env <- parent.frame(pos)
-                if (is_from_cheat(env) &&
+                if (is_from_eheat(env) &&
                     exists("kr", envir = env, inherits = FALSE) &&
                     exists("kc", envir = env, inherits = FALSE) &&
                     # Since ComplexHeatmap function much are the S4 methods
@@ -209,7 +209,7 @@ prepare_ggheat <- function(object) {
         }
         # in the last slice, we draw inside guides
         if (n == total && length(inside_guides)) {
-            .cheat_decorate(heatmap_body_vp_name, {
+            .eheat_decorate(heatmap_body_vp_name, {
                 lapply(inside_guides, grid::grid.draw)
             })
         }

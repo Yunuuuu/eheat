@@ -125,7 +125,7 @@ gganno_get_order_list <- function(name, axis,
     nframes <- sys.nframe() - 1L # total parents
     while (pos <= nframes) {
         env <- parent.frame(pos)
-        if (is_from_cheat(env) &&
+        if (is_from_eheat(env) &&
             exists(name, envir = env, inherits = FALSE) &&
             is_call_from(pos, call_target)) {
             obj <- .subset2(env, name)
@@ -255,7 +255,7 @@ draw_gganno <- function(anno, order_list, id) {
             rows = ggplot2::vars(.data$.slice),
             scales = "free_y", space = "free_y"
         )
-        y_scale <- cheat_scales(coords[c(1L, 3:2)], labels,
+        y_scale <- eheat_scales(coords[c(1L, 3:2)], labels,
             scale_fn = ggplot2::scale_y_continuous
         )
         if (!is.null(p$scales$get_scales("y"))) {
@@ -273,7 +273,7 @@ draw_gganno <- function(anno, order_list, id) {
             cols = ggplot2::vars(.data$.slice),
             scales = "free_x", space = "free_x"
         )
-        x_scale <- cheat_scales(coords[c(1L, 3:2)], labels,
+        x_scale <- eheat_scales(coords[c(1L, 3:2)], labels,
             scale_fn = ggplot2::scale_x_continuous
         )
         if (!is.null(p$scales$get_scales("x"))) {
@@ -352,7 +352,7 @@ draw_gganno <- function(anno, order_list, id) {
             # } else {
             #     annotation_global_vp <- grid::current.viewport()$name
             # }
-            # .cheat_decorate(annotation_global_vp, {
+            # .eheat_decorate(annotation_global_vp, {
             #     lapply(inside_guides, grid::grid.draw)
             # })
             if (n == 1L) {

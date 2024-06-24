@@ -64,7 +64,7 @@ new_anno <- function(n, draw_fn, ylim = NULL,
         cli::cli_inform(msg)
     }
     anno <- methods::new("AnnotationFunction")
-    which <- cheat_which(which)
+    which <- eheat_which(which)
     anno@which <- which
     anno@fun_name <- name
     anno_size <- anno_width_and_height(which, width, height, unit(1, "cm"))
