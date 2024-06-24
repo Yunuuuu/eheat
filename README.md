@@ -14,12 +14,14 @@
 [![R-CMD-check](https://github.com/Yunuuuu/eheat/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Yunuuuu/eheat/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
-This package serves as a bridge between the ggplot2 and ComplexHeatmap
-packages. Essentially, all ggplot2 geometries and operations can be
-utilized in ComplexHeatmap through the `eheat` package, with the
-exception of facet operations (and you shouldn’t do it in `eheat`
-package). Fortunately, ComplexHeatmap is capable of handling these
-operations independently, rendering them unnecessary.
+This package serves as a bridge between the
+[ggplot2](https://ggplot2.tidyverse.org/) and
+[ComplexHeatmap](https://github.com/jokergoo/ComplexHeatmap) packages.
+Essentially, all ggplot2 geometries and operations can be utilized in
+ComplexHeatmap through the `eheat` package, with the exception of facet
+operations (and you shouldn’t do it in `eheat` package). Fortunately,
+ComplexHeatmap is capable of handling these operations independently,
+rendering them unnecessary.
 
 ## Installation
 
