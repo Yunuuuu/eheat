@@ -28,7 +28,7 @@ draw(object, ...)
 \item{n}{Total number of slices.}
 }
 \value{
-draw the annotation.
+Draw the object.
 }
 \description{
 Only object with \link{make_legends} methods can be put in

@@ -7,7 +7,7 @@
 \alias{make_legends.gtable}
 \alias{make_legends.ggplot}
 \alias{make_legends.list}
-\title{Legends from ggplot2}
+\title{Make legends object}
 \usage{
 make_legends(x, ...)
 

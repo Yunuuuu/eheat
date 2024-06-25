@@ -1,4 +1,4 @@
-#' Legends from ggplot2
+#' Make legends object
 #'
 #' @description Only object with [make_legends] methods can be put in
 #' `legends_margin`. Only object with [draw][draw-method] methods can be put in
@@ -85,20 +85,37 @@ make_legends.list <- function(x, ..., margins = NULL) {
     unlist(lapply(x, make_legends, margins = margins), FALSE, FALSE)
 }
 
-#' @keywords internal
+#' Get guide legends as a list of `gtable` object
+#' 
+#' @param x See method signatures
+#' @param ... Not used currently.
+#' @inheritParams make_legends
+#' @return A list of [gtable][gtable::gtable] objects.
+#' @examples 
+#' gg <- ggplot(mtcars) +
+#'     geom_bar(
+#'         aes(mpg, disp, fill = factor(mpg)),
+#'         stat = "identity"
+#'     )
+#' get_guides(gg)
+#' @export
+#' @rdname get_guides
 get_guides <- function(x, ...) UseMethod("get_guides")
 
 #' @export
+#' @rdname get_guides
 get_guides.default <- function(x, ...) {
     cli::cli_abort("{.arg x} must be a {.cls ggplot} or a {.cls gtable} object")
 }
 
 #' @export
+#' @rdname get_guides
 get_guides.ggplot <- function(x, ...) {
     get_guides(ggplot2::ggplotGrob(x), ...)
 }
 
 #' @export
+#' @rdname get_guides
 get_guides.gtable <- function(x, margins = NULL, ...) {
     margins <- margins %||% MARGINS
     patterns <- gt_ggpatterns(margins, "guide")

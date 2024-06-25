@@ -1,12 +1,16 @@
 #' @examples
 #' gpar(col = "red")
 #' @importFrom grid gpar
+#' @return 
+#' - `gpar`: An object of class [gpar][grid::gpar].
 #' @export
 grid::gpar
 
 #' @examples
 #' unit(1, "npc")
 #' @importFrom grid unit
+#' @return 
+#' - `unit`: An object of class [unit][grid::unit].
 #' @export
 grid::unit
 

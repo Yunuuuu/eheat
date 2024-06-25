@@ -75,6 +75,7 @@
 #' draw(anno)
 #' draw(anno[1:2])
 #' @seealso [AnnotationFunction][ComplexHeatmap::AnnotationFunction]
+#' @return A `ExtendedAnnotation` object.
 #' @importFrom ComplexHeatmap ht_opt
 #' @export
 eanno <- function(draw_fn, ..., matrix = NULL, which = NULL, subset_rule = NULL,
@@ -372,7 +373,6 @@ methods::setMethod(
 #' @param n Total number of slices.
 #' @param ... Additional arguments passed on to
 # [draw-AnnotationFunction][ComplexHeatmap::draw,HeatmapAnnotation-method].
-#' @return draw the annotation.
 #' @export
 #' @importFrom ComplexHeatmap draw
 #' @export

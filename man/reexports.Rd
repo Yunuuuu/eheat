@@ -6,6 +6,15 @@
 \alias{gpar}
 \alias{unit}
 \title{Objects exported from other packages}
+\value{
+\itemize{
+\item \code{gpar}: An object of class \link[grid:gpar]{gpar}.
+}
+
+\itemize{
+\item \code{unit}: An object of class \link[grid:unit]{unit}.
+}
+}
 \examples{
 gpar(col = "red")
 unit(1, "npc")

@@ -9,6 +9,7 @@
 #' @examples
 #' draw(eheat(matrix(rnorm(81), nrow = 9)))
 #' @importFrom ComplexHeatmap draw
+#' @return Draw the object.
 #' @export
 #' @name draw-method
 ComplexHeatmap::draw

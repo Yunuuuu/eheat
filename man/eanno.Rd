@@ -82,7 +82,7 @@ details. Only object with \link{make_legends} methods can be put in
 \item{name}{A string, the name of the annotation.}
 }
 \value{
-A \code{\link[ComplexHeatmap]{AnnotationFunction-class}} object which can be used in \code{\link[ComplexHeatmap]{HeatmapAnnotation}}.
+A \code{ExtendedAnnotation} object.
 }
 \description{
 Constructor of AnnotationFunction Class

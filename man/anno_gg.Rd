@@ -60,7 +60,7 @@ specify elements for each side separately. Valid elements are
 \code{NULL}, all valid ggplot elements will be used.}
 }
 \value{
-A \code{\link[ComplexHeatmap]{AnnotationFunction-class}} object which can be used in \code{\link[ComplexHeatmap]{HeatmapAnnotation}}.
+A \code{ExtendedAnnotation} object.
 }
 \description{
 Create a heatmap annotation with ggplot object.
