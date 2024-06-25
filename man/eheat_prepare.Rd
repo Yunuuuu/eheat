@@ -25,6 +25,13 @@ object.}
 
 \item{name}{A string, the name of the annotation.}
 }
+\value{
+An modified \link[=eheat]{ExtendedHeatmap} or \link[=eanno]{ExtendedAnnotation}
+object.
+}
 \description{
 Prepare ExtendedHeatmap
+}
+\examples{
+eheat_prepare(ggheat(matrix(rnorm(81), nrow = 9)))
 }
