@@ -1,7 +1,7 @@
 #' Create a heatmap annotation with ggplot object.
 #' @inheritParams ggfit
-#' @inheritParams new_anno
-#' @inherit new_anno return
+#' @inheritParams eanno
+#' @inherit eanno return
 #' @seealso [ggfit]
 #' @examples
 #' g <- ggplot(mpg, aes(displ, hwy, colour = class)) +
@@ -61,14 +61,14 @@ anno_gg <- function(gg, align_with = "full", clip = NULL, gt = NULL,
     }
     align_with <- match.arg(align_with, c("panel", "plot", "full"))
     assert_clip(clip)
-    new_anno(NA,
+    eanno(
         function(index, k, n) {
             vp <- grid::viewport()
             margins <- setup_margins(clip, vp)
             .ggfit(gt, align_with, margins)
         },
         which = which, width = width, height = height,
-        show_name = show_name, name = "anno_gg"
+        show_name = show_name, fun_name = "anno_gg"
     )
 }
 
@@ -146,11 +146,11 @@ anno_gg2 <- function(gg, align_with = "full",
     assert_margins(margins)
     margins <- unique(margins)
     elements <- setup_elements(elements, align_with, margins)
-    new_anno(NA,
+    eanno(
         function(index, k, n) {
             .ggfit(gt, align_with, margins, elements)
         },
         which = which, width = width, height = height,
-        show_name = show_name, name = "anno_gg2"
+        show_name = show_name, fun_name = "anno_gg2"
     )
 }

@@ -203,47 +203,10 @@ eheat_scales <- function(data, lables, scale_fn) {
 }
 
 wrap_legend <- function(legend) {
-    if (length(legend) > 0L && inherits(legend, c("Legends", "grob"))) {
+    if (length(legend) > 0L && !is.list(legend)) {
         list(legend)
     } else {
         legend
-    }
-}
-
-# here is the magic
-#' @param name "heatmap_legend_list" or "annotation_legend_list"
-#' @param gglegends By calling `make_legends` function.
-#' @noRd
-add_gg_legend_list <- function(name, gglegends, call_target = "make_layout") {
-    if (length(gglegends) == 0L) return(NULL) # styler: off
-    pos <- 2L
-    nframes <- sys.nframe() - 1L # total parents
-    while (pos <= nframes) {
-        env <- parent.frame(pos) # we locate the legend environment
-        if (is_from_eheat(env) &&
-            exists(name, envir = env, inherits = FALSE) &&
-            # Since ComplexHeatmap function much are the S4 methods
-            # we identify the call name from the parent generic function
-            is_call_from(pos, call_target)) {
-            old <- wrap_legend(.subset2(env, name))
-            index <- grep("^\\.__gglegends\\d+$",
-                rlang::names2(old),
-                perl = TRUE
-            )
-            old_gglegends <- old[index]
-            names(gglegends) <- paste0(
-                ".__gglegends",
-                seq_along(gglegends) + length(old_gglegends)
-            )
-            # we then modify the legend list
-            assign(
-                # user provided legends always in the end
-                name, c(old_gglegends, gglegends, old[-index]),
-                envir = env
-            )
-            break
-        }
-        pos <- pos + 1L
     }
 }
 

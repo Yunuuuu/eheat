@@ -3,15 +3,12 @@
 \docType{class}
 \name{gganno}
 \alias{gganno}
-\alias{ggAnnotationFunction-class}
-\title{Build AnnotationFunction Class with ggplot2}
+\alias{ggAnno-class}
+\title{Build ggAnno Class}
 \usage{
-gganno(matrix, ggfn, ..., which = NULL, width = NULL, height = NULL)
+gganno(ggfn, ..., matrix = NULL, which = NULL, width = NULL, height = NULL)
 }
 \arguments{
-\item{matrix}{A matrix, if it is a simple vector, it will be converted to a
-one-column matrix. Data.frame will also be coerced into matrix.}
-
 \item{ggfn}{A function or formula, accept a initial \link[ggplot2:ggplot]{ggplot}
 data as the input and must return a \link[ggplot2:ggplot]{ggplot} object. For the
 passed data details, please see section \code{ggfn}.
@@ -25,6 +22,11 @@ very compact anonymous functions (lambdas) with up to two inputs.}
 
 \item{...}{Additional arguments passed to \code{ggfn}.}
 
+\item{matrix}{A matrix, if it is a simple vector, it will be converted to a
+one-column matrix. Data.frame will also be coerced into matrix. If \code{NULL},
+the matrix from heatmap will be used. You can also provide a function to
+transform the matrix.}
+
 \item{which}{Whether it is drawn as a column annotation or a row annotation?}
 
 \item{width}{The width of the plotting region (the viewport) that the annotation is drawn. If it is a row annotation, the width must be an absolute unit. Since the \code{AnnotationFunction} object is always contained by the \code{\link[ComplexHeatmap]{SingleAnnotation-class}}object, you can only set the width of row annotations or height of column annotations, while e.g. the height of the row annotation is always \code{unit(1, "npc")} which means it always fully filled in the parent \code{SingleAnnotation} and only in \code{\link[ComplexHeatmap]{SingleAnnotation}} or even \code{\link[ComplexHeatmap]{HeatmapAnnotation}} can adjust the height of the row annotations.}
@@ -32,17 +34,15 @@ very compact anonymous functions (lambdas) with up to two inputs.}
 \item{height}{The height of the plotting region (the viewport) that the annotation is drawn. If it is a column annotation, the width must be an absolute unit.}
 }
 \value{
-A \code{ggAnnotationFunction} object.
+A \code{ggAnno} object.
 }
 \description{
 Plot heatmaps layer by layer
 }
 \details{
-Both \code{gganno} and \code{gganno2} perform identical functions, but \code{gganno} is not
-compatible with \link[ComplexHeatmap:Heatmap]{Heatmap}.  In such cases, only an
-empty annotation region will be added. On the other hand, \code{gganno2} can be
-seamlessly combined with both \link[ComplexHeatmap:Heatmap]{Heatmap} and
-\link{ggheat}, although legends will not be extracted.
+\code{gganno} can be seamlessly combined with both
+\link[ComplexHeatmap:Heatmap]{Heatmap} and \link{ggheat}, although legends will not be
+extracted in the later case.
 }
 \note{
 Maintaining the internal limits along the heatmap to align well with
@@ -67,10 +67,10 @@ uniformly considered as observations and columns as variables.
 }
 
 \examples{
-draw(gganno(rnorm(10L), function(p) {
+draw(gganno(function(p) {
     p + geom_point(aes(y = V1))
-}, height = unit(10, "cm"), width = unit(0.7, "npc")))
+}, matrix = rnorm(10L), height = unit(10, "cm"), width = unit(0.7, "npc")))
 }
 \seealso{
-\link[=draw,ggAnnotationFunction-method]{draw-ggAnnotationFunction}
+\link{eanno}
 }
