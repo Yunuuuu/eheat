@@ -3,6 +3,7 @@
 S3method("[",ExtendedAnnotation)
 S3method(eheat_prepare,ExtendedAnnotation)
 S3method(eheat_prepare,ExtendedHeatmap)
+S3method(eheat_prepare,ggAnno)
 S3method(eheat_prepare,ggHeatmap)
 S3method(get_guides,default)
 S3method(get_guides,ggplot)

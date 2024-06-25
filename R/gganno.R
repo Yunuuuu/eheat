@@ -53,7 +53,9 @@ methods::setClass(
 
 #' @importFrom ggplot2 ggplot
 #' @importFrom ggplot2 aes
-eheat_prepare.ggAnno <- function(anno, order_list, name) {
+#' @export
+#' @rdname eheat_prepare
+eheat_prepare.ggAnno <- function(object, order_list, name = NULL, ...) {
     if (is.null(name)) {
         id <- "(gganno)"
         fn_id <- "{.fn ggfn}"
@@ -61,9 +63,9 @@ eheat_prepare.ggAnno <- function(anno, order_list, name) {
         id <- sprintf("(gganno: %s)", name)
         fn_id <- sprintf("{.fn ggfn} %s", id)
     }
-    which <- anno@which
+    which <- object@which
     # we always regard matrix row as the observations
-    matrix <- anno@matrix
+    matrix <- object@matrix
     data <- as_tibble0(matrix, rownames = NULL) # nolint
     if (length(order_list) > 1L) {
         with_slice <- TRUE
@@ -95,7 +97,7 @@ eheat_prepare.ggAnno <- function(anno, order_list, name) {
     } else {
         p <- ggplot(data, aes(x = .data$.x))
     }
-    p <- rlang::inject(anno@fun(p, !!!anno@dots))
+    p <- rlang::inject(object@fun(p, !!!object@dots))
     if (!ggplot2::is.ggplot(p)) {
         cli::cli_abort(
             sprintf("%s must return a {.cls ggplot2} object.", fn_id)
@@ -158,7 +160,7 @@ eheat_prepare.ggAnno <- function(anno, order_list, name) {
     }
 
     gt <- ggplot2::ggplotGrob(p) # nolint
-    anno@fun <- function(index, k, n) {
+    object@fun <- function(index, k, n) {
         vp <- flip_viewport(which, xscale = c(0.5, n + 0.5), yscale = c(0, 1))
         if (with_slice) {
             m <- NULL
@@ -193,8 +195,8 @@ eheat_prepare.ggAnno <- function(anno, order_list, name) {
             vp = vp
         )
     }
-    anno@dots <- list()
-    anno@legends_panel <- get_guides(gt, margins = "i")
-    anno@legends_margin <- get_guides(gt)
-    anno
+    object@dots <- list()
+    object@legends_panel <- get_guides(gt, margins = "i")
+    object@legends_margin <- get_guides(gt)
+    object
 }
