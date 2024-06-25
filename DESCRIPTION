@@ -1,6 +1,6 @@
 Package: eheat
 Title: Extended ComplexHeatmap
-Version: 0.99.1
+Version: 0.99.2
 Authors@R: 
     person("Yun", "Peng", , "yunyunp96@163.com", role = c("aut", "cre"), comment = c(ORCID = "0000-0003-2801-3332"))
 Description: This package serves as a bridge between the ggplot2 and ComplexHeatmap packages. Essentially, all ggplot2 geometries and operations can be utilized in ComplexHeatmap.
