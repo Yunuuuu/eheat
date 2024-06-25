@@ -33,5 +33,5 @@ object.
 Prepare ExtendedHeatmap
 }
 \examples{
-eheat_prepare(ggheat(matrix(rnorm(81), nrow = 9)))
+eheat_prepare(eheat(matrix(rnorm(81), nrow = 9)))
 }
