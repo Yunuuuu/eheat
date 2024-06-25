@@ -4,6 +4,7 @@
   - [`ggheat`](#ggheat)
   - [`gganno`](#gganno)
   - [`anno_gg` and `anno_gg2`](#anno_gg-and-anno_gg2)
+  - [sessionInfo](#sessioninfo)
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
@@ -721,3 +722,53 @@ ggheat(m,
 ```
 
 <img src="man/figures/README-anno_gg2-full-1.png" width="100%" />
+
+## sessionInfo
+
+``` r
+sessionInfo()
+#> R version 4.4.0 (2024-04-24)
+#> Platform: x86_64-pc-linux-gnu
+#> Running under: Ubuntu 24.04 LTS
+#> 
+#> Matrix products: default
+#> BLAS/LAPACK: /usr/lib/x86_64-linux-gnu/libmkl_rt.so;  LAPACK version 3.8.0
+#> 
+#> locale:
+#>  [1] LC_CTYPE=C.UTF-8       LC_NUMERIC=C           LC_TIME=C.UTF-8       
+#>  [4] LC_COLLATE=C.UTF-8     LC_MONETARY=C.UTF-8    LC_MESSAGES=C.UTF-8   
+#>  [7] LC_PAPER=C.UTF-8       LC_NAME=C              LC_ADDRESS=C          
+#> [10] LC_TELEPHONE=C         LC_MEASUREMENT=C.UTF-8 LC_IDENTIFICATION=C   
+#> 
+#> time zone: Asia/Shanghai
+#> tzcode source: system (glibc)
+#> 
+#> attached base packages:
+#> [1] grid      stats     graphics  grDevices utils     datasets  methods  
+#> [8] base     
+#> 
+#> other attached packages:
+#> [1] eheat_0.99.2          ggplot2_3.5.1         ComplexHeatmap_2.20.0
+#> 
+#> loaded via a namespace (and not attached):
+#>  [1] utf8_1.2.4          generics_0.1.3      tidyr_1.3.1        
+#>  [4] shape_1.4.6.1       digest_0.6.35       magrittr_2.0.3     
+#>  [7] evaluate_0.24.0     RColorBrewer_1.1-3  iterators_1.0.14   
+#> [10] circlize_0.4.16     fastmap_1.2.0       foreach_1.5.2      
+#> [13] doParallel_1.0.17   GlobalOptions_0.1.2 purrr_1.0.2        
+#> [16] fansi_1.0.6         viridisLite_0.4.2   scales_1.3.0       
+#> [19] codetools_0.2-20    cli_3.6.2           rlang_1.1.4        
+#> [22] crayon_1.5.2        munsell_0.5.1       withr_3.0.0        
+#> [25] yaml_2.3.8          ggh4x_0.2.8         tools_4.4.0        
+#> [28] parallel_4.4.0      dplyr_1.1.4         colorspace_2.1-0   
+#> [31] GetoptLong_1.0.5    BiocGenerics_0.50.0 vctrs_0.6.5        
+#> [34] R6_2.5.1            png_0.1-8           matrixStats_1.3.0  
+#> [37] stats4_4.4.0        lifecycle_1.0.4     magick_2.8.3       
+#> [40] S4Vectors_0.42.0    IRanges_2.38.0      clue_0.3-65        
+#> [43] cluster_2.1.6       pkgconfig_2.0.3     pillar_1.9.0       
+#> [46] gtable_0.3.5        glue_1.7.0          Rcpp_1.0.12        
+#> [49] highr_0.11          xfun_0.45           tibble_3.2.1       
+#> [52] tidyselect_1.2.1    knitr_1.47          farver_2.1.2       
+#> [55] rjson_0.2.21        htmltools_0.5.8.1   labeling_0.4.3     
+#> [58] rmarkdown_2.27      Cairo_1.6-2         compiler_4.4.0
+```

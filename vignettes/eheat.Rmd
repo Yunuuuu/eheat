@@ -585,3 +585,8 @@ ggheat(m,
   )
 )
 ```
+
+## sessionInfo
+```{r}
+sessionInfo()
+```
