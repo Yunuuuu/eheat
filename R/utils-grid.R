@@ -30,8 +30,7 @@ flip_gp <- function(gp) {
 }
 
 subset_gp <- function(gp, i) {
-    params <- lapply(gp, `[[`, i)
-    do.call(gpar, params)
+    do.call(grid::gpar, lapply(gp, .subset2, i))
 }
 
 recycle_gp <- function(gp, n) {

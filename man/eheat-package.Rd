@@ -2,9 +2,8 @@
 % Please edit documentation in R/eheat-package.R
 \docType{package}
 \name{eheat-package}
-\alias{eheat}
 \alias{eheat-package}
-\title{eheat: Extented ComplexHeatmap}
+\title{eheat: Extended ComplexHeatmap}
 \description{
 This package serves as a bridge between the ggplot2 and ComplexHeatmap packages. Essentially, all ggplot2 geometries and operations can be utilized in ComplexHeatmap.
 }

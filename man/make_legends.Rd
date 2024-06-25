@@ -2,23 +2,42 @@
 % Please edit documentation in R/legend.R
 \name{make_legends}
 \alias{make_legends}
+\alias{make_legends.Legends}
+\alias{make_legends.grob}
+\alias{make_legends.gtable}
+\alias{make_legends.ggplot}
+\alias{make_legends.list}
 \title{Legends from ggplot2}
 \usage{
-make_legends(x, margins = NULL)
+make_legends(x, ...)
+
+\method{make_legends}{Legends}(x, ...)
+
+\method{make_legends}{grob}(x, ...)
+
+\method{make_legends}{gtable}(x, ...)
+
+\method{make_legends}{ggplot}(x, ..., margins = NULL)
+
+\method{make_legends}{list}(x, ..., margins = NULL)
 }
 \arguments{
 \item{x}{A \link[ggplot2:ggplot]{ggplot2} object.}
 
+\item{...}{Not used currently.}
+
 \item{margins}{Guides of which margin to draw besides the plot in the \code{vp}
-viewport. Allowed values are \code{"t"}, \code{"l"}, \code{"b"}, \code{"r"}, and \code{"i"}. "i" means the
-inside legends (\code{ggplot2::theme(legend.position = "inside")}). Default:
+viewport. Allowed values are \code{"t"}, \code{"l"}, \code{"b"}, \code{"r"}, and \code{"i"}. \code{"i"} means
+the inside legends (\code{ggplot2::theme(legend.position = "inside")}). Default:
 \code{NULL}, which indicates \code{c("t", "l", "b", "r")}.}
 }
 \value{
 A list of \link[ComplexHeatmap:Legends-class]{Legends} object.
 }
 \description{
-Legends from ggplot2
+Only object with \link{make_legends} methods can be put in
+\code{legends_margin}. Only object with \link[=draw-method]{draw} methods can be put in
+\code{legends_panel}.
 }
 \examples{
 gg <- ggplot(mtcars) +

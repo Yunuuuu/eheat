@@ -12,13 +12,22 @@ is_scalar <- function(x) length(x) == 1L
 #' @param n the number of generations to go back.
 #' @param name function name.
 #' @noRd
-is_call_from <- function(n, name) {
+is_call_from <- function(n, call = NULL) {
     n <- n + 1L # `is_call_from` will generate one frame
-    call_nm <- rlang::call_name(sys.call(sys.parent(n)))
-    if (identical(call_nm, name)) return(TRUE) # styler: off
-    # For S4 methods, the call_nm should be `.local`
+    parent_call <- sys.call(sys.parent(n))
+    call_nm <- rlang::call_name(parent_call)
+    if (!is.call(call)) {
+        parent_call <- call_nm
+    }
+    if (identical(parent_call, call)) return(TRUE) # styler: off
+    # For S4 methods, the `call_nm` should be `.local`
     if (!identical(call_nm, ".local")) return(FALSE)  # styler: off
-    identical(rlang::call_name(sys.call(sys.parent(n + 1L))), name)
+    parent_call <- sys.call(sys.parent(n + 1L))
+    call_nm <- rlang::call_name(parent_call)
+    if (!is.call(call)) {
+        parent_call <- call_nm
+    }
+    identical(parent_call, call)
 }
 
 imap <- function(.x, .f, ...) {
@@ -178,3 +187,19 @@ recycle_scalar <- function(x, length, arg = rlang::caller_arg(x)) {
         cli::cli_abort("length of {.arg {arg}} can only be {msg}")
     }
 }
+
+scale_get_limits <- function(matrix, scale = NULL) {
+    if (is.null(scale)) {
+        if (is_discrete(matrix)) {
+            scale <- ggplot2::scale_y_discrete()
+        } else {
+            scale <- ggplot2::scale_y_continuous()
+        }
+    }
+    new_scale <- scale$clone()
+    new_scale$reset()
+    new_scale$train(matrix)
+    new_scale$get_limits()
+}
+
+fclass <- function(x) .subset(class(x), 1L)
