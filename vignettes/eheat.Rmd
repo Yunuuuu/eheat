@@ -103,19 +103,24 @@ draw(ggheat(small_mat))
 You do not need to explicitly specify the color mapping as you can utilize the
 `scale_*` function directly from ggplot2. All guide legends will directly
 extracted from `ggplot2`. The essential parameter of `ggheat` is `ggfn`, which
-accepts a ggplot2 object equipped with a default data and mappings established
-via `ggplot(data, aes(.data$.column, .data$.row))`. By default, the data
-includes 7 columns, each prefixed with a dot for caution.
+accepts a ggplot2 object with a default data and mapping created by
+`ggplot(data, aes(.data$x, .data$y))`.  the data contains following columns:
 
-* `.slice`: slice number, combine `.slice_row` and `.slice_column`.
+- `.slice`: slice number, combine `.slice_row` and `.slice_column`.
 
-* `.slice_row`: the slice row number.
+- `.slice_row`: the slice row number
 
-* `.slice_column`: the slice column number.
+- `.slice_column`: the slice column number
 
-* `.row` and `.column`: the row and column coordinates.
+- `.row_names` and `.column_names`: the row and column names of the original
+  matrix (only applicable when names exist).
 
-* `.row_index` and `.column_index`: the row and column index of the original
+- `.row_index` and `.column_index`: the row and column index of the original
+  matrix.
+
+- `x` and `y`: the `x` and `y` coordinates
+
+- `value`: the actual matrix value for the heatmap matrix.
 
 ```{r ggheat_data}
 pdf(NULL)
@@ -184,13 +189,13 @@ draw(
   ggheat(small_mat, function(p) {
     p +
       geom_tile(
-        aes(fill = values),
+        aes(fill = value),
         width = 1L, height = 1L,
-        data = ~ dplyr::filter(p$data, .row <= .column)
+        data = ~ dplyr::filter(p$data, y <= x)
       ) +
       geom_text(
         aes(label = sprintf("%d * %d", .row_index, .column_index)),
-        data = ~ dplyr::filter(p$data, .row >= .column)
+        data = ~ dplyr::filter(p$data, y >= x)
       ) +
       theme_bw()
   }, rect_gp = gpar(type = "none"))
@@ -238,8 +243,8 @@ draw(ggheat(small_mat, function(p) {
 }, column_km = 2L, row_km = 3, row_names_gp = gpar(col = "red")))
 ```
 
-While the legends are controlled by `ggplot2`. However, the default legend name
-is taken from `ComplexHeatmap::Heatmap` in order to maintain consistency. 
+While the legends are controlled by `ggplot2`, the default legend name is taken
+from `ComplexHeatmap::Heatmap` in order to maintain consistency. 
 ```{r ggheat_legend_name1}
 draw(
   ggheat(small_mat, function(p) {
@@ -269,9 +274,9 @@ draw(
   ggheat(small_mat, function(p) {
     p +
       geom_tile(
-        aes(fill = values),
+        aes(fill = value),
         width = 1L, height = 1L,
-        data = ~ dplyr::filter(p$data, .row <= .column)
+        data = ~ dplyr::filter(.x, y <= x)
       ) +
       theme_bw() +
       theme(
@@ -284,19 +289,21 @@ draw(
 
 ## `gganno`
 The same with `ggheat`, the essential parameter of `gganno` is also the `ggfn`,
-which accepts a ggplot2 object equipped with a default data and mappings
-established by `ggplot(data, aes(.data$.x (or .data$.y)))`. The original matrix
-will be converted into a data.frame with another 3 columns added: 
+which accepts a ggplot2 object with a default data and mapping created by
+`ggplot(data, aes(.data$x))` / `ggplot(data, ggplot2::aes(y = .data$y))`.  The
+original matrix will be converted into a long-data.frame (`gganno` always regard
+row as the observations) with following columns.
 
-* `.slice`: the slice row (which = "row") or column (which = "column")
-  number. 
-
-* `.x`/`.y`: indicating the x-axis (or y-axis) coordinates. Don't use
-`ggplot2::coord_flip` to flip coordinates as it can disrupt internal
-design. 
-
-* `.index`: denoting the row index of the original matrix, where rows are
-  uniformly considered as observations and columns as variables. 
+- `.slice`: the slice row (which = "row") or column (which = "column")
+  number.
+- `.row_names` and `.column_names`: the row and column names of the original
+  matrix (only applicable when names exist).
+- `.row_index` and `.column_index`: the row and column index of the original
+  matrix.
+- `x` / `y`: indicating the x-axis (or y-axis) coordinates. Don't use
+  [coord_flip][ggplot2::coord_flip] to flip coordinates as it may disrupt
+  internal operations.
+- `value`: the actual matrix value of the annotation matrix.
 
 `gganno` can be seamlessly combined with both `ggheat` and
 `ComplexHeatmap::Heatmap`, although legends will not be extracted in the later
@@ -308,11 +315,9 @@ anno_data <- sample(1:10, nrow(small_mat))
 draw(ggheat(small_mat,
   top_annotation = HeatmapAnnotation(
     foo = gganno(
-      # Note: vector will be converted one-column data.frame
-      # with a column names `V1`
       matrix = anno_data,
       function(p) {
-        p + geom_point(aes(.x, V1))
+        p + geom_point(aes(x, value))
       }
     ), which = "column"
   )
@@ -327,7 +332,7 @@ draw(ggheat(small_mat,
     foo = gganno(
       matrix = anno_data,
       function(p) {
-        p + geom_bar(aes(y = V1, fill = factor(.index)), stat = "identity")
+        p + geom_bar(aes(y = value, fill = factor(.row_index)), stat = "identity")
       }, height = unit(5, "cm")
     ), which = "column"
   )
@@ -340,7 +345,7 @@ draw(ggheat(small_mat,
     foo = gganno(
       matrix = anno_data,
       function(p) {
-        p + geom_boxplot(aes(y = V1, fill = factor(.slice)))
+        p + geom_boxplot(aes(y = value, fill = factor(.slice)))
       }, height = unit(5, "cm")
     ), which = "column"
   ), column_km = 2L
@@ -357,27 +362,22 @@ draw(ggheat(small_mat,
     foo = gganno(
       matrix = cbind(box_matrix1, box_matrix2),
       function(p) {
-        long_data <- ~ tidyr::pivot_longer(.x, starts_with("group"),
-          names_to = "group"
-        )
         p +
           geom_violin(
             aes(
-              y = value, fill = factor(group),
+              y = value, fill = factor(.column_names),
               color = factor(.slice),
-              group = paste(.slice, .index, group, sep = "-")
-            ),
-            data = long_data
+              group = paste(.slice, .row_index, .column_names, sep = "-")
+            )
           ) +
           geom_boxplot(
             aes(
-              y = value, fill = factor(group),
+              y = value, fill = factor(.column_names),
               color = factor(.slice),
-              group = paste(.slice, .index, group, sep = "-")
+              group = paste(.slice, .row_index, .column_names, sep = "-")
             ),
             width = 0.2,
-            position = position_dodge(width = 0.9),
-            data = long_data
+            position = position_dodge(width = 0.9)
           ) +
           scale_fill_brewer(
             name = "Group", type = "qual", palette = "Set3"
@@ -397,15 +397,15 @@ draw(ggheat(small_mat,
     foo = gganno(
       matrix = anno_data,
       function(p) {
-        p + aes(y = V1) + geom_text(aes(label = .index))
+        p + aes(y = value) + geom_text(aes(label = .row_index))
       }, height = unit(2, "cm")
     ), which = "column"
   ),
   bottom_annotation = HeatmapAnnotation(
     foo = gganno(
       function(p) {
-        p + aes(y = V1) +
-          geom_text(aes(label = .index)) +
+        p + aes(y = value) +
+          geom_text(aes(label = .row_index)) +
           scale_y_reverse()
       },
       matrix = anno_data,
@@ -416,8 +416,8 @@ draw(ggheat(small_mat,
   right_annotation = HeatmapAnnotation(
     foo = gganno(
       function(p) {
-        p + aes(x = V1) +
-          geom_text(aes(label = .index))
+        p + aes(x = value) +
+          geom_text(aes(label = .row_index))
       },
       matrix = anno_data,
       width = unit(3, "cm")
@@ -427,8 +427,8 @@ draw(ggheat(small_mat,
   left_annotation = HeatmapAnnotation(
     foo = gganno(
       function(p) {
-        p + aes(x = V1) +
-          geom_text(aes(label = .index)) +
+        p + aes(x = value) +
+          geom_text(aes(label = .row_index)) +
           scale_x_reverse()
       },
       matrix = anno_data,
@@ -447,7 +447,7 @@ draw(Heatmap(small_mat,
     foo = gganno(
       matrix = anno_data,
       function(p) {
-        p + geom_bar(aes(y = V1, fill = factor(.index)), stat = "identity")
+        p + geom_bar(aes(y = value, fill = factor(.row_index)), stat = "identity")
       }
     ), which = "column"
   )

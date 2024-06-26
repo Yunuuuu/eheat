@@ -52,23 +52,26 @@ Maintaining the internal limits along the heatmap to align well with
 
 
 \code{ggfn} accept a ggplot2 object with a default data and mapping created by
-\code{ggplot(data, aes(.data$.x))} / \code{ggplot(data, ggplot2::aes(y = .data$.y))}.
-The original matrix will be converted into a data.frame with another 3
-columns added:
+\code{ggplot(data, aes(.data$x))} / \code{ggplot(data, ggplot2::aes(y = .data$y))}.
+The original matrix will be converted into a long-data.frame (\code{gganno} always
+regard row as the observations) with following columns:
 \itemize{
 \item \code{.slice}: the slice row (which = "row") or column (which = "column")
 number.
-\item \code{.x}/\code{.y}: indicating the x-axis (or y-axis) coordinates. Don't use
+\item \code{.row_names} and \code{.column_names}: the row and column names of the original
+matrix (only applicable when names exist).
+\item \code{.row_index} and \code{.column_index}: the row and column index of the original
+matrix.
+\item \code{x} / \code{y}: indicating the x-axis (or y-axis) coordinates. Don't use
 \link[ggplot2:coord_flip]{coord_flip} to flip coordinates as it may disrupt
 internal operations.
-\item \code{.index}: denoting the row index of the original matrix, where rows are
-uniformly considered as observations and columns as variables.
+\item \code{value}: the actual matrix value of the annotation matrix.
 }
 }
 
 \examples{
 draw(gganno(function(p) {
-    p + geom_point(aes(y = V1))
+    p + geom_point(aes(y = value))
 }, matrix = rnorm(10L), height = unit(10, "cm"), width = unit(0.7, "npc")))
 }
 \seealso{

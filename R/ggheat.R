@@ -19,14 +19,16 @@
 #' @section ggfn:
 #'
 #' `ggfn` accept a ggplot2 object with a default data and mapping created by
-#' `ggplot(data, aes(.data$.column, .data$.row))`.
-#' the data contains 7 columns:
+#' `ggplot(data, aes(.data$x, .data$y))`.  the data contains following columns:
 #' - `.slice`: slice number, combine `.slice_row` and `.slice_column`.
 #' - `.slice_row`: the slice row number
 #' - `.slice_column`: the slice column number
-#' - `.row` and `.column`: the row and column coordinates
+#' - `.row_names` and `.column_names`: the row and column names of the original
+#'   matrix (only applicable when names exist).
 #' - `.row_index` and `.column_index`: the row and column index of the original
 #'   matrix.
+#' - `x` and `y`: the `x` and `y` coordinates
+#' - `value`: the actual matrix value for the heatmap matrix.
 #'
 #' @note Maintaining the internal limits along the heatmap to align well with
 #' `ComplexHeatmap` is important.
@@ -86,9 +88,11 @@ eheat_prepare.ggHeatmap <- function(object, ...) {
     data <- tidyr::pivot_longer(data,
         cols = !".row_index",
         names_to = ".column_index",
-        values_to = "values"
+        values_to = "value"
     )
     data$.column_index <- as.integer(data$.column_index)
+    if (!is.null(row_nms)) data$.row_names <- row_nms[data$.row_index]
+    if (!is.null(col_nms)) data$.column_names <- col_nms[data$.column_index]
 
     # prepare slice panels data ------------------------
     slice_list <- eheat_full_slice_index(order_list)
@@ -99,7 +103,7 @@ eheat_prepare.ggHeatmap <- function(object, ...) {
         # reverse y-axis as ggplot2 and ComplexHeatmap draw in different
         # direction, but we cannot draw anything if we use `scale_y_reverse`, I
         # don't know why?. So we just reverse the values
-        data$.row <- reverse_trans(data$.row)
+        data$y <- reverse_trans(data$y)
         data
     })
     coords <- do.call(rbind, coords)
@@ -109,7 +113,13 @@ eheat_prepare.ggHeatmap <- function(object, ...) {
     )
 
     # create the ggplot2 object --------------------
-    p <- ggplot(data, aes(.data$.column, .data$.row))
+    nms <- c(
+        ".slice", ".slice_row", ".slice_column",
+        ".row_names", ".column_names",
+        ".row_index", ".column_index",
+        "x", "y", "value"
+    )
+    p <- ggplot(data[intersect(nms, names(data))], aes(.data$x, .data$y))
 
     # special case for rect_gp$type == "none" ------
     if (!identical(rect_gp$type, "none")) {
@@ -117,7 +127,7 @@ eheat_prepare.ggHeatmap <- function(object, ...) {
         # ggplot2::labs has relative low priorities, so user can provide scale
         #          name to overwrite the name
         p <- p + ggplot2::geom_tile(
-            aes(.data$.column, .data$.row, fill = .data$values),
+            aes(.data$x, .data$y, fill = .data$value),
             width = 1L, height = 1L
         ) + ggplot2::labs(fill = object@name)
     }
@@ -150,17 +160,17 @@ eheat_prepare.ggHeatmap <- function(object, ...) {
         }
         p$scales <- p$scales$non_position_scales()
     }
-
     # prepare scales ------------------------------
     scales <- lapply(c("row", "column"), function(axis) {
         if (axis == "row") {
             fn <- ggplot2::scale_y_continuous
             labels <- row_nms
+            cols <- c(".slice_row", "y", ".row_index")
         } else {
             fn <- ggplot2::scale_x_continuous
             labels <- col_nms
+            cols <- c(".slice_column", "x", ".column_index")
         }
-        cols <- sprintf(c(".slice_%s", ".%s", ".%s_index"), axis)
         # prepapre scales for each slice panel
         eheat_scales(coords[cols], labels, scale_fn = fn)
     })

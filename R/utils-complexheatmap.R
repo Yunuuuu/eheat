@@ -124,8 +124,8 @@ eheat_full_slice_index <- function(order_list) {
                 .slice_column = j,
                 .row_index = row_order[expand_idx[[1L]]],
                 .column_index = column_order[expand_idx[[2L]]],
-                .row = row_full[as.character(.data$.row_index)],
-                .column = column_full[as.character(.data$.column_index)]
+                x = column_full[as.character(.data$.column_index)],
+                y = row_full[as.character(.data$.row_index)]
             )
         }
     }

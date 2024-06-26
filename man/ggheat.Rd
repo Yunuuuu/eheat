@@ -41,15 +41,17 @@ Maintaining the internal limits along the heatmap to align well with
 
 
 \code{ggfn} accept a ggplot2 object with a default data and mapping created by
-\code{ggplot(data, aes(.data$.column, .data$.row))}.
-the data contains 7 columns:
+\code{ggplot(data, aes(.data$x, .data$y))}.  the data contains following columns:
 \itemize{
 \item \code{.slice}: slice number, combine \code{.slice_row} and \code{.slice_column}.
 \item \code{.slice_row}: the slice row number
 \item \code{.slice_column}: the slice column number
-\item \code{.row} and \code{.column}: the row and column coordinates
+\item \code{.row_names} and \code{.column_names}: the row and column names of the original
+matrix (only applicable when names exist).
 \item \code{.row_index} and \code{.column_index}: the row and column index of the original
 matrix.
+\item \code{x} and \code{y}: the \code{x} and \code{y} coordinates
+\item \code{value}: the actual matrix value for the heatmap matrix.
 }
 }
 
