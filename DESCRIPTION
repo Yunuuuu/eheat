@@ -1,6 +1,6 @@
 Package: eheat
 Title: Extended ComplexHeatmap
-Version: 0.99.5
+Version: 0.99.6
 Authors@R: 
     person("Yun", "Peng", , "yunyunp96@163.com", role = c("aut", "cre"), comment = c(ORCID = "0000-0003-2801-3332"))
 Description: This package serves as a bridge between the ggplot2 and ComplexHeatmap packages. Essentially, all ggplot2 geometries and operations can be utilized in ComplexHeatmap.
@@ -31,12 +31,13 @@ Collate:
     'eanno.R'
     'eheat-package.R'
     'eheat.R'
-    'ggheat.R'
     'gganno.R'
     'ggfit.R'
+    'ggheat.R'
     'import-standalone-assert.R'
     'import-standalone-cli.R'
     'import-standalone-obj-type.R'
+    'internal-methods.R'
     'legend.R'
     'prepare.R'
     'utils-assert.R'

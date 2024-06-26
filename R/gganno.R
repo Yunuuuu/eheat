@@ -44,18 +44,15 @@ gganno <- function(ggfn, ..., matrix = NULL,
 
 #' @export
 #' @rdname gganno
-#' @include ggheat.R
-methods::setClass(
-    "ggAnno",
-    slots = list(ggparams = "list"),
-    contains = "ExtendedAnnotation"
-)
+#' @include eanno.R
+methods::setClass("ggAnno", contains = "ExtendedAnnotation")
 
+#' @inheritParams internal-method
 #' @importFrom ggplot2 ggplot
 #' @importFrom ggplot2 aes
 #' @export
 #' @rdname eheat_prepare
-eheat_prepare.ggAnno <- function(object, order_list, name = NULL, ...) {
+eheat_prepare.ggAnno <- function(object, ..., viewport, heatmap, name) {
     if (is.null(name)) {
         id <- "(gganno)"
         fn_id <- "{.fn ggfn}"
@@ -66,6 +63,14 @@ eheat_prepare.ggAnno <- function(object, order_list, name = NULL, ...) {
     which <- object@which
     # we always regard matrix row as the observations
     matrix <- object@matrix
+    if (is.null(heatmap)) {
+        order_list <- list(seq_len(nrow(matrix)))
+    } else {
+        order_list <- switch(which,
+            row = heatmap@row_order_list,
+            column = heatmap@column_order_list
+        )
+    }
     data <- as_tibble0(matrix, rownames = NULL) # nolint
     if (length(order_list) > 1L) {
         with_slice <- TRUE
@@ -161,7 +166,6 @@ eheat_prepare.ggAnno <- function(object, order_list, name = NULL, ...) {
 
     gt <- ggplot2::ggplotGrob(p) # nolint
     object@fun <- function(index, k, n) {
-        vp <- flip_viewport(which, xscale = c(0.5, n + 0.5), yscale = c(0, 1))
         if (with_slice) {
             m <- NULL
             if (which == "row") {
@@ -191,8 +195,7 @@ eheat_prepare.ggAnno <- function(object, order_list, name = NULL, ...) {
         .ggfit(
             gt_area(gt, pattern, margins = m),
             align_with = "panel", margins = m,
-            elements = c("axis", "lab"),
-            vp = vp
+            elements = c("axis", "lab")
         )
     }
     object@dots <- list()

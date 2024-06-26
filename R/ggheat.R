@@ -51,7 +51,7 @@ methods::setClass(
     contains = "ExtendedHeatmap"
 )
 
-methods::setValidity("ExtendedAnnotation", function(object) {
+methods::setValidity("ggHeatmap", function(object) {
     ggfn <- object@ggfn
     if (!is.null(ggfn) && !is.function(ggfn)) {
         cli::cli_abort("{.code @ggfn} must be a function or NULL")

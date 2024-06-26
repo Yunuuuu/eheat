@@ -15,8 +15,10 @@
 #' ``width``, ``height``, ``fill`` which are column index, row index in
 #' ``matrix``, coordinate of the cell, the width and height of the cell and the
 #' filled color. ``x``, ``y``, ``width`` and ``height`` are all `grid::unit`
-#' objects.  -layer_fun Similar as ``cell_fun``, but is vectorized. Check
-#' <https://jokergoo.github.io/ComplexHeatmap-reference/book/a-single-heatmap.html#customize-the-heatmap-body>.
+#' objects. Check
+#' <https://jokergoo.github.io/ComplexHeatmap-reference/book/a-single-heatmap.html#customize-the-heatmap-body>. You can always use
+#' `self` to indicates the matrix attached in this Heatmap.
+#' - `layer_fun`: Similar as ``cell_fun``, but is vectorized.
 #' - `jitter`: Random shifts added to the matrix. The value can be logical or a
 #'      single numeric value. It it is ``TRUE``, random values from uniform
 #'      distribution between 0 and 1e-10 are generated. If it is a numeric
@@ -194,13 +196,13 @@ methods::setClass(
     contains = "Heatmap"
 )
 
-#' @param object A `ExtendedHeatmap` object.
 #' @examples
 #' prepare(eheat(matrix(rnorm(81), nrow = 9)))
 #' @inheritParams ComplexHeatmap::prepare
 #' @importFrom ComplexHeatmap prepare
 #' @export
-#' @rdname eheat
+#' @keywords internal
+#' @rdname internal-method
 methods::setMethod(
     f = "prepare", signature = "ExtendedHeatmap",
     definition = function(object, process_rows = TRUE, process_columns = TRUE) {
@@ -227,117 +229,130 @@ methods::setMethod(
     }
 )
 
-#' @examples
-#' make_layout(prepare(eheat(matrix(rnorm(81), nrow = 9))))
+wrap_heat_fn <- function(object, fun_name) {
+    fn <- .subset2(object@matrix_param, fun_name)
+    if (is.null(fn)) return(fn) # styler: off
+    args <- formals(fn)
+
+    # is.null is a fast path for a common case; the %in% check is slower but
+    # also catches the case where there's a `self = NULL` argument.
+    if (!is.null(.subset2(args, "self")) || "self" %in% names(args)) {
+        matrix <- object@matrix
+        function(j, i, x, y, w, h, fill) {
+            fn(j, i, x, y, w, h, fill, self = matrix)
+        }
+    } else {
+        fn
+    }
+}
+
+#' @importClassesFrom ComplexHeatmap HeatmapAnnotation
 #' @importFrom ComplexHeatmap make_layout
 #' @export
-#' @rdname eheat
+#' @keywords internal
+#' @rdname internal-method
+methods::setMethod("make_layout", "ExtendedHeatmap", function(object) {
+    object <- methods::callNextMethod()
+
+    # run eheat_prepare ---------------------------------
+    # New generics to extend ComplexHeatmap easily
+    # we can insert legends and modify `draw_fn` here
+    object <- eheat_prepare(object)
+
+    # we extend ComplexHeatmap by applying `make_layout` for each annotation
+    # and extracted legends
+    for (position in c("top", "bottom", "left", "right")) {
+        anno_nm <- sprintf("%s_annotation", position)
+        annotation <- methods::slot(object, anno_nm)
+        if (is.null(annotation)) next
+        methods::slot(object, anno_nm) <- make_layout(annotation, object)
+    }
+
+    # draw panel legends --------------------------------
+    initialized_eheat_fn <- wrap_heat_fn(object, "layer_fun")
+    object@matrix_param$cell_fun <- wrap_heat_fn(object, "cell_fun")
+    n <- 0L
+    total <- length(object@row_order_list) * length(object@column_order_list)
+    object@matrix_param$layer_fun <- function(j, i, x, y, w, h, fill) {
+        n <<- n + 1L
+        if (!is.null(initialized_eheat_fn)) {
+            initialized_eheat_fn(j, i, x, y, w, h, fill)
+        }
+        # in the last slice, we draw panel legends
+        if (n == total && length(object@legends_panel)) {
+            # https://github.com/jokergoo/ComplexHeatmap/blob/7d95ca5cf533b98bd0351eecfc6805ad30c754c0/R/Heatmap-class.R#L1730
+            heatmap_body_vp_name <- sprintf("%s_heatmap_body_wrap", object@name)
+            .eheat_decorate(heatmap_body_vp_name, {
+                lapply(object@legends_panel, draw)
+            })
+        }
+    }
+    object
+})
+
+#' @importClassesFrom ComplexHeatmap HeatmapAnnotation
+#' @importFrom ComplexHeatmap make_layout
+#' @export
+#' @keywords internal
+#' @rdname internal-method
 methods::setMethod(
-    f = "make_layout", signature = "ExtendedHeatmap",
-    definition = function(object) {
-        object <- methods::callNextMethod()
-
-        # run eheat_prepare ---------------------------------
-        # New generics to extend ComplexHeatmap easily
-        # we can insert legends and modify `draw_fn` here
-        object <- eheat_prepare(object)
-
-        # draw panel legends --------------------------------
-        initialized_eheat_fn <- object@matrix_param$layer_fun
-
-        n <- 0L
-        total <- length(object@row_order_list) *
-            length(object@column_order_list)
-        object@matrix_param$layer_fun <- function(j, i, x, y, w, h, fill) {
-            n <<- n + 1L
-            if (!is.null(initialized_eheat_fn)) {
-                initialized_eheat_fn(j, i, x, y, w, h, fill)
-            }
-            # in the last slice, we draw panel legends
-            if (n == total && length(object@legends_panel)) {
-                # https://github.com/jokergoo/ComplexHeatmap/blob/7d95ca5cf533b98bd0351eecfc6805ad30c754c0/R/Heatmap-class.R#L1730
-                heatmap_body_vp_name <- sprintf(
-                    "%s_heatmap_body_wrap", object@name
-                )
-                .eheat_decorate(heatmap_body_vp_name, {
-                    lapply(object@legends_panel, draw)
-                })
-            }
+    "make_layout", "HeatmapAnnotation",
+    function(object, heatmap) {
+        # we call `make_layout` to initialize ExtendedAnnotation and extract
+        # legends
+        anno_list <- object@anno_list
+        anno_sizes <- object@anno_size
+        anno_gaps <- object@gap
+        nms <- names(anno_list)
+        n_anno <- length(anno_list)
+        for (i in seq_along(anno_list)) {
+            anno <- anno_list[[i]]@fun
+            # if the annotation exits and is `ExtendedAnnotation`
+            if (!inherits(anno, "ExtendedAnnotation")) next
+            which <- anno@which
+            # we allocate each annotation a viewport ----------------
+            # always add a viewport for the whole annotation.
+            # start from the last annoation which is put on right/bottom
+            just <- switch(which,
+                row = c(1, 1),
+                column = c(0, 1)
+            )
+            x <- switch(which,
+                row = sum(anno_sizes[seq_len(i)]) +
+                    sum(anno_gaps[seq_len(i)]) -
+                    anno_gaps[i],
+                column = unit(0, "npc")
+            )
+            width <- switch(which,
+                row = anno_sizes[i],
+                column = unit(1, "npc")
+            )
+            y <- switch(which,
+                row = unit(1, "npc"),
+                column = sum(anno_sizes[seq(i, n_anno)]) +
+                    sum(anno_gaps[seq(i, n_anno)]) -
+                    anno_gaps[n_anno]
+            )
+            height <- switch(which,
+                row = unit(1, "npc"),
+                column = anno_sizes[i]
+            )
+            name <- .subset(nms, i)
+            vp <- grid::viewport(
+                x = x, y = y, width = width, height = height, just = just,
+                name = sprintf("annotation_%s", name)
+            )
+            anno <- make_layout(
+                anno,
+                viewport = vp,
+                heatmap = heatmap,
+                name = name
+            )
+            anno_list[[i]]@fun <- anno
+            # we add annotation legends
+            add_eheat_legends("annotation_legend_list", anno@legends_margin)
         }
-
-        # we extend ComplexHeatmap by applying `make_layout` for each annotation
-        # and extracted legends
-        for (position in c("top", "bottom", "left", "right")) {
-            anno_nm <- sprintf("%s_annotation", position)
-            annotation <- methods::slot(object, anno_nm)
-            if (is.null(annotation)) next
-            # we call `make_layout` to initialize ExtendedAnnotation and extract
-            # legends
-            anno_list <- annotation@anno_list
-            anno_sizes <- annotation@anno_size
-            anno_gaps <- annotation@gap
-            nms <- names(anno_list)
-            n_anno <- length(nms)
-            for (i in seq_along(anno_list)) {
-                anno <- anno_list[[i]]@fun
-                # if the annotation exits and is `ExtendedAnnotation`
-                if (!inherits(anno, "ExtendedAnnotation")) next
-                order_list <- switch(anno@which,
-                    row = object@row_order_list,
-                    column = object@column_order_list
-                )
-                # we initialize the ExtendedAnnotation object and extract the
-                # legends
-                # start from the last annoation which is put on right/bottom
-                # and we always add a viewport for the whole annotation.
-                just <- switch(position,
-                    top = ,
-                    bottom = c(0, 1),
-                    left = ,
-                    right = c(1, 1)
-                )
-                x <- switch(position,
-                    top = ,
-                    bottom = unit(0, "npc"),
-                    left = ,
-                    right = sum(anno_sizes[seq_len(i)]) +
-                        sum(anno_gaps[seq_len(i)]) -
-                        anno_gaps[i]
-                )
-                width <- switch(position,
-                    top = ,
-                    bottom = unit(1, "npc"),
-                    left = ,
-                    right = anno_sizes[i]
-                )
-                y <- switch(position,
-                    top = ,
-                    bottom = sum(anno_sizes[seq(i, n_anno)]) +
-                        sum(anno_gaps[seq(i, n_anno)]) -
-                        anno_gaps[n_anno],
-                    left = ,
-                    right = unit(1, "npc")
-                )
-                height <- switch(position,
-                    top = ,
-                    bottom = anno_sizes[i],
-                    left = ,
-                    right = unit(1, "npc")
-                )
-                anno <- make_layout(
-                    anno, order_list,
-                    position = position,
-                    x = x, y = y, width = width, height = height, just = just,
-                    heat_name = object@name,
-                    heat_matrix = object@matrix,
-                    name = .subset(nms, i)
-                )
-                anno_list[[i]]@fun <- anno
-                # we add annotation legends
-                add_eheat_legends("annotation_legend_list", anno@legends_margin)
-            }
-            methods::slot(object, anno_nm)@anno_list <- anno_list
-        }
+        object@anno_list <- anno_list
         object
     }
 )

@@ -4,15 +4,16 @@
 #' Manual](https://jokergoo.github.io/ComplexHeatmap-reference/book/heatmap-annotations.html#implement-new-annotation-functions)
 #' for details.
 #'
-#' The function must have at least three arguments: `index`, `k` and `n` (the
-#' names of the arguments can be arbitrary) where `k` and `n` are optional.
-#' `index` corresponds to the indices of rows or columns of the heatmap. The
-#' value of `index` is not necessarily to be the whole row indices or column
-#' indices in the heatmap. It can also be a subset of the indices if the
-#' annotation is split into slices according to the split of the heatmap.
+#' The function must have at least Four arguments: `index`, `k`, `n`, and
+#' `matrix` (the names of the arguments can be arbitrary) where `k` and `n` are
+#' optional.  `index` corresponds to the indices of rows or columns of the
+#' heatmap. The value of `index` is not necessarily to be the whole row indices
+#' or column indices in the heatmap. It can also be a subset of the indices if
+#' the annotation is split into slices according to the split of the heatmap.
 #' `index` is reordered according to the reordering of heatmap rows or columns
 #' (e.g. by clustering). So, `index` actually contains a list of row or column
-#' indices for the current slice after row or column reordering.
+#' indices for the current slice after row or column reordering. `matrix` will
+#' contain the data passed into the argument `matrix`.
 #'
 #' k corresponds to the current slice and n corresponds to the total number of
 #' slices.
@@ -65,7 +66,7 @@
 #'         n <- length(index)
 #'         pushViewport(viewport(xscale = c(0.5, n + 0.5), yscale = c(0, 10)))
 #'         grid.rect()
-#'         grid.points(1:n, self[index], default.units = "native")
+#'         grid.points(1:n, self[index, drop = TRUE], default.units = "native")
 #'         if (k == 1) grid.yaxis()
 #'         popViewport()
 #'     },
@@ -117,14 +118,24 @@ eanno <- function(draw_fn, ..., matrix = NULL, which = NULL, subset_rule = NULL,
         }
 
         if (subsettable <- subset_rule) {
-            subset_rule <- lapply(
-                dots[rlang::have_name(dots)],
-                function(x) TRUE
-            )
+            subsettable_args <- dots[rlang::have_name(dots)]
+            if (length(subsettable_args)) {
+                subset_rule <- rep_len(TRUE, length(subsettable_args))
+                names(subset_rule) <- rlang::names2(subsettable_args)
+            } else {
+                subset_rule <- list()
+            }
         }
     } else if (is.list(subset_rule)) {
         if (!rlang::is_named2(subset_rule)) {
             cli::cli_abort("{.arg subset_rule} must be named")
+        }
+        missing_rules <- setdiff(
+            rlang::names2(subset_rule),
+            rlang::names2(dots)
+        )
+        if (length(missing_rules)) {
+            cli::cli_abort("Cannot find {.val {missing_rules}} in {.arg ...}")
         }
         subset_rule <- lapply(subset_rule, allow_lambda)
         if (!all(vapply(subset_rule, is.function, logical(1L)))) {
@@ -237,16 +248,16 @@ methods::setValidity("ExtendedAnnotation", function(object) {
     TRUE
 })
 
-wrap_anno_fn <- function(fn, matrix, dots) {
-    force(matrix)
-    force(dots)
-
+wrap_anno_fn <- function(object) {
     # prepare annotation function --------------------------
+    matrix <- object@matrix
+    dots <- object@dots
+    fn <- object@fun
     args <- formals(fn)
-    # is.null is a fast path for a common case; the %in% check is slower but also
-    # catches the case where there's a `self = NULL` argument.
-    has_self <- !is.null(args[["self"]]) || "self" %in% names(args)
-    if (has_self) {
+
+    # is.null is a fast path for a common case; the %in% check is slower but
+    # also catches the case where there's a `self = NULL` argument.
+    if (!is.null(.subset2(args, "self")) || "self" %in% names(args)) {
         function(index, k, n) {
             rlang::inject(fn(index, k, n, !!!dots, self = matrix))
         }
@@ -258,21 +269,33 @@ wrap_anno_fn <- function(fn, matrix, dots) {
 }
 
 #' @param object An [ExtendedAnnotation][eanno] object.
-#' @param order_list Heatmap order list (column/row) after clustering.
-#' @param heat_matrix Heatmap matrix.
+#' @param viewport A viewport for this annotation.
+#' @param heatmap Heatmap object after clustering.
 #' @param name A string, the name of the annotation.
 #' @importFrom ComplexHeatmap make_layout
 #' @export
-#' @rdname eanno
+#' @rdname internal-method
 methods::setMethod(
     "make_layout", "ExtendedAnnotation",
-    function(object, order_list, ..., heat_matrix = NULL, name = NULL) {
+    function(object, ..., viewport = NULL, heatmap = NULL, name = NULL) {
+        # we initialize the ExtendedAnnotation object and extract the
+        # legends
         which <- object@which
+        if (is.null(name)) {
+            id <- object@fun_name
+        } else {
+            id <- sprintf("%s (%s)", object@fun_name, name)
+        }
         # prepare ExtendedAnnotation matrix data ---------------------------
         mat <- object@matrix
+        if (is.null(heatmap)) {
+            heat_matrix <- NULL
+        } else {
+            heat_matrix <- heatmap@matrix
+        }
         if (is.null(heat_matrix) && (is.null(mat) || is.function(mat))) {
             cli::cli_abort(paste(
-                "You must provide a matrix in", object@fun_name,
+                "You must provide a matrix in", id,
                 "in order to draw {.cls {fclass(object)}} directly"
             ))
         }
@@ -288,27 +311,26 @@ methods::setMethod(
                 column = t(heat_matrix)
             )
             if (!is.matrix(mat <- mat(data))) {
-                cli::cli_abort("{.fn @matrix} must return a matrix")
+                cli::cli_abort("{.fn @matrix} of {id} must return a matrix")
             }
             object@n <- nrow(mat)
         }
         object@matrix <- mat
 
         # call `eheat_prepare` to modify object after make_layout ----------
-        object <- eheat_prepare(object, order_list, name)
+        # for `eheat_prepare`, the actual geom matrix has been added
+        object <- eheat_prepare(
+            object,
+            viewport = viewport,
+            heatmap = heatmap, name = name
+        )
 
-        initialized_eanno_fn <- wrap_anno_fn(object@fun, mat, object@dots)
-
-        if (is.null(name)) {
-            vp_name <- NULL # should be called from draw directly
-        } else {
-            vp_name <- sprintf("annotation_%s", name)
-        }
-        dots <- rlang::list2(...)
+        initialized_eanno_fn <- wrap_anno_fn(object)
+        force(viewport)
         object@fun <- function(index, k, n) {
             # in the first slice, we always insert annotation viewport
             if (k == 1L) {
-                if (!is.null(heat_matrix)) {
+                if (!is.null(viewport)) {
                     # current viewport: `draw,AnnotationFunction` function
                     # parent viewport - 1: `draw,HeatmapAnnotation` function
                     # parent viewport - 2: `draw,HeatmapAnnotation` function
@@ -326,20 +348,7 @@ methods::setMethod(
                     #   -- "main_heatmap_list"
                     current_vp <- grid::current.viewport()$name
                     grid::upViewport(5L)
-                    if (which == "row") {
-                        yscale <- c(0.5, n + 0.5)
-                        xscale <- c(0, 1)
-                    } else {
-                        xscale <- c(0.5, n + 0.5)
-                        yscale <- c(0, 1)
-                    }
-                    vp <- grid::viewport(
-                        x = dots$x, y = dots$y, width = dots$width,
-                        height = dots$height, just = dots$just,
-                        xscale = xscale, yscale = yscale,
-                        name = vp_name
-                    )
-                    grid::pushViewport(vp)
+                    grid::pushViewport(viewport)
                     grid::seekViewport(current_vp)
                 }
             }
@@ -356,10 +365,13 @@ methods::setMethod(
             # })
             # in the last slice, we draw legends in the panel
             if (k == n && length(object@legends_panel)) {
-                if (is.null(vp_name)) {
+                if (is.null(viewport)) {
                     lapply(object@legends_panel, draw)
                 } else {
-                    .eheat_decorate(vp_name, lapply(object@legends_panel, draw))
+                    .eheat_decorate(
+                        viewport$name,
+                        lapply(object@legends_panel, draw)
+                    )
                 }
             }
         }
@@ -400,7 +412,7 @@ methods::setMethod(
         # since `eheat` will initialize `eanno` when preparing the main
         # heatmap layout.
         if (k == 1L && !object@initialized) {
-            order_list <- NULL
+            heatmap <- NULL
             pos <- 1L
             nframes <- sys.nframe() - 1L # total parents
             # https://github.com/jokergoo/ComplexHeatmap/blob/7d95ca5cf533b98bd0351eecfc6805ad30c754c0/R/HeatmapList-draw_component.R#L670
@@ -411,28 +423,17 @@ methods::setMethod(
                 if (is_from_eheat(env) &&
                     exists("ht_main", envir = env, inherits = FALSE) &&
                     is_call_from(pos, "draw_heatmap_list")) {
-                    obj <- .subset2(env, "ht_main")
-                    if (methods::.hasSlot(obj, "row_order_list") &&
-                        methods::.hasSlot(obj, "column_order_list")) {
-                        order_list <- switch(object@which,
-                            row = obj@row_order_list,
-                            column = obj@column_order_list
-                        )
-                    }
+                    heatmap <- .subset2(env, "ht_main")
                 }
                 pos <- pos + 1L
             }
-            if (is.null(order_list)) {
-                if (n == 1L) {
-                    order_list <- list(index)
-                } else {
-                    cli::cli_abort("Cannot initialize {.cls {object@name}}")
-                }
+            if (is.null(heatmap) && n > 1L) {
+                cli::cli_abort("Cannot initialize {.cls {object@name}}")
             }
             # we can only supply heatmap matrix when called from `make_layout`
             # of heatmap, there is no heatmap matrix when called from draw
             # directly.
-            object <- make_layout(object, order_list)
+            object <- make_layout(object, heatmap = heatmap)
         }
         # will create a new viewport
         methods::callNextMethod(

@@ -4,7 +4,6 @@
 \name{eanno}
 \alias{eanno}
 \alias{ExtendedAnnotation-class}
-\alias{make_layout,ExtendedAnnotation-method}
 \title{Constructor of AnnotationFunction Class}
 \usage{
 eanno(
@@ -20,23 +19,22 @@ eanno(
   legends_panel = NULL,
   fun_name = NULL
 )
-
-\S4method{make_layout}{ExtendedAnnotation}(object, order_list, ..., heat_matrix = NULL, name = NULL)
 }
 \arguments{
 \item{draw_fn}{A function which defines how to draw the annotation. See
 \href{https://jokergoo.github.io/ComplexHeatmap-reference/book/heatmap-annotations.html#implement-new-annotation-functions}{ComplexHeatmap Manual}
 for details.
 
-The function must have at least three arguments: \code{index}, \code{k} and \code{n} (the
-names of the arguments can be arbitrary) where \code{k} and \code{n} are optional.
-\code{index} corresponds to the indices of rows or columns of the heatmap. The
-value of \code{index} is not necessarily to be the whole row indices or column
-indices in the heatmap. It can also be a subset of the indices if the
-annotation is split into slices according to the split of the heatmap.
+The function must have at least Four arguments: \code{index}, \code{k}, \code{n}, and
+\code{matrix} (the names of the arguments can be arbitrary) where \code{k} and \code{n} are
+optional.  \code{index} corresponds to the indices of rows or columns of the
+heatmap. The value of \code{index} is not necessarily to be the whole row indices
+or column indices in the heatmap. It can also be a subset of the indices if
+the annotation is split into slices according to the split of the heatmap.
 \code{index} is reordered according to the reordering of heatmap rows or columns
 (e.g. by clustering). So, \code{index} actually contains a list of row or column
-indices for the current slice after row or column reordering.
+indices for the current slice after row or column reordering. \code{matrix} will
+contain the data passed into the argument \code{matrix}.
 
 k corresponds to the current slice and n corresponds to the total number of
 slices.
@@ -72,14 +70,6 @@ details. Only object with \link{make_legends} methods can be put in
 \code{legends_panel}.}
 
 \item{fun_name}{Name of the annotation function, only used for message.}
-
-\item{object}{An \link[=eanno]{ExtendedAnnotation} object.}
-
-\item{order_list}{Heatmap order list (column/row) after clustering.}
-
-\item{heat_matrix}{Heatmap matrix.}
-
-\item{name}{A string, the name of the annotation.}
 }
 \value{
 A \code{ExtendedAnnotation} object.
@@ -116,7 +106,7 @@ anno <- eanno(
         n <- length(index)
         pushViewport(viewport(xscale = c(0.5, n + 0.5), yscale = c(0, 10)))
         grid.rect()
-        grid.points(1:n, self[index], default.units = "native")
+        grid.points(1:n, self[index, drop = TRUE], default.units = "native")
         if (k == 1) grid.yaxis()
         popViewport()
     },

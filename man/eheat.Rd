@@ -4,15 +4,9 @@
 \name{eheat}
 \alias{eheat}
 \alias{ExtendedHeatmap-class}
-\alias{prepare,ExtendedHeatmap-method}
-\alias{make_layout,ExtendedHeatmap-method}
 \title{Extended Heatmap}
 \usage{
 eheat(matrix, ..., legends_margin = list(), legends_panel = list())
-
-\S4method{prepare}{ExtendedHeatmap}(object, process_rows = TRUE, process_columns = TRUE)
-
-\S4method{make_layout}{ExtendedHeatmap}(object)
 }
 \arguments{
 \item{matrix}{A matrix, if it is a simple vector, it will be converted to a
@@ -32,8 +26,10 @@ parameters will be passed into this function: \code{j}, \code{i}, \code{x}, \cod
 \code{width}, \code{height}, \code{fill} which are column index, row index in
 \code{matrix}, coordinate of the cell, the width and height of the cell and the
 filled color. \code{x}, \code{y}, \code{width} and \code{height} are all \code{grid::unit}
-objects.  -layer_fun Similar as \code{cell_fun}, but is vectorized. Check
-\url{https://jokergoo.github.io/ComplexHeatmap-reference/book/a-single-heatmap.html#customize-the-heatmap-body}.
+objects. Check
+\url{https://jokergoo.github.io/ComplexHeatmap-reference/book/a-single-heatmap.html#customize-the-heatmap-body}. You can always use
+\code{self} to indicates the matrix attached in this Heatmap.
+\item \code{layer_fun}: Similar as \code{cell_fun}, but is vectorized.
 \item \code{jitter}: Random shifts added to the matrix. The value can be logical or a
 single numeric value. It it is \code{TRUE}, random values from uniform
 distribution between 0 and 1e-10 are generated. If it is a numeric
@@ -176,12 +172,6 @@ added in the \code{heatmap_legend_list} of
 plotted in the heatmap matrix panel.Only object with \link{make_legends} methods
 can be put in \code{legends_margin}. Only object with \link[=draw-method]{draw} methods
 can be put in \code{legends_panel}.}
-
-\item{object}{A \code{ExtendedHeatmap} object.}
-
-\item{process_rows}{Whether to process rows of the heatmap.}
-
-\item{process_columns}{Whether to process columns of the heatmap.}
 }
 \value{
 A \code{ExtendedHeatmap} Object.
@@ -207,6 +197,4 @@ graphics.
 }
 \examples{
 eheat(matrix(rnorm(81), nrow = 9))
-prepare(eheat(matrix(rnorm(81), nrow = 9)))
-make_layout(prepare(eheat(matrix(rnorm(81), nrow = 9))))
 }
