@@ -382,8 +382,8 @@ created by `ggplot(data, aes(.data$x))` /
 converted into a long-data.frame (`gganno` always regard row as the
 observations) with following columns.
 
-- `.slice`: the slice row (which = “row”) or column (which = “column”)
-  number.
+- `.slice`: the slice row (which = `"row"`) or column (which =
+  `"column"`) number.
 - `.row_names` and `.column_names`: the row and column names of the
   original matrix (only applicable when names exist).
 - `.row_index` and `.column_index`: the row and column index of the
