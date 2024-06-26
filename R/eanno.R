@@ -77,7 +77,6 @@
 #' draw(anno[1:2])
 #' @seealso [AnnotationFunction][ComplexHeatmap::AnnotationFunction]
 #' @return A `ExtendedAnnotation` object.
-#' @importFrom ComplexHeatmap ht_opt
 #' @export
 eanno <- function(draw_fn, ..., matrix = NULL, which = NULL, subset_rule = NULL,
                   width = NULL, height = NULL, show_name = TRUE,

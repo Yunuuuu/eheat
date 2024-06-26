@@ -4,10 +4,12 @@
 \alias{with_ht_verbose}
 \title{Make ComplexHeatmap verbose}
 \usage{
-with_ht_verbose(code)
+with_ht_verbose(code, verbose = TRUE)
 }
 \arguments{
 \item{code}{Running \link{ggheat} or \link[ComplexHeatmap:Heatmap]{Heatmap} function.}
+
+\item{verbose}{A boolean value indicates whether to draw Heatmap verbosely.}
 }
 \value{
 The results of the evaluation of the \code{code} argument.

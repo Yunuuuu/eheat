@@ -46,14 +46,15 @@ eheat_decorate <- function(vp_name, code) {
 
 #' Make ComplexHeatmap verbose
 #' @param code Running [ggheat] or [Heatmap][ComplexHeatmap::Heatmap] function.
+#' @param verbose A boolean value indicates whether to draw Heatmap verbosely.
 #' @return The results of the evaluation of the `code` argument.
 #' @examples
 #' with_ht_verbose(ggheat(matrix(rnorm(81), nrow = 9)))
 #' @seealso [with_ht_opts]
 #' @export
-with_ht_verbose <- function(code) {
+with_ht_verbose <- function(code, verbose = TRUE) {
     old <- ComplexHeatmap::ht_opt("verbose")
-    ComplexHeatmap::ht_opt(verbose = TRUE)
+    ComplexHeatmap::ht_opt(verbose = verbose)
     on.exit(ComplexHeatmap::ht_opt(verbose = old))
     force(code)
 }
@@ -71,6 +72,7 @@ with_ht_verbose <- function(code) {
 #'     list(verbose = TRUE),
 #'     ggheat(matrix(rnorm(81), nrow = 9))
 #' )
+#' @importFrom ComplexHeatmap ht_opt
 #' @export
 with_ht_opts <- function(opts, code) {
     assert_(opts, function(x) is.list(x) && rlang::is_named(x), "a named list")
@@ -78,11 +80,16 @@ with_ht_opts <- function(opts, code) {
     # old <- rlang::inject(ComplexHeatmap::ht_opt(!!!nms))
     # if (is.null(old)) old <- list(old)
     # names(old) <- nms
-    rlang::inject(ComplexHeatmap::ht_opt(!!!opts))
-    on.exit(rlang::inject(ComplexHeatmap::ht_opt(RESET = TRUE)))
+    ComplexHeatmap::ht_opt(opts)
+    on.exit(ComplexHeatmap::ht_opt(RESET = TRUE))
     force(code)
 }
 
+set_ht_opt <- function(opt, value) {
+    old <- ht_opt[[opt]]
+    ht_opt[[opt]] <- value
+    invisible(old)
+}
 
 .eheat_decorate <- function(vp_name, code) {
     current_vp <- grid::current.viewport()$name
