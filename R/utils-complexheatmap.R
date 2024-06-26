@@ -88,8 +88,7 @@ with_ht_opts <- function(opts, code) {
 #' @seealso [with_ht_opts]
 #' @export
 with_ht_verbose <- function(code, verbose = TRUE) {
-    old <- ht_opt("verbose")
-    ht_opt(verbose = verbose)
+    old <- set_ht_opt("verbose", verbose)
     on.exit(ht_opt(verbose = old))
     force(code)
 }
