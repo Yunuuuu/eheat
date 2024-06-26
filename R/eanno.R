@@ -310,9 +310,15 @@ methods::setMethod(
                 row = heat_matrix,
                 column = t(heat_matrix)
             )
-            if (!is.matrix(mat <- mat(data))) {
-                cli::cli_abort("{.fn @matrix} of {id} must return a matrix")
-            }
+            mat <- tryCatch(
+                build_matrix(mat(data)),
+                function(cnd) {
+                    cli::cli_abort(paste(
+                        "{.fn @matrix} of {id} must return a {.cls matrix},",
+                        "a simple vector, or a {.cls data.frame}."
+                    ))
+                }
+            )
             object@n <- nrow(mat)
         }
         object@matrix <- mat
