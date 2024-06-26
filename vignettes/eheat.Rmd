@@ -300,9 +300,7 @@ row as the observations) with following columns.
   matrix (only applicable when names exist).
 - `.row_index` and `.column_index`: the row and column index of the original
   matrix.
-- `x` / `y`: indicating the x-axis (or y-axis) coordinates. Don't use
-  [coord_flip][ggplot2::coord_flip] to flip coordinates as it may disrupt
-  internal operations.
+- `x` / `y`: indicating the x-axis (or y-axis) coordinates.
 - `value`: the actual matrix value of the annotation matrix.
 
 `gganno` can be seamlessly combined with both `ggheat` and

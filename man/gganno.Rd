@@ -56,7 +56,7 @@ Maintaining the internal limits along the heatmap to align well with
 The original matrix will be converted into a long-data.frame (\code{gganno} always
 regard row as the observations) with following columns:
 \itemize{
-\item \code{.slice}: the slice row (which = "row") or column (which = "column")
+\item \code{.slice}: the slice row (which = \code{"row"}) or column (which = \code{"column"})
 number.
 \item \code{.row_names} and \code{.column_names}: the row and column names of the original
 matrix (only applicable when names exist).

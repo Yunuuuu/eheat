@@ -14,7 +14,7 @@
 #' `ggplot(data, aes(.data$x))` / `ggplot(data, ggplot2::aes(y = .data$y))`.
 #' The original matrix will be converted into a long-data.frame (`gganno` always
 #' regard row as the observations) with following columns:
-#' - `.slice`: the slice row (which = "row") or column (which = "column")
+#' - `.slice`: the slice row (which = `"row"`) or column (which = `"column"`)
 #'   number.
 #' - `.row_names` and `.column_names`: the row and column names of the original
 #'   matrix (only applicable when names exist).

@@ -388,9 +388,7 @@ observations) with following columns.
   original matrix (only applicable when names exist).
 - `.row_index` and `.column_index`: the row and column index of the
   original matrix.
-- `x` / `y`: indicating the x-axis (or y-axis) coordinates. Don’t use
-  \[coord_flip\]\[ggplot2::coord_flip\] to flip coordinates as it may
-  disrupt internal operations.
+- `x` / `y`: indicating the x-axis (or y-axis) coordinates.
 - `value`: the actual matrix value of the annotation matrix.
 
 `gganno` can be seamlessly combined with both `ggheat` and
@@ -747,7 +745,7 @@ sessionInfo()
 #> [8] base     
 #> 
 #> other attached packages:
-#> [1] eheat_0.99.6          ggplot2_3.5.1         ComplexHeatmap_2.20.0
+#> [1] eheat_0.99.7          ggplot2_3.5.1         ComplexHeatmap_2.20.0
 #> 
 #> loaded via a namespace (and not attached):
 #>  [1] utf8_1.2.4          generics_0.1.3      tidyr_1.3.1        
