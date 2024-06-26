@@ -319,6 +319,13 @@ methods::setMethod(
                     ))
                 }
             )
+            if (nrow(mat) != nrow(data)) {
+                cli::cli_abort(paste(
+                    "{.fn @matrix} of {id} must a {.cls matrix}",
+                    "with {nrow(mat)} observation{?s}, but the heatmap",
+                    "contain {nrow(data)} for {which} annotation."
+                ))
+            }
             object@n <- nrow(mat)
         }
         object@matrix <- mat
