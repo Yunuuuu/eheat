@@ -271,8 +271,6 @@ draw(ggheat(small_mat, function(p) {
 
 <img src="man/figures/README-ggheat_rownames-1.png" width="100%" />
 
-# 这是一个Markdown文件
-
 虽然图例由`ggplot2`控制，但默认的图例名称取自`ComplexHeatmap::Heatmap`，以保持一致性。
 
 ``` r
