@@ -1,3 +1,4 @@
+⚠️ ⚠️ ⚠️ ⚠️ ** `eheat` is superseded: only bug fix will be made, no new features will be added. use the [ggalign](https://github.com/Yunuuuu/ggalign) instead. ** ⚠️ ⚠️ ⚠️ ⚠️
 
 - [eheat](#eheat)
   - [Installation](#installation)
